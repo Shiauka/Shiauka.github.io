@@ -1,0 +1,71 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { episodes } from '@/data/episodes'
+
+const latestEpisodes = episodes.slice(-3).reverse()
+---
+
+<BaseLayout title="首頁" description="祿哥的個人網站——分享工程師的投資理念、資產配置實作與退休自由之路。">
+
+  <!-- Hero -->
+  <section class="bg-gray-950 text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
+      <p class="text-brand font-medium mb-3 tracking-wide text-sm uppercase">一個工程師的財務自白</p>
+      <h1 class="text-4xl sm:text-5xl font-bold leading-tight mb-6">
+        投資不是賭博，<br />是一門可以學的技術
+      </h1>
+      <p class="text-gray-400 text-lg max-w-xl mb-8">
+        我是祿哥，軟體工程師。這裡分享我如何用五桶資產配置框架，
+        一步步朝退休自由前進——沒有神話，只有邏輯與紀律。
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/podcast" class="bg-brand hover:bg-brand-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+          收聽播客
+        </a>
+        <a href="/articles" class="border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+          閱讀文章
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 系列簡介 -->
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+    <h2 class="text-2xl font-bold mb-4">關於這個系列</h2>
+    <p class="text-gray-600 leading-relaxed max-w-2xl">
+      「一個工程師的財務自白」是我把自身投資邏輯系統化整理的播客系列。
+      從資產配置理念、ETF 選擇、再平衡策略，到實際的帳戶管理，
+      每集聚焦一個主題，說清楚、講明白，不廢話。
+    </p>
+    <p class="text-gray-600 leading-relaxed max-w-2xl mt-3">
+      目標只有一個：財務自由，提早退休。這不是夢，是工程問題。
+    </p>
+  </section>
+
+  <!-- 最新播客 -->
+  <section class="bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold">最新播客</h2>
+        <a href="/podcast" class="text-brand hover:text-brand-dark text-sm font-medium transition-colors">全部集數 →</a>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {latestEpisodes.map(ep => (
+          <a
+            href={ep.youtubeId ? `https://www.youtube.com/watch?v=${ep.youtubeId}` : '/podcast'}
+            target={ep.youtubeId ? '_blank' : undefined}
+            rel={ep.youtubeId ? 'noopener noreferrer' : undefined}
+            class="bg-white border border-gray-200 rounded-xl p-5 hover:border-brand hover:shadow-md transition-all group"
+          >
+            <span class="text-xs font-semibold text-brand mb-2 block">EP{String(ep.ep).padStart(2, '0')}</span>
+            <h3 class="font-semibold text-gray-900 group-hover:text-brand transition-colors leading-snug mb-2">
+              {ep.title}
+            </h3>
+            <p class="text-sm text-gray-500 line-clamp-2">{ep.desc}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

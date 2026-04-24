@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand:       #E87930;
+  --color-brand-dark:  #C5611A;
+  --color-brand-light: #F5A86A;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+}

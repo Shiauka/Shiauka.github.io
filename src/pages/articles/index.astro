@@ -1,0 +1,57 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+// Phase 2 會在這裡載入 Astro Content Collections 的文章列表
+// import { getCollection } from 'astro:content'
+// const articles = await getCollection('articles')
+
+const comingSoon = [
+  { title: '五桶資產配置完整指南', desc: '從框架設計到實際標的，一篇說清楚。', relatedEp: 'EP02' },
+  { title: '台美 ETF 完整比較表', desc: '費用率、稅務、持有方式的全面對比。', relatedEp: 'EP07' },
+  { title: '美國遺產稅：台灣人必看', desc: '超過 $60,000 美元資產的風險與應對策略。', relatedEp: 'EP03' },
+  { title: '再平衡完整 SOP', desc: '什麼時機動、怎麼動、動多少的完整流程。', relatedEp: 'EP05' },
+  { title: 'SGOV：讓閒置美元每天賺錢', desc: '短期美債 ETF 的完整使用指南。', relatedEp: 'EP03' },
+]
+---
+
+<BaseLayout
+  title="文章"
+  description="祿哥的投資文章——每篇對應播客集數，比音頻更深、有圖表有數字。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- 標題 -->
+    <div class="mb-10">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Articles</p>
+      <h1 class="text-3xl font-bold mb-3">文章</h1>
+      <p class="text-gray-600 max-w-2xl">
+        每篇文章對應一集播客，但比音頻更深入——有圖表、有數字、有完整推理。
+        搜尋引擎找得到，書籤起來慢慢讀。
+      </p>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="bg-brand/5 border border-brand/20 rounded-xl p-6 mb-8">
+      <p class="text-brand font-semibold mb-1">文章陸續更新中</p>
+      <p class="text-sm text-gray-600">以下是即將發布的主題預告，訂閱 YouTube 頻道以收到最新通知。</p>
+    </div>
+
+    <div class="space-y-3">
+      {comingSoon.map(article => (
+        <div class="flex items-start gap-4 p-5 rounded-xl border border-dashed border-gray-200 opacity-70">
+          <div class="shrink-0">
+            <span class="inline-block text-xs font-semibold bg-brand/10 text-brand px-2 py-1 rounded">
+              {article.relatedEp}
+            </span>
+          </div>
+          <div>
+            <h2 class="font-semibold mb-1">{article.title}</h2>
+            <p class="text-sm text-gray-500">{article.desc}</p>
+          </div>
+          <span class="shrink-0 text-xs text-gray-400 mt-1 ml-auto whitespace-nowrap">即將發布</span>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</BaseLayout>

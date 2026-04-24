@@ -1,0 +1,58 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { episodes } from '@/data/episodes'
+---
+
+<BaseLayout
+  title="播客"
+  description="一個工程師的財務自白——全集數列表。從資產配置理念到實際操作，每集聚焦一個主題。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- 標題 -->
+    <div class="mb-10">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Podcast</p>
+      <h1 class="text-3xl font-bold mb-3">一個工程師的財務自白</h1>
+      <p class="text-gray-600 max-w-2xl">
+        把複雜的投資邏輯拆解成一集一集的故事。每集聚焦一個主題，
+        從理念到工具，從策略到紀律，帶你建立自己的投資系統。
+      </p>
+    </div>
+
+    <!-- 集數列表 -->
+    <div class="space-y-3">
+      {episodes.slice().reverse().map(ep => (
+        <a
+          href={ep.youtubeId ? `https://www.youtube.com/watch?v=${ep.youtubeId}` : '#'}
+          target={ep.youtubeId ? '_blank' : undefined}
+          rel={ep.youtubeId ? 'noopener noreferrer' : undefined}
+          class={`flex items-start gap-4 p-5 rounded-xl border transition-all group ${
+            ep.youtubeId
+              ? 'border-gray-200 hover:border-brand hover:shadow-md cursor-pointer'
+              : 'border-dashed border-gray-200 cursor-default opacity-60'
+          }`}
+        >
+          <!-- EP 編號 -->
+          <div class="shrink-0 w-12 h-12 rounded-lg bg-brand/10 flex items-center justify-center">
+            <span class="text-brand font-bold text-sm">{String(ep.ep).padStart(2, '0')}</span>
+          </div>
+          <!-- 內容 -->
+          <div class="flex-1 min-w-0">
+            <h2 class={`font-semibold leading-snug mb-1 ${ep.youtubeId ? 'group-hover:text-brand transition-colors' : ''}`}>
+              {ep.title}
+            </h2>
+            <p class="text-sm text-gray-500">{ep.desc}</p>
+          </div>
+          <!-- 箭頭 -->
+          {ep.youtubeId && (
+            <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-0.5">→</span>
+          )}
+          {!ep.youtubeId && (
+            <span class="shrink-0 text-xs text-gray-400 mt-1 whitespace-nowrap">即將上架</span>
+          )}
+        </a>
+      ))}
+    </div>
+
+  </div>
+</BaseLayout>

@@ -1,0 +1,39 @@
+# Astro build output
+dist/
+
+# Astro generated cache
+.astro/
+
+# Dependencies
+node_modules/
+
+# Environment variables (API keys, secrets)
+.env
+.env.*
+!.env.example
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Claude Code internal config
+CLAUDE.md
+AGENTS.md
+
+# Deployment platforms (if ever used)
+.vercel
+.netlify
