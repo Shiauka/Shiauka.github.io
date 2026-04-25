@@ -2,7 +2,10 @@
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { episodes } from '@/data/episodes'
 
-const latestEpisodes = episodes.slice(-3).reverse()
+const latestEpisodes = episodes
+  .filter(ep => ep.youtubeId)
+  .sort((a, b) => b.ep - a.ep)
+  .slice(0, 3)
 ---
 
 <BaseLayout title="首頁" description="祿哥的個人網站——分享工程師的投資理念、資產配置實作與退休自由之路。">
