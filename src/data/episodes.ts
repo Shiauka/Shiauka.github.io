@@ -28,7 +28,7 @@ export const episodes: Episode[] = [
     ep: 4,
     title: '投資紀律，才是真正的護城河',
     desc: '為什麼長期報酬的最大敵人是自己？建立投資紀律的具體方法。',
-    youtubeId: '',
+    youtubeId: 'Gcahm9hP8BM',
   },
   {
     ep: 5,
