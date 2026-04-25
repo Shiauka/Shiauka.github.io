@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { episodes } from '@/data/episodes'
+
+const uploaded   = episodes.filter(ep =>  ep.youtubeId).sort((a, b) => b.ep - a.ep)
+const unuploaded = episodes.filter(ep => !ep.youtubeId).sort((a, b) => a.ep - b.ep)
+const nextEp     = unuploaded[0]
+const futureEps  = unuploaded.slice(1)
+const sorted     = [...(nextEp ? [nextEp] : []), ...uploaded, ...futureEps]
 ---
 
 <BaseLayout
@@ -21,37 +27,45 @@ import { episodes } from '@/data/episodes'
 
     <!-- 集數列表 -->
     <div class="space-y-3">
-      {episodes.slice().reverse().map(ep => (
-        <a
-          href={ep.youtubeId ? `https://www.youtube.com/watch?v=${ep.youtubeId}` : '#'}
-          target={ep.youtubeId ? '_blank' : undefined}
-          rel={ep.youtubeId ? 'noopener noreferrer' : undefined}
-          class={`flex items-start gap-4 p-5 rounded-xl border transition-all group ${
-            ep.youtubeId
-              ? 'border-gray-200 hover:border-brand hover:shadow-md cursor-pointer'
-              : 'border-dashed border-gray-200 cursor-default opacity-60'
-          }`}
-        >
-          <!-- EP 編號 -->
-          <div class="shrink-0 w-12 h-12 rounded-lg bg-brand/10 flex items-center justify-center">
-            <span class="text-brand font-bold text-sm">{String(ep.ep).padStart(2, '0')}</span>
-          </div>
-          <!-- 內容 -->
-          <div class="flex-1 min-w-0">
-            <h2 class={`font-semibold leading-snug mb-1 ${ep.youtubeId ? 'group-hover:text-brand transition-colors' : ''}`}>
-              {ep.title}
-            </h2>
-            <p class="text-sm text-gray-500">{ep.desc}</p>
-          </div>
-          <!-- 箭頭 -->
-          {ep.youtubeId && (
-            <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-0.5">→</span>
-          )}
-          {!ep.youtubeId && (
-            <span class="shrink-0 text-xs text-gray-400 mt-1 whitespace-nowrap">即將上架</span>
-          )}
-        </a>
-      ))}
+      {sorted.map(ep => {
+        const isNext = nextEp && ep.ep === nextEp.ep
+        return (
+          <a
+            href={ep.youtubeId ? `https://www.youtube.com/watch?v=${ep.youtubeId}` : '#'}
+            target={ep.youtubeId ? '_blank' : undefined}
+            rel={ep.youtubeId ? 'noopener noreferrer' : undefined}
+            class={`flex items-start gap-4 p-5 rounded-xl border transition-all group ${
+              ep.youtubeId
+                ? 'border-gray-200 hover:border-brand hover:shadow-md cursor-pointer'
+                : isNext
+                  ? 'border-brand/40 bg-brand/5 cursor-default'
+                  : 'border-dashed border-gray-200 cursor-default opacity-50'
+            }`}
+          >
+            <!-- EP 編號 -->
+            <div class="shrink-0 w-12 h-12 rounded-lg bg-brand/10 flex items-center justify-center">
+              <span class="text-brand font-bold text-sm">{String(ep.ep).padStart(2, '0')}</span>
+            </div>
+            <!-- 內容 -->
+            <div class="flex-1 min-w-0">
+              <h2 class={`font-semibold leading-snug mb-1 ${ep.youtubeId ? 'group-hover:text-brand transition-colors' : ''}`}>
+                {ep.title}
+              </h2>
+              <p class="text-sm text-gray-500">{ep.desc}</p>
+            </div>
+            <!-- 狀態標示 -->
+            {ep.youtubeId && (
+              <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-0.5">→</span>
+            )}
+            {!ep.youtubeId && isNext && (
+              <span class="shrink-0 text-xs text-brand font-medium mt-1 whitespace-nowrap">下一集</span>
+            )}
+            {!ep.youtubeId && !isNext && (
+              <span class="shrink-0 text-xs text-gray-400 mt-1 whitespace-nowrap">即將上架</span>
+            )}
+          </a>
+        )
+      })}
     </div>
 
   </div>
