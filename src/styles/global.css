@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-brand:       #E87930;
@@ -13,4 +14,155 @@ html {
 
 body {
   font-family: var(--font-sans);
+}
+
+/* ── 文章內文排版 ── */
+.article-body {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: #374151;
+}
+
+.article-body h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.article-body h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.article-body p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+
+.article-body strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.article-body a {
+  color: #E87930;
+  text-decoration: none;
+}
+.article-body a:hover {
+  text-decoration: underline;
+}
+
+/* ── 表格（加上明顯外框）── */
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 1.75rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.article-body thead tr {
+  background-color: #f9fafb;
+}
+
+.article-body th {
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.article-body th:last-child {
+  border-right: none;
+}
+
+.article-body td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  border-right: 1px solid #f3f4f6;
+  color: #4b5563;
+  vertical-align: top;
+}
+
+.article-body td:last-child {
+  border-right: none;
+}
+
+.article-body tr:last-child td {
+  border-bottom: none;
+}
+
+.article-body tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+
+/* ── 引用區塊 ── */
+.article-body blockquote {
+  border-left: 4px solid #E87930;
+  background-color: #fffbf5;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #6b7280;
+}
+
+.article-body blockquote p {
+  margin-bottom: 0.5rem;
+}
+.article-body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── 程式碼區塊 ── */
+.article-body code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.3rem;
+  font-size: 0.875em;
+  color: #d97706;
+}
+
+.article-body pre {
+  background-color: #1f2937;
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.article-body pre code {
+  background: none;
+  color: #e5e7eb;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+/* ── 水平分隔線 ── */
+.article-body hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2.5rem 0;
+}
+
+/* ── 清單 ── */
+.article-body ul,
+.article-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.article-body li {
+  margin-bottom: 0.4rem;
 }

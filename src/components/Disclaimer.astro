@@ -1,0 +1,20 @@
+---
+interface Props {
+  type?: 'general' | 'tax' | 'legal'
+}
+const { type = 'general' } = Astro.props
+---
+
+<aside class="mt-12 p-5 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-900">
+  <p class="font-semibold mb-2">⚠️ 免責聲明</p>
+  <p class="leading-relaxed">
+    本文內容僅供參考，不構成任何投資建議、財務建議{type !== 'general' ? '、法律建議或稅務建議' : '或財務規劃建議'}。
+    投資涉及風險，過去績效不代表未來表現，任何投資決策請自行審慎評估或諮詢專業理財顧問。
+    {(type === 'tax' || type === 'legal') && (
+      <>
+        本文涉及稅務與法律相關內容，稅法因個人情況、資產規模與居住地不同而有所差異，
+        文中資訊僅為一般性說明，不適用於所有情況。稅務與法律問題請務必諮詢合格的專業律師或會計師。
+      </>
+    )}
+  </p>
+</aside>
