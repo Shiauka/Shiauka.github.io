@@ -183,3 +183,5 @@ SGOV 是讓閒置美元不白白坐著的最好方式——既不承擔利率風
 - 防禦桶：流動性、安全感、再平衡子彈
 
 下一篇：[台幣帳戶 vs 美元帳戶：我的帳戶分工邏輯](/articles/ep03-account-structure)
+
+延伸閱讀：[五桶配置回測：10 年下來，這樣分散到底值不值得？](/articles/five-bucket-backtest)
