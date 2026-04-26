@@ -72,4 +72,10 @@ export const episodes: Episode[] = [
     desc: '不談信仰，純粹從倉位管理角度說清楚：為什麼是 3%、為什麼不是 0，以及為什麼選 IBIT 而不是直接買幣。',
     youtubeId: '_dHOCqeYI4s',
   },
+  {
+    ep: 12,
+    title: '現金防禦桶：SGOV 的邏輯與防禦桶的真正用途',
+    desc: '現金防禦桶不是放著不動，而是讓你在市場崩跌時有子彈。分析 SGOV 的選擇邏輯與防禦桶的實際運作。',
+    youtubeId: 'mzA88Hr0M5M',
+  },
 ]
