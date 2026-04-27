@@ -78,4 +78,10 @@ export const episodes: Episode[] = [
     desc: '現金防禦桶不是放著不動，而是讓你在市場崩跌時有子彈。分析 SGOV 的選擇邏輯與防禦桶的實際運作。',
     youtubeId: 'mzA88Hr0M5M',
   },
+  {
+    ep: 13,
+    title: '緊急備用金：要放多少，放在哪裡？',
+    desc: '「三到六個月生活費」這個說法不夠精確。用固定支出和彈性支出的區分，算出真正需要的數字，以及選對工具放對地方。',
+    youtubeId: 'G3x3rNCOKwI',
+  },
 ]
