@@ -34,7 +34,7 @@ export const episodes: Episode[] = [
     ep: 5,
     title: '再平衡的藝術：什麼時候動，怎麼動，動多少？',
     desc: '再平衡的觸發條件、執行策略，以及如何在不影響稅務的前提下調整配置。',
-    youtubeId: 'dfDUr1OIcAg',
+    youtubeId: 'SythlVWpdjo',
   },
   {
     ep: 6,
