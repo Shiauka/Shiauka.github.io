@@ -40,7 +40,7 @@ export const episodes: Episode[] = [
     ep: 6,
     title: '我如何選 ETF？費用率、流動性、稅務一次講清楚',
     desc: '選 ETF 的三大核心指標，以及我在台灣和美國市場各自的選擇邏輯。',
-    youtubeId: 'R4KuYfYFHc0',
+    youtubeId: 'PkxtWWDU1LQ',
   },
   {
     ep: 7,
