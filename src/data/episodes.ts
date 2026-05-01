@@ -34,19 +34,19 @@ export const episodes: Episode[] = [
     ep: 5,
     title: '再平衡的藝術：什麼時候動，怎麼動，動多少？',
     desc: '再平衡的觸發條件、執行策略，以及如何在不影響稅務的前提下調整配置。',
-    youtubeId: 'SythlVWpdjo',
+    youtubeId: 'ccL8Xj2njm4',
   },
   {
     ep: 6,
     title: '我如何選 ETF？費用率、流動性、稅務一次講清楚',
     desc: '選 ETF 的三大核心指標，以及我在台灣和美國市場各自的選擇邏輯。',
-    youtubeId: 'PkxtWWDU1LQ',
+    youtubeId: '7VmHeV898zc',
   },
   {
     ep: 7,
     title: '0050 還是 VOO？台美 ETF 的比較與我的選法',
     desc: '深度比較台灣與美國指數型 ETF，從費用率、成分股、稅務到實際操作的完整分析。',
-    youtubeId: 'v61dlLVS60w',
+    youtubeId: 'ZFfkXlwAZyI',
   },
   {
     ep: 8,
