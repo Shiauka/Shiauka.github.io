@@ -44,9 +44,9 @@ export const episodes: Episode[] = [
   },
   {
     ep: 7,
-    title: '0050 還是 VOO？台美 ETF 的比較與我的選法',
+    title: '0050 還是 VOO？費用率只是開始',
     desc: '深度比較台灣與美國指數型 ETF，從費用率、成分股、稅務到實際操作的完整分析。',
-    youtubeId: 'ZFfkXlwAZyI',
+    youtubeId: 'B4zQL-6lGw0',
   },
   {
     ep: 8,
