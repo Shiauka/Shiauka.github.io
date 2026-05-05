@@ -58,7 +58,7 @@ export const episodes: Episode[] = [
     ep: 9,
     title: '全球分散桶：為什麼我不只買美股？',
     desc: '非美成熟市場（VEA）與新興市場（VWO）的配置邏輯，以及全球分散的真實意義。',
-    youtubeId: 'mDB74o_Ee4c',
+    youtubeId: '3wnmssD4IAU',
   },
   {
     ep: 10,
