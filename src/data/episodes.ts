@@ -64,7 +64,7 @@ export const episodes: Episode[] = [
     ep: 10,
     title: '黃金在我的投資組合裡扮演什麼角色？',
     desc: '黃金不是「投機」，而是系統性風險的保險。分析 IAU 在另類資產桶的定位與比例選擇。',
-    youtubeId: 'ZVEiWBcJK60',
+    youtubeId: 'mF_H_iulIpw',
   },
   {
     ep: 11,
