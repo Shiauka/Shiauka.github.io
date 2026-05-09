@@ -70,7 +70,7 @@ export const episodes: Episode[] = [
     ep: 11,
     title: '比特幣：我為什麼只配置 5% 以內，而且不後悔',
     desc: '不談信仰，純粹從倉位管理角度說清楚：為什麼是 5% 以內、為什麼不是 0，以及為什麼選 IBIT 而不是直接買幣。',
-    youtubeId: '',
+    youtubeId: 'obaCOgVpWWo',
   },
   {
     ep: 12,
