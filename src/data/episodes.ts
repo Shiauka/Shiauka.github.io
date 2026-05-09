@@ -52,7 +52,7 @@ export const episodes: Episode[] = [
     ep: 8,
     title: '攻擊桶的邏輯：QQQ 與 00631L 我為什麼這樣用',
     desc: '為什麼要有「攻擊桶」？槓桿 ETF 的風險與使用時機，以及我的實際配置比例。',
-    youtubeId: 'ZAwGIRbIP78',
+    youtubeId: 'woJRBCkW7Fs',
   },
   {
     ep: 9,
