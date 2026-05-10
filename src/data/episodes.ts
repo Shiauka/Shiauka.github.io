@@ -82,6 +82,6 @@ export const episodes: Episode[] = [
     ep: 13,
     title: '緊急備用金：要放多少，放在哪裡？',
     desc: '「三到六個月生活費」這個說法不夠精確。用固定支出和彈性支出的區分，算出真正需要的數字，以及選對工具放對地方。',
-    youtubeId: '',
+    youtubeId: 'AQro8esO-7s',
   },
 ]
