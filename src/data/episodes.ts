@@ -76,7 +76,7 @@ export const episodes: Episode[] = [
     ep: 12,
     title: '現金防禦桶：SGOV 的邏輯與防禦桶的真正用途',
     desc: '現金防禦桶不是放著不動，而是讓你在市場崩跌時有子彈。分析 SGOV 的選擇邏輯與防禦桶的實際運作。',
-    youtubeId: 'VdU_EKLpTA4',
+    youtubeId: 'vJqNoJhdWKs',
   },
   {
     ep: 13,
