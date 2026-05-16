@@ -183,8 +183,6 @@ draft: false
 
 ---
 
-下一篇：[複委託 vs 直接開海外帳戶：我最終怎麼選？](/articles/ep15-brokerage-choice)
-
 **延伸閱讀：**
 - [投資紀律不是意志力，是系統設計](/articles/ep04-investment-discipline)——建立財務系統的底層邏輯
 - [工程師投資五個彎路：我走過的坑，你不用再走一次](/articles/engineer-investment-mistakes)——從真實錯誤學習的財務教訓
