@@ -76,18 +76,18 @@ export const episodes: Episode[] = [
     ep: 12,
     title: '現金防禦桶：SGOV 的邏輯與防禦桶的真正用途',
     desc: '現金防禦桶不是放著不動，而是讓你在市場崩跌時有子彈。分析 SGOV 的選擇邏輯與防禦桶的實際運作。',
-    youtubeId: 'vJqNoJhdWKs',
+    youtubeId: 'mYac9LTwLp4',
   },
   {
     ep: 13,
     title: '緊急備用金：要放多少，放在哪裡？',
     desc: '「三到六個月生活費」這個說法不夠精確。用固定支出和彈性支出的區分，算出真正需要的數字，以及選對工具放對地方。',
-    youtubeId: 'AQro8esO-7s',
+    youtubeId: 'Xbkd7PbrW74',
   },
   {
     ep: 14,
     title: 'AI 時代的工程師：財務安全感如何重建？',
     desc: '年薪兩百萬，帳戶裡只剩二十萬活存。高薪不等於財務安全感。分析工程師三大財務脆弱點，以及如何一層一層建立真正的財務韌性。',
-    youtubeId: 'h3r_dLRblkc',
+    youtubeId: 'wiCzCRSp5fA',
   },
 ]
