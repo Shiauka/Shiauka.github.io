@@ -157,7 +157,7 @@ Asset Dashboard 把所有資產數據存在你自己的電腦上，加上一個�
 
 ## 如何從零開始
 
-工具的源代碼和安裝檔都放在 GitHub（YouTube 說明欄有連結）。它是 Tauri 桌面應用程式，Windows 使用者直接下載安裝檔，安裝後點開就能用，不需要任何技術背景。完全免費，沒有付費版本。
+工具的源代碼和安裝檔都放在 [GitHub — asset-dashboard-tauri](https://github.com/Shiauka/asset-dashboard-tauri)。它是 Tauri 桌面應用程式，Windows 使用者直接下載 Releases 頁面的安裝檔，安裝後點開就能用，不需要任何技術背景。完全免費，沒有付費版本。
 
 **第一次設定的流程大概是這樣：**
 
