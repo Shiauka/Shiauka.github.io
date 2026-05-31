@@ -102,4 +102,10 @@ export const episodes: Episode[] = [
     desc: '買完房每個月手頭只剩三萬，到底該繼續投資還是提前還房貸？從利率比較、台灣稅務不對稱、心理帳戶，到三個數字三個格子的決策框架，算清楚再決定。',
     youtubeId: 'edgPiJ3CdaU',
   },
+  {
+    ep: 17,
+    title: 'Asset Dashboard：我的資產管理儀表板（免費）',
+    desc: '我算了將近四年的投資報酬率，一直是錯的。從 Excel 撐不住的那一刻，到自己做一套本機桌面工具——七個分頁完整示範，時間加權報酬率、退休規劃、再平衡分析全在裡面，免費下載。',
+    youtubeId: '1t8mHMNgfpw',
+  },
 ]
