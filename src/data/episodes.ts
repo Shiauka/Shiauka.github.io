@@ -100,7 +100,7 @@ export const episodes: Episode[] = [
     ep: 16,
     title: '有房貸，還要投資嗎？我怎麼決定每個月投多少',
     desc: '買完房每個月手頭只剩三萬，到底該繼續投資還是提前還房貸？從利率比較、台灣稅務不對稱、心理帳戶，到三個數字三個格子的決策框架，算清楚再決定。',
-    youtubeId: 'edgPiJ3CdaU',
+    youtubeId: 'Cd8un35X1F8',
   },
   {
     ep: 17,
