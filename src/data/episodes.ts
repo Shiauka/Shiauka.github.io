@@ -104,7 +104,7 @@ export const episodes: Episode[] = [
   },
   {
     ep: 17,
-    title: 'Asset Dashboard：我的資產管理儀表板（免費）',
+    title: '我受不了 Excel，所以自己寫了一個資產儀表板（免費下載）',
     desc: '我算了將近四年的投資報酬率，一直是錯的。從 Excel 撐不住的那一刻，到自己做一套本機桌面工具——七個分頁完整示範，時間加權報酬率、退休規劃、再平衡分析全在裡面，免費下載。',
     youtubeId: 'bX3HacMx5s4',
   },
@@ -116,7 +116,7 @@ export const episodes: Episode[] = [
   },
   {
     ep: 19,
-    title: '第一證券 vs IB 開戶實戰：台灣人怎麼開海外帳戶',
+    title: '第一證券 vs IB：台灣人開海外券商，我選哪一個？',
     desc: '我第一次申請海外券商帳戶，前後拖了將近六週。不是手續複雜，是走了兩個很冤枉的彎路。第一證券 vs IB 完整比較，開戶步驟、文件清單、入金方式、W-8BEN 說清楚，以及三個最常踩的坑。',
     youtubeId: '8o2Om-UXdQI',
   },
