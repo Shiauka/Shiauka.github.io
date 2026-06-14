@@ -118,7 +118,7 @@ export const episodes: Episode[] = [
     ep: 19,
     title: '第一證券 vs IB：台灣人開海外券商，我選哪一個？',
     desc: '我第一次申請海外券商帳戶，前後拖了將近六週。不是手續複雜，是走了兩個很冤枉的彎路。第一證券 vs IB 完整比較，開戶步驟、文件清單、入金方式、W-8BEN 說清楚，以及三個最常踩的坑。',
-    youtubeId: '8o2Om-UXdQI',
+    youtubeId: 'gUA-LqjxpUs',
   },
   {
     ep: 20,
