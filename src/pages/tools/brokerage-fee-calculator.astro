@@ -161,7 +161,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         const P = monthly * 12;
         const rows = [];
         let pos = 0, cumFu = 0, cumOv = 0, cum646 = 0;
-        let annualCross = 0;
+        let annualCross = 0, ovCross646 = 0;
 
         for (let y = 1; y <= years; y++) {
           const start = pos;
@@ -175,10 +175,11 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           const total646 = P * fee646 + avg * er646;
 
           cumFu += fuTotal; cumOv += ovTotal; cum646 += total646;
-          if (!annualCross && fuTotal < total646) annualCross = y;
+          if (!annualCross && fuTotal < total646) annualCross = y;   // 複委託「當年」成本低於 00646
+          if (!ovCross646 && cumOv <= cum646) ovCross646 = y;        // 海外「累積」成本反超 00646
           rows.push({ y, fuTotal, ovTotal, total646, avg });
         }
-        return { years, rows, cumFu, cumOv, cum646, annualCross };
+        return { years, rows, cumFu, cumOv, cum646, annualCross, ovCross646 };
       }
 
       function render() {
@@ -204,17 +205,23 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           </div>`;
         }).join('');
 
-        // Turning point text
-        const saveVsFu = r.cumFu - r.cumOv;
-        const saveVs646 = r.cum646 - r.cumOv;
-        let cross = r.annualCross
-          ? `在你目前的設定下，<strong>第 ${r.annualCross} 年起</strong>，複委託 VOO 的「當年成本」開始低於 00646（部位夠大、內扣費用率差距 ${( (num('er646')-num('erVOO')) ).toFixed(2)}% 超過了手續費＋換匯的劣勢）。`
-          : `在 ${r.years} 年內，複委託 VOO 的當年成本<strong>始終高於</strong> 00646——因為複委託有最低手續費與換匯成本墊高了門檻。`;
+        // Turning point text — fully data-driven (cheapest is the baseline, others are always ≥ 0)
+        const sorted = [...totals].sort((a, b) => a.val - b.val);
+        const best = sorted[0], mid = sorted[1], worst = sorted[2];
+        let insight;
+        if (best.key === '646') {
+          insight = `目前持有年數短、部位還小，<strong>00646 的低固定成本（無換匯、無電匯、手續費低）暫時最划算</strong>。持有越久，海外券商 VOO 那邊 0.03% vs 0.36% 的內扣費用率差距會逐漸反超——把上面的「持有年數」調大就看得到轉折。`;
+        } else if (best.key === 'ov') {
+          insight = `<strong>海外券商 VOO 累積成本最低</strong>（代價是開戶一次性時間與電匯延遲）。`
+            + (r.ovCross646 > 1 ? `它大約在<strong>第 ${r.ovCross646} 年</strong>累積成本反超 00646——在那之前 00646 還比較便宜。` : ``);
+        } else {
+          insight = `在這組參數下，<strong>複委託 VOO 反而最便宜</strong>（通常發生在拿掉最低手續費、且部位很大時）。`;
+        }
         $('turning').innerHTML = `
           <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
-          <p class="mb-2">${r.years} 年下來，<strong style="color:#2563eb">海外券商 VOO</strong> 累積成本最低，比複委託省 <strong>${fmt(saveVsFu)}</strong>、比 00646 省 <strong>${fmt(saveVs646)}</strong>（代價是開戶一次性時間與電匯延遲）。</p>
-          <p class="mb-2">${cross}</p>
-          <p class="text-xs text-gray-500">注：EP18 影片用的是簡化版（只算手續費＋費用率、複委託 0.5% 不含最低手續費與換匯），得到「轉折點 ≈ 一年投入」。這裡把<strong>最低手續費與換匯</strong>也算進去，所以轉折點通常會比影片晚一些——這正是「自己把數字算清楚」的價值。</p>`;
+          <p class="mb-2">${r.years} 年累積下來，最便宜的是 <strong style="color:${best.color}">${best.label}</strong>（${fmt(best.val)}）：比 ${mid.label} 省 <strong>${fmt(mid.val - best.val)}</strong>、比 ${worst.label} 省 <strong>${fmt(worst.val - best.val)}</strong>。</p>
+          <p class="mb-2">${insight}</p>
+          <p class="text-xs text-gray-500">注：EP18 影片用的是簡化版（只算手續費＋費用率、複委託 0.5% 不含最低手續費與換匯），得到「轉折點 ≈ 一年投入」。這裡把<strong>最低手續費與換匯</strong>也算進去，所以轉折通常會比影片晚一些——這正是「自己把數字算清楚」的價值。</p>`;
 
         // Chart
         const maxY = Math.max(r.cumFu, r.cumOv, r.cum646);
