@@ -1,0 +1,270 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="複委託 vs 海外券商 費用比較計算機"
+  description="輸入你的定期定額金額與持有年數，算出複委託 VOO、海外券商 VOO、台灣 00646 三條路的累積成本與轉折點——對應 EP18。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP18</p>
+      <h1 class="text-3xl font-bold mb-3">複委託 vs 海外券商 費用比較計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        買美股有三條路：<strong>複委託買 VOO</strong>、<strong>自己開海外券商買 VOO</strong>、<strong>台灣帳戶買 00646</strong>。
+        手續費、內扣費用率、換匯成本疊起來，到底哪條路便宜？把你的數字填進去，自己算一次。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的投入計畫</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">每月定期定額（NT$）</span>
+          <input id="monthly" type="number" min="0" step="1000" value="20000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">持有年數</span>
+          <input id="years" type="number" min="1" max="40" step="1" value="10"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預期年化報酬（%）</span>
+          <input id="ret" type="number" min="0" max="30" step="0.5" value="7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+
+      <details class="mt-4 group">
+        <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 進階參數（費率、換匯、電匯費）</summary>
+        <div class="grid sm:grid-cols-3 gap-4 mt-4">
+          <label class="block">
+            <span class="text-sm text-gray-600">複委託手續費率（%）</span>
+            <input id="feeFu" type="number" min="0" step="0.05" value="0.5"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">複委託最低手續費 / 筆（NT$）</span>
+            <input id="minFu" type="number" min="0" step="50" value="200"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">換匯成本（%）</span>
+            <input id="fx" type="number" min="0" step="0.1" value="0.4"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">海外券商電匯費 / 年（NT$）</span>
+            <input id="wire" type="number" min="0" step="100" value="800"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">VOO 內扣費用率（%）</span>
+            <input id="erVOO" type="number" min="0" step="0.01" value="0.03"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">00646 內扣費用率（%）</span>
+            <input id="er646" type="number" min="0" step="0.01" value="0.36"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">00646 手續費率（%）</span>
+            <input id="fee646" type="number" min="0" step="0.0025" value="0.1425"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">假設複委託為每月一筆共 12 筆／年；三條路投入金額與報酬相同，只比成本差異。股利稅 30% 三條路相同，未列入比較。</p>
+      </details>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Turning point -->
+    <div id="turning" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">累積成本走勢</h2>
+      <p class="text-xs text-gray-400 mb-4">每條線是該路徑「從第 1 年到第 N 年」的累積總成本（手續費＋換匯＋電匯＋內扣費用率）。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#C5611A"></span>複委託 VOO</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#2563eb"></span>海外券商 VOO</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#16a34a"></span>台灣 00646</span>
+      </div>
+    </div>
+
+    <!-- Year table -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 年度明細表</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-4 font-medium">年</th>
+              <th class="py-2 px-4 font-medium text-right">複委託 VOO（當年）</th>
+              <th class="py-2 px-4 font-medium text-right">海外 VOO（當年）</th>
+              <th class="py-2 px-4 font-medium text-right">00646（當年）</th>
+              <th class="py-2 pl-4 font-medium text-right">該年部位（約）</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Tax note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 成本之外，還有兩件事不在這張表裡</p>
+      <p><strong>股利稅：</strong>三條路都被預扣 30% 美股股利稅（00646 在基金內部扣），實質稅負幾乎相同——所以這裡沒列。想省這 30% 要看愛爾蘭 ETF，見
+        <a class="text-brand hover:underline" href="/articles/irish-etf-vs-us-etf">愛爾蘭 ETF vs 美國 ETF</a>。</p>
+      <p><strong>遺產稅：</strong>複委託與海外券商持有的 VOO 都算「美國資產」，超過 6 萬美元免稅額會碰到美國遺產稅；00646 是台灣掛牌，不觸發。這是三條路差異最大的一塊，見
+        <a class="text-brand hover:underline" href="/articles/ep03-us-estate-tax">美國遺產稅：那道隱形的坎</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採用簡化假設（固定費率、固定報酬、不含個別券商促銷與稅務退補），不構成投資、稅務或法律建議。實際費用以各券商當期條件為準。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep18-brokerage-comparison" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP18 完整費用拆解 →</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ids = ['monthly','years','ret','feeFu','minFu','fx','wire','erVOO','er646','fee646'];
+      const num = (id) => parseFloat($(id).value) || 0;
+      const fmt = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+
+      function simulate() {
+        const monthly = num('monthly');
+        const years = Math.max(1, Math.min(40, Math.round(num('years'))));
+        const ret = num('ret') / 100;
+        const feeFu = num('feeFu') / 100;
+        const minFu = num('minFu');
+        const fx = num('fx') / 100;
+        const wire = num('wire');
+        const erVOO = num('erVOO') / 100;
+        const er646 = num('er646') / 100;
+        const fee646 = num('fee646') / 100;
+
+        const P = monthly * 12;
+        const rows = [];
+        let pos = 0, cumFu = 0, cumOv = 0, cum646 = 0;
+        let annualCross = 0;
+
+        for (let y = 1; y <= years; y++) {
+          const start = pos;
+          const end = start * (1 + ret) + P * (1 + ret / 2);
+          const avg = (start + end) / 2;
+          pos = end;
+
+          const feeFuTrade = 12 * Math.max(monthly * feeFu, minFu);
+          const fuTotal = feeFuTrade + P * fx + avg * erVOO;
+          const ovTotal = 0 + P * fx + wire + avg * erVOO;
+          const total646 = P * fee646 + avg * er646;
+
+          cumFu += fuTotal; cumOv += ovTotal; cum646 += total646;
+          if (!annualCross && fuTotal < total646) annualCross = y;
+          rows.push({ y, fuTotal, ovTotal, total646, avg });
+        }
+        return { years, rows, cumFu, cumOv, cum646, annualCross };
+      }
+
+      function render() {
+        const r = simulate();
+        const totals = [
+          { key: 'fu', label: '複委託 VOO', val: r.cumFu, color: '#C5611A' },
+          { key: 'ov', label: '海外券商 VOO', val: r.cumOv, color: '#2563eb' },
+          { key: '646', label: '台灣 00646', val: r.cum646, color: '#16a34a' },
+        ];
+        const cheapest = totals.reduce((a, b) => (b.val < a.val ? b : a));
+
+        // Verdict cards
+        $('cards').innerHTML = totals.map(t => {
+          const win = t.key === cheapest.key;
+          const diff = t.val - cheapest.val;
+          return `<div class="rounded-2xl border p-5 ${win ? 'border-brand bg-brand/5' : 'border-gray-200'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium" style="color:${t.color}">${t.label}</span>
+              ${win ? '<span class="text-[10px] font-bold bg-brand text-white px-2 py-0.5 rounded-full">最便宜</span>' : ''}
+            </div>
+            <div class="text-2xl font-bold text-gray-900">${fmt(t.val)}</div>
+            <div class="text-xs text-gray-500 mt-1">${r.years} 年累積總成本${win ? '' : `<br>比最低多付 ${fmt(diff)}`}</div>
+          </div>`;
+        }).join('');
+
+        // Turning point text
+        const saveVsFu = r.cumFu - r.cumOv;
+        const saveVs646 = r.cum646 - r.cumOv;
+        let cross = r.annualCross
+          ? `在你目前的設定下，<strong>第 ${r.annualCross} 年起</strong>，複委託 VOO 的「當年成本」開始低於 00646（部位夠大、內扣費用率差距 ${( (num('er646')-num('erVOO')) ).toFixed(2)}% 超過了手續費＋換匯的劣勢）。`
+          : `在 ${r.years} 年內，複委託 VOO 的當年成本<strong>始終高於</strong> 00646——因為複委託有最低手續費與換匯成本墊高了門檻。`;
+        $('turning').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2">${r.years} 年下來，<strong style="color:#2563eb">海外券商 VOO</strong> 累積成本最低，比複委託省 <strong>${fmt(saveVsFu)}</strong>、比 00646 省 <strong>${fmt(saveVs646)}</strong>（代價是開戶一次性時間與電匯延遲）。</p>
+          <p class="mb-2">${cross}</p>
+          <p class="text-xs text-gray-500">注：EP18 影片用的是簡化版（只算手續費＋費用率、複委託 0.5% 不含最低手續費與換匯），得到「轉折點 ≈ 一年投入」。這裡把<strong>最低手續費與換匯</strong>也算進去，所以轉折點通常會比影片晚一些——這正是「自己把數字算清楚」的價值。</p>`;
+
+        // Chart
+        const maxY = Math.max(r.cumFu, r.cumOv, r.cum646);
+        const W = 640, H = 260, padL = 56, padR = 16, padT = 12, padB = 28;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const xAt = (i) => padL + (r.years <= 1 ? plotW / 2 : (plotW * i) / (r.years - 1));
+        const yAt = (v) => padT + plotH - (maxY ? (plotH * v) / maxY : 0);
+        const cum = { fu: 0, ov: 0, '646': 0 };
+        const pts = { fu: [], ov: [], '646': [] };
+        r.rows.forEach((row, i) => {
+          cum.fu += row.fuTotal; cum.ov += row.ovTotal; cum['646'] += row.total646;
+          pts.fu.push([xAt(i), yAt(cum.fu)]);
+          pts.ov.push([xAt(i), yAt(cum.ov)]);
+          pts['646'].push([xAt(i), yAt(cum['646'])]);
+        });
+        const poly = (p, c) => `<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" points="${p.map(a => a.join(',')).join(' ')}"/>`;
+        const dots = (p, c) => p.map(a => `<circle cx="${a[0]}" cy="${a[1]}" r="2.5" fill="${c}"/>`).join('');
+        // y gridlines
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = (maxY * g) / 4;
+          const yy = yAt(v);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${Math.round(v / 1000)}k</text>`;
+        }
+        // x labels (first, mid, last)
+        const xl = [0, Math.floor((r.years - 1) / 2), r.years - 1];
+        let xlabels = '';
+        [...new Set(xl)].forEach(i => {
+          xlabels += `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#9ca3af">第${i + 1}年</text>`;
+        });
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="累積成本走勢圖">
+          ${grid}${xlabels}
+          ${poly(pts['646'], '#16a34a')}${poly(pts.fu, '#C5611A')}${poly(pts.ov, '#2563eb')}
+          ${dots(pts['646'], '#16a34a')}${dots(pts.fu, '#C5611A')}${dots(pts.ov, '#2563eb')}
+        </svg>`;
+
+        // Table
+        $('tbody').innerHTML = r.rows.map(row => `
+          <tr class="border-b border-gray-100">
+            <td class="py-2 pr-4">${row.y}</td>
+            <td class="py-2 px-4 text-right" style="color:#C5611A">${fmt(row.fuTotal)}</td>
+            <td class="py-2 px-4 text-right" style="color:#2563eb">${fmt(row.ovTotal)}</td>
+            <td class="py-2 px-4 text-right" style="color:#16a34a">${fmt(row.total646)}</td>
+            <td class="py-2 pl-4 text-right text-gray-500">${fmt(row.avg)}</td>
+          </tr>`).join('');
+      }
+
+      ids.forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>
