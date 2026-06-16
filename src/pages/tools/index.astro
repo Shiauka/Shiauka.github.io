@@ -1,0 +1,57 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+const tools = [
+  {
+    href: '/tools/brokerage-fee-calculator',
+    title: '複委託 vs 海外券商 費用比較計算機',
+    desc: '輸入定期定額金額與持有年數，算出複委託 VOO、海外券商 VOO、台灣 00646 三條路的累積成本與轉折點。',
+    episode: 18,
+    tags: ['費用比較', '複委託', '00646'],
+  },
+]
+---
+
+<BaseLayout
+  title="工具"
+  description="祿哥做的免費互動小工具——把每集播客的計算題變成你自己能玩的計算機。"
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+
+    <div class="mb-10">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools</p>
+      <h1 class="text-3xl font-bold mb-3">工具</h1>
+      <p class="text-gray-600 max-w-2xl">
+        把每集播客講的計算題，變成你自己能調數字的互動計算機。免費、純前端、不收集任何資料。
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      {tools.map(tool => (
+        <a
+          href={tool.href}
+          class="flex items-start gap-4 p-5 rounded-xl border border-gray-200 hover:border-brand hover:shadow-md transition-all group"
+        >
+          <div class="shrink-0 mt-0.5">
+            <span class="inline-block text-xs font-semibold bg-brand/10 text-brand px-2.5 py-1 rounded-full whitespace-nowrap">
+              EP{String(tool.episode).padStart(2, '0')}
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-gray-900 group-hover:text-brand transition-colors leading-snug mb-1">
+              {tool.title}
+            </h2>
+            <p class="text-sm text-gray-500 line-clamp-2">{tool.desc}</p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              {tool.tags.map(tag => (
+                <span class="text-xs text-gray-400">#{tag}</span>
+              ))}
+            </div>
+          </div>
+          <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-1">→</span>
+        </a>
+      ))}
+    </div>
+
+  </div>
+</BaseLayout>
