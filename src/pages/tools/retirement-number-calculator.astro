@@ -1,0 +1,288 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="財務自由數字計算機"
+  description="用退休後支出、3.5% 提領率、通膨反推你的財務自由數字，再從現有資產與月投入算出預估達標年齡——對應 EP15。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP15</p>
+      <h1 class="text-3xl font-bold mb-3">財務自由數字計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        把「感覺夠了」變成有根據的數字。填入退休後支出與你的提領率，算出<strong>財務自由數字</strong>；
+        再放進現有資產與每月投入，看你<strong>幾歲能達標</strong>。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的數字</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">目前年齡</span>
+          <input id="currentAge" type="number" min="18" max="80" step="1" value="35"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">計畫退休年齡</span>
+          <input id="retireAge" type="number" min="30" max="90" step="1" value="55"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">退休後每月支出（今日幣值，NT$）</span>
+          <input id="monthlyExpense" type="number" min="0" step="1000" value="43000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">現有投資資產（NT$）</span>
+          <input id="currentAssets" type="number" min="0" step="100000" value="3000000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">每月投入（NT$）</span>
+          <input id="monthly" type="number" min="0" step="1000" value="30000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+
+      <details class="mt-4 group">
+        <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 進階參數（提領率、報酬、通膨）</summary>
+        <div class="grid sm:grid-cols-3 gap-4 mt-4">
+          <label class="block">
+            <span class="text-sm text-gray-600">提領率（%）</span>
+            <input id="wr" type="number" min="2" max="6" step="0.1" value="3.5"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            <span class="text-[11px] text-gray-400">4% 法則的台灣保守版；退休窗口越長越保守</span>
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">預期年化報酬（名目，%）</span>
+            <input id="ret" type="number" min="0" max="20" step="0.5" value="7"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">通膨率（%）</span>
+            <input id="inf" type="number" min="0" max="10" step="0.5" value="2"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">採名目全程計算：目標金額隨通膨換算成退休當年的名目金額，報酬用名目報酬率。月投以年金終值公式計算（月利率＝年報酬÷12）。</p>
+      </details>
+    </div>
+
+    <!-- Free number cards -->
+    <h2 class="font-semibold text-gray-900 mb-3">① 你的財務自由數字</h2>
+    <div id="numCards" class="grid sm:grid-cols-2 gap-4 mb-8"></div>
+
+    <!-- Path cards -->
+    <h2 class="font-semibold text-gray-900 mb-3">② 達成路徑</h2>
+    <div id="pathCards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+    <div id="verdict" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">資產成長 vs 目標</h2>
+      <p class="text-xs text-gray-400 mb-4">橘線是你的資產隨時間複利成長；灰虛線是隨通膨上升的名目目標。兩線交叉處＝達標。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#E87930"></span>預估資產</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#9ca3af"></span>名目目標（含通膨）</span>
+      </div>
+    </div>
+
+    <!-- Contribution split -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">退休時，誰貢獻比較多？</h2>
+      <p class="text-xs text-gray-400 mb-4">現有資產的複利成長 vs 未來每月新投入的累積——部位越早累積到一定規模，複利的貢獻就越大。</p>
+      <div id="split"></div>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 三個讓數字失準的地方</p>
+      <p><strong>退休後支出 ≠ 現在支出：</strong>扣掉房貸、通勤；但醫療、保險要往上加。用「退休後月度最低維持支出」代入，別直接套現在的月支出。</p>
+      <p><strong>提領率沒有標準答案：</strong>4% 是美國 30 年窗口的版本；計畫越早退、窗口越長，越該用 3.5% 或更低（倍數從 25 倍升到約 28.6 倍）。</p>
+      <p><strong>通膨兩種算法不能混用：</strong>今日目標只能配實質報酬率；名目目標才配名目報酬率。混用會讓達標日看起來比實際早。完整說明見 <a class="text-brand hover:underline" href="/articles/ep15-retirement-number">EP15 文章</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採用簡化假設（固定報酬、固定通膨、不含稅負與二代健保補充保費的逐年變動），不構成投資、稅務或法律建議。實際結果依市場與個人情況而定。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep15-retirement-number" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP15 完整算法 →</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ids = ['currentAge','retireAge','monthlyExpense','currentAssets','monthly','wr','ret','inf'];
+      const num = (id) => parseFloat($(id).value) || 0;
+      const fmt = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' 萬';
+
+      function compute() {
+        const currentAge = Math.round(num('currentAge'));
+        let retireAge = Math.round(num('retireAge'));
+        if (retireAge <= currentAge) retireAge = currentAge + 1;
+        const years = retireAge - currentAge;
+        const monthlyExpense = num('monthlyExpense');
+        const currentAssets = num('currentAssets');
+        const monthly = num('monthly');
+        const wr = num('wr') / 100;
+        const r = num('ret') / 100;
+        const inf = num('inf') / 100;
+
+        const annualExpense = monthlyExpense * 12;
+        const todayTarget = wr > 0 ? annualExpense / wr : 0;
+        const nominalTarget = todayTarget * Math.pow(1 + inf, years);
+
+        const rm = r / 12;            // 月報酬（對齊影片：年報酬÷12）
+        const infm = Math.pow(1 + inf, 1 / 12) - 1;
+        const monthsToRetire = years * 12;
+        const annuityFactor = (m) => rm > 0 ? (Math.pow(1 + rm, m) - 1) / rm : m;
+
+        // 退休時預估資產
+        const assetsFromCurrent = currentAssets * Math.pow(1 + rm, monthsToRetire);
+        const assetsFromMonthly = monthly * annuityFactor(monthsToRetire);
+        const projectedAtRetire = assetsFromCurrent + assetsFromMonthly;
+
+        // 為了在退休年齡達標所需月投
+        const need = nominalTarget - assetsFromCurrent;
+        const requiredMonthly = need <= 0 ? 0 : need / annuityFactor(monthsToRetire);
+
+        // 預估達標年齡（逐月模擬，目標隨通膨上升）
+        let reachAgeMonth = -1;
+        const maxMonths = (90 - currentAge) * 12;
+        for (let m = 0; m <= maxMonths; m++) {
+          const assets = currentAssets * Math.pow(1 + rm, m) + monthly * annuityFactor(m);
+          const target = todayTarget * Math.pow(1 + infm, m);
+          if (assets >= target) { reachAgeMonth = m; break; }
+        }
+
+        return {
+          currentAge, retireAge, years, todayTarget, nominalTarget,
+          assetsFromCurrent, assetsFromMonthly, projectedAtRetire,
+          requiredMonthly, reachAgeMonth, monthly, monthsToRetire,
+          rm, infm, currentAssets, maxMonths,
+        };
+      }
+
+      function render() {
+        const d = compute();
+
+        // ① free number cards
+        $('numCards').innerHTML = `
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm text-gray-500 mb-1">今日幣值目標</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(d.todayTarget)}</div>
+            <div class="text-xs text-gray-400 mt-1">${fmt(d.todayTarget)}<br>＝ 年支出 ÷ 提領率</div>
+          </div>
+          <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+            <div class="text-sm text-brand font-medium mb-1">退休當年名目目標（${d.retireAge} 歲）</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(d.nominalTarget)}</div>
+            <div class="text-xs text-gray-400 mt-1">${fmt(d.nominalTarget)}<br>含 ${d.years} 年通膨換算，這是帳戶真正要達到的數字</div>
+          </div>`;
+
+        // ② path cards
+        const surplus = d.projectedAtRetire - d.nominalTarget;
+        const hit = surplus >= 0;
+        const reachStr = d.reachAgeMonth >= 0
+          ? `${(d.currentAge + d.reachAgeMonth / 12).toFixed(1)} 歲`
+          : '90 歲前未達標';
+        $('pathCards').innerHTML = `
+          <div class="rounded-2xl border ${hit ? 'border-brand bg-brand/5' : 'border-red-200 bg-red-50'} p-5">
+            <div class="text-sm font-medium mb-1 ${hit ? 'text-brand' : 'text-red-600'}">${d.retireAge} 歲預估資產</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(d.projectedAtRetire)}</div>
+            <div class="text-xs text-gray-500 mt-1">${hit ? `超過目標 ${wan(surplus)} ✅` : `距目標還差 ${wan(-surplus)}`}</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm text-gray-500 mb-1">預估達標年齡</div>
+            <div class="text-2xl font-bold text-gray-900">${reachStr}</div>
+            <div class="text-xs text-gray-400 mt-1">資產追上隨通膨上升的目標</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm text-gray-500 mb-1">${d.retireAge} 歲達標所需月投</div>
+            <div class="text-2xl font-bold text-gray-900">${d.requiredMonthly <= 0 ? '0' : fmt(d.requiredMonthly)}</div>
+            <div class="text-xs text-gray-400 mt-1">${d.requiredMonthly <= 0 ? '光現有資產複利即可達標' : '在退休年齡剛好達標的最低月投'}</div>
+          </div>`;
+
+        // verdict
+        let v = '';
+        if (hit) {
+          v = `<p class="font-semibold text-gray-900 mb-2">📌 你目前的步調可以達標</p>
+            <p class="mb-2">照現在每月投入 <strong>${fmt(d.monthly)}</strong>，預估在 <strong>${reachStr}</strong> 達到財務自由數字——${d.reachAgeMonth >= 0 && (d.currentAge + d.reachAgeMonth / 12) < d.retireAge ? `比計畫退休的 ${d.retireAge} 歲還早。` : `落在 ${d.retireAge} 歲附近。`}</p>
+            <p class="text-xs text-gray-500">想提早？把每月投入往上加一萬，因為複利，效果通常比直覺大很多——拉動上面的數字試試。</p>`;
+        } else {
+          v = `<p class="font-semibold text-gray-900 mb-2">📌 目前步調還差一段</p>
+            <p class="mb-2">照現在每月投入 <strong>${fmt(d.monthly)}</strong>，到 ${d.retireAge} 歲距目標還差 <strong>${wan(-surplus)}</strong>。要在 ${d.retireAge} 歲達標，每月需投入約 <strong>${fmt(d.requiredMonthly)}</strong>。</p>
+            <p class="text-xs text-gray-500">或者：延後退休年齡、降低退休後支出、或拉高提領率假設（風險也跟著上升）。</p>`;
+        }
+        $('verdict').innerHTML = v;
+
+        // chart
+        const endAge = Math.min(90, Math.max(d.retireAge, d.reachAgeMonth >= 0 ? Math.ceil(d.currentAge + d.reachAgeMonth / 12) : d.retireAge) + 2);
+        const span = endAge - d.currentAge;
+        const assetsPts = [], targetPts = [];
+        let maxV = 0;
+        for (let y = 0; y <= span; y++) {
+          const m = y * 12;
+          const a = d.currentAssets * Math.pow(1 + d.rm, m) + d.monthly * (d.rm > 0 ? (Math.pow(1 + d.rm, m) - 1) / d.rm : m);
+          const t = d.todayTarget * Math.pow(1 + d.infm, m);
+          assetsPts.push(a); targetPts.push(t);
+          maxV = Math.max(maxV, a, t);
+        }
+        const W = 640, H = 280, padL = 52, padR = 16, padT = 12, padB = 28;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const xAt = (y) => padL + (span <= 0 ? plotW / 2 : (plotW * y) / span);
+        const yAt = (v2) => padT + plotH - (maxV ? (plotH * v2) / maxV : 0);
+        const line = (arr, c, dash) => `<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" ${dash ? 'stroke-dasharray="5 4"' : ''} points="${arr.map((v2, y) => xAt(y) + ',' + yAt(v2)).join(' ')}"/>`;
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v2 = (maxV * g) / 4, yy = yAt(v2);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${Math.round(v2 / 10000)}萬</text>`;
+        }
+        const xl = [...new Set([0, Math.round(span / 2), span])];
+        let xlabels = '';
+        xl.forEach(y => { xlabels += `<text x="${xAt(y)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#9ca3af">${d.currentAge + y}歲</text>`; });
+        // reach marker
+        let marker = '';
+        if (d.reachAgeMonth >= 0) {
+          const ry = d.reachAgeMonth / 12;
+          if (ry <= span) {
+            const mx = xAt(ry), my = yAt(d.todayTarget * Math.pow(1 + d.infm, d.reachAgeMonth));
+            marker = `<circle cx="${mx}" cy="${my}" r="5" fill="none" stroke="#E87930" stroke-width="2"/>
+              <text x="${mx}" y="${my - 10}" text-anchor="middle" font-size="10" fill="#E87930" font-weight="bold">達標</text>`;
+          }
+        }
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="資產成長 vs 目標圖">
+          ${grid}${xlabels}${line(targetPts, '#9ca3af', true)}${line(assetsPts, '#E87930', false)}${marker}
+        </svg>`;
+
+        // split bar
+        const total = d.projectedAtRetire || 1;
+        const pctCur = (d.assetsFromCurrent / total) * 100;
+        const pctMon = (d.assetsFromMonthly / total) * 100;
+        $('split').innerHTML = `
+          <div class="flex h-8 rounded-lg overflow-hidden text-xs font-medium text-white">
+            <div style="width:${pctCur}%;background:#E87930" class="flex items-center justify-center">${pctCur >= 12 ? Math.round(pctCur) + '%' : ''}</div>
+            <div style="width:${pctMon}%;background:#C5611A" class="flex items-center justify-center">${pctMon >= 12 ? Math.round(pctMon) + '%' : ''}</div>
+          </div>
+          <div class="flex flex-wrap gap-4 mt-3 text-sm">
+            <span><span class="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style="background:#E87930"></span>現有資產複利：<strong>${wan(d.assetsFromCurrent)}</strong></span>
+            <span><span class="inline-block w-3 h-3 rounded-sm align-middle mr-1.5" style="background:#C5611A"></span>未來月投累積：<strong>${wan(d.assetsFromMonthly)}</strong></span>
+          </div>`;
+      }
+
+      ids.forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>

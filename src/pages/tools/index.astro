@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 
+// 依集數由新到舊排列（與文章列表一致：EP 大的在上）
 const tools = [
   {
     href: '/tools/brokerage-fee-calculator',
@@ -8,6 +9,13 @@ const tools = [
     desc: '輸入定期定額金額與持有年數，算出複委託 VOO、海外券商 VOO、台灣 00646 三條路的累積成本與轉折點。',
     episode: 18,
     tags: ['費用比較', '複委託', '00646'],
+  },
+  {
+    href: '/tools/retirement-number-calculator',
+    title: '財務自由數字計算機',
+    desc: '用退休後支出、3.5% 提領率、通膨反推你的財務自由數字，再從現有資產與月投入算出預估達標年齡。',
+    episode: 15,
+    tags: ['財務自由', '提領率', '退休規劃'],
   },
 ]
 ---
