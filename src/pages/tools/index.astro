@@ -1,13 +1,16 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { openTs, isPublished } from '@/lib/publish'
 
 // 依集數由新到舊排列（與文章列表一致：EP 大的在上）
+// pubDate = 對應集數的公開日；公開日 19:00（台灣）前不在列表顯示，到時前端自動現身。
 const tools = [
   {
     href: '/tools/brokerage-fee-calculator',
     title: '複委託 vs 海外券商 費用比較計算機',
     desc: '輸入定期定額金額與持有年數，算出複委託 VOO、海外券商 VOO、台灣 00646 三條路的累積成本與轉折點。',
     episode: 18,
+    pubDate: '2026-06-16',
     tags: ['費用比較', '複委託', '00646'],
   },
   {
@@ -15,9 +18,12 @@ const tools = [
     title: '財務自由數字計算機',
     desc: '用退休後支出、3.5% 提領率、通膨反推你的財務自由數字，再從現有資產與月投入算出預估達標年齡。',
     episode: 15,
+    pubDate: '2026-06-05',
     tags: ['財務自由', '提領率', '退休規劃'],
   },
 ]
+
+const now = Date.now()
 ---
 
 <BaseLayout
@@ -35,10 +41,16 @@ const tools = [
     </div>
 
     <div class="space-y-4">
-      {tools.map(tool => (
+      {tools.map(tool => {
+        const live = isPublished(tool.pubDate, now)
+        return (
         <a
           href={tool.href}
-          class="flex items-start gap-4 p-5 rounded-xl border border-gray-200 hover:border-brand hover:shadow-md transition-all group"
+          data-reveal-ts={live ? undefined : String(openTs(tool.pubDate))}
+          class:list={[
+            'flex items-start gap-4 p-5 rounded-xl border border-gray-200 hover:border-brand hover:shadow-md transition-all group',
+            { hidden: !live },
+          ]}
         >
           <div class="shrink-0 mt-0.5">
             <span class="inline-block text-xs font-semibold bg-brand/10 text-brand px-2.5 py-1 rounded-full whitespace-nowrap">
@@ -58,8 +70,13 @@ const tools = [
           </div>
           <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-1">→</span>
         </a>
-      ))}
+        )
+      })}
     </div>
 
   </div>
 </BaseLayout>
+
+<script>
+  import '@/scripts/reveal.ts'
+</script>
