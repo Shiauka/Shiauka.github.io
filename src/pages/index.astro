@@ -4,8 +4,15 @@ import { episodes } from '@/data/episodes'
 
 const SPOTIFY_SHOW_URL = 'https://open.spotify.com/show/033d989NU4Dv5YcXBwnr8g'
 
+// 公開日當天「晚上 7 點（台灣 UTC+8）」才算正式上線（19:00 TW = 11:00 UTC）。
+// 首頁只列已公開的集數，避免連到還在排程的私人影片。
+function openTs(pubDate: string): number {
+  const [y, m, d] = pubDate.split('-').map(Number)
+  return Date.UTC(y, m - 1, d, 11, 0, 0)
+}
+const now = Date.now()
 const latestEpisodes = episodes
-  .filter(ep => ep.youtubeId)
+  .filter(ep => ep.youtubeId && openTs(ep.pubDate) <= now)
   .sort((a, b) => b.ep - a.ep)
   .slice(0, 3)
 ---
