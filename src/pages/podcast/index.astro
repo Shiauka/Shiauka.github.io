@@ -2,16 +2,11 @@
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { episodes } from '@/data/episodes'
 import { getCollection } from 'astro:content'
+import { openTs, isPublished } from '@/lib/publish'
 
 const SPOTIFY_SHOW_URL = 'https://open.spotify.com/show/033d989NU4Dv5YcXBwnr8g'
 
-// 公開日當天「晚上 7 點（台灣 UTC+8）」才開放連結 → 19:00 TW = 11:00 UTC。
-// 以固定時區計算，瀏覽器在哪個時區看到的開放時間都一致。
-const TW_OPEN_HOUR_UTC = 11
-function openTs(pubDate: string): number {
-  const [y, m, d] = pubDate.split('-').map(Number)
-  return Date.UTC(y, m - 1, d, TW_OPEN_HOUR_UTC, 0, 0)
-}
+// 公開日當天「晚上 7 點（台灣 UTC+8）」才開放連結（openTs 已處理時區）。
 function mmdd(pubDate: string): string {
   const [, m, d] = pubDate.split('-').map(Number)
   return `${m}/${d}`
@@ -90,7 +85,7 @@ for (const ep of Object.values(articlesByEp)) {
         const ytUrl    = `https://www.youtube.com/watch?v=${ep.youtubeId}`
         return (
           <div
-            data-sched-ts={scheduled ? String(ep.openTs) : undefined}
+            data-publish-ts={scheduled ? String(ep.openTs) : undefined}
             class={`p-5 rounded-xl border transition-all ${
               live
                 ? 'border-gray-200 hover:border-brand hover:shadow-md'
@@ -128,11 +123,15 @@ for (const ep of Object.values(articlesByEp)) {
                         href={ytUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        data-reveal-ts={String(ep.openTs)}
                         class="watch-link hidden shrink-0 text-xs font-medium text-red-600 border border-red-200 rounded px-2 py-0.5 hover:bg-red-50 transition-colors whitespace-nowrap"
                       >
                         ▶ 觀看
                       </a>
-                      <span class="soon-badge shrink-0 text-xs text-gray-400 whitespace-nowrap">
+                      <span
+                        data-until-ts={String(ep.openTs)}
+                        class="soon-badge shrink-0 text-xs text-gray-400 whitespace-nowrap"
+                      >
                         🔒 {mmdd(ep.pubDate)} 晚間上線
                       </span>
                     </>
@@ -152,14 +151,18 @@ for (const ep of Object.values(articlesByEp)) {
                 <!-- 對應文章 -->
                 {epArts.length > 0 && (
                   <div class="mt-2.5 flex flex-wrap gap-x-4 gap-y-1">
-                    {epArts.map(article => (
-                      <a
-                        href={`/articles/${article.slug}`}
-                        class="text-xs text-brand hover:underline"
-                      >
-                        📖 {article.data.title}
-                      </a>
-                    ))}
+                    {epArts.map(article => {
+                      const artLive = isPublished(article.data.pubDate, now)
+                      return (
+                        <a
+                          href={`/articles/${article.slug}`}
+                          data-reveal-ts={artLive ? undefined : String(openTs(article.data.pubDate))}
+                          class:list={['text-xs text-brand hover:underline', { hidden: !artLive }]}
+                        >
+                          📖 {article.data.title}
+                        </a>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -173,15 +176,5 @@ for (const ep of Object.values(articlesByEp)) {
 </BaseLayout>
 
 <script>
-  // 公開日 19:00（台灣時間）一到，把「🔒 即將上線」的卡片自動翻成可點的「▶ 觀看」連結，
-  // 不需要重新部署網站。
-  const now = Date.now()
-  document.querySelectorAll<HTMLElement>('[data-sched-ts]').forEach(card => {
-    const ts = Number(card.dataset.schedTs)
-    if (!Number.isFinite(ts) || now < ts) return
-    card.classList.remove('opacity-50', 'border-dashed')
-    card.classList.add('border-gray-200', 'hover:border-brand', 'hover:shadow-md')
-    card.querySelector('.watch-link')?.classList.remove('hidden')
-    card.querySelector('.soon-badge')?.classList.add('hidden')
-  })
+  import '@/scripts/reveal.ts'
 </script>

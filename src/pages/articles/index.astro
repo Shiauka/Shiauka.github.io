@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getCollection } from 'astro:content'
+import { openTs, isPublished } from '@/lib/publish'
 
+const now = Date.now()
 const articles = (await getCollection('articles', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 ---
@@ -21,10 +23,16 @@ const articles = (await getCollection('articles', ({ data }) => !data.draft))
     </div>
 
     <div class="space-y-4">
-      {articles.map(article => (
+      {articles.map(article => {
+        const live = isPublished(article.data.pubDate, now)
+        return (
         <a
           href={`/articles/${article.slug}`}
-          class="flex items-start gap-4 p-5 rounded-xl border border-gray-200 hover:border-brand hover:shadow-md transition-all group"
+          data-reveal-ts={live ? undefined : String(openTs(article.data.pubDate))}
+          class:list={[
+            'flex items-start gap-4 p-5 rounded-xl border border-gray-200 hover:border-brand hover:shadow-md transition-all group',
+            { hidden: !live },
+          ]}
         >
           <div class="shrink-0 mt-0.5">
             {article.data.episode ? (
@@ -50,8 +58,13 @@ const articles = (await getCollection('articles', ({ data }) => !data.draft))
           </div>
           <span class="shrink-0 text-gray-400 group-hover:text-brand transition-colors mt-1">→</span>
         </a>
-      ))}
+        )
+      })}
     </div>
 
   </div>
 </BaseLayout>
+
+<script>
+  import '@/scripts/reveal.ts'
+</script>
