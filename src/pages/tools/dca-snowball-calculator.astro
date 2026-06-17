@@ -1,0 +1,224 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="定期定額複利雪球計算機"
+  description="月投三萬、年化 7%、二十年後超過一半的資產是複利長出來的。填入你的月投金額、年數與報酬率，看本金與複利怎麼分、雪球哪一年開始滾贏本金——對應 EP23。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP23</p>
+      <h1 class="text-3xl font-bold mb-3">定期定額複利雪球計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        定期定額最容易被低估的，是<strong>時間複利</strong>。你存進去的是本金，市場替你長出來的是複利。
+        填入你的月投金額、年數與預期報酬，看看二十年、三十年後，帳戶裡有多少其實不是你存的——以及雪球哪一年開始滾贏本金。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的定期定額計畫</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">每月投入（NT$）</span>
+          <input id="monthly" type="number" min="0" step="1000" value="30000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">投入年數</span>
+          <input id="years" type="number" min="1" max="40" step="1" value="20"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預期年化報酬（%）</span>
+          <input id="ret" type="number" min="0" max="30" step="0.5" value="7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">採每月月底投入、報酬按月複利（年化 ÷ 12）的年金未來值公式計算。報酬率是假設值、無法保證；7% 約為全球股市長期平均的概數。未計入手續費、稅與通膨。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">雪球的形狀：本金 vs 複利</h2>
+      <p class="text-xs text-gray-400 mb-4">下層是你累計投入的本金（直線成長），上層是複利長出來的部分。越往後，上層越厚——這就是「越早開始越值錢」的原因。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#cbd5e1"></span>累計本金</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#C5611A"></span>複利貢獻</span>
+      </div>
+    </div>
+
+    <!-- Year table -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 五年節點明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-4 font-medium">年</th>
+              <th class="py-2 px-4 font-medium text-right">累計本金</th>
+              <th class="py-2 px-4 font-medium text-right">帳戶終值</th>
+              <th class="py-2 px-4 font-medium text-right">複利貢獻</th>
+              <th class="py-2 pl-4 font-medium text-right">複利佔比</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 雪球的兩個關鍵體會</p>
+      <p><strong>前段最慢、最多人放棄：</strong>前十年複利貢獻通常還不到本金的三分之一，帳面成長慢、容易覺得「不值得這麼麻煩」。但雪球的後段最肥，撐過去才看得到陡升。</p>
+      <p><strong>晚開始很貴：</strong>你犧牲的永遠是最前面那幾年——也就是讓後段複利得以發生的「底層雪」。每拖一年，砍掉的是這筆錢未來幾十年的複利尾巴。能不能<strong>每個月都真的在場</strong>，比報酬率高低更操之在己。怎麼把它自動化，見 <a class="text-brand hover:underline" href="/articles/ep23-dca-automation">EP23 定期定額自動化</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採固定報酬率的簡化假設，實際市場報酬逐年波動、無法保證，過去績效不代表未來結果。未計入手續費、稅與通膨。不構成投資建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep23-dca-automation" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP23 定期定額自動化 →</a>
+      <a href="/tools/retirement-number-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">算我的財務自由數字</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ids = ['monthly','years','ret'];
+      const num = (id) => parseFloat($(id).value) || 0;
+      const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' 萬';
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+
+      // 年金未來值（每月投入、月複利）到第 y 年
+      function fvAt(P, mRate, y) {
+        const n = y * 12;
+        if (mRate === 0) return P * n;
+        return P * ((Math.pow(1 + mRate, n) - 1) / mRate);
+      }
+
+      function compute() {
+        const P = Math.max(0, num('monthly'));
+        const years = Math.max(1, Math.min(40, Math.round(num('years'))));
+        const mRate = num('ret') / 100 / 12;
+        const rows = [];
+        let crossYear = 0;
+        for (let y = 1; y <= years; y++) {
+          const principal = P * y * 12;
+          const fv = fvAt(P, mRate, y);
+          const gain = fv - principal;
+          if (!crossYear && gain >= principal) crossYear = y;
+          rows.push({ y, principal, fv, gain, ratio: fv ? gain / fv : 0 });
+        }
+        return { P, years, mRate, rows, crossYear };
+      }
+
+      function render() {
+        const r = compute();
+        const last = r.rows[r.rows.length - 1];
+
+        // Cards
+        $('cards').innerHTML = `
+          <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">${r.years} 年後帳戶終值</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(last.fv)}</div>
+            <div class="text-xs text-gray-500 mt-1">${ntd(last.fv)}</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">你存進去的本金</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(last.principal)}</div>
+            <div class="text-xs text-gray-500 mt-1">佔終值 ${((last.principal / last.fv) * 100).toFixed(0)}%</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">複利長出來的</div>
+            <div class="text-2xl font-bold" style="color:#C5611A">${wan(last.gain)}</div>
+            <div class="text-xs text-gray-500 mt-1">佔終值 ${(last.ratio * 100).toFixed(0)}%</div>
+          </div>`;
+
+        // Insight
+        let crossText;
+        if (r.crossYear) {
+          crossText = `大約在<strong>第 ${r.crossYear} 年</strong>，複利累積貢獻首度超過你投進去的本金——之後每多撐一年，市場替你賺的就拉得越開。`;
+        } else {
+          crossText = `在這個年數內，複利貢獻還沒追上本金；把「投入年數」調大一點，就能看到雪球滾贏本金的那一年（年化 7% 時大約落在第 19 年前後）。`;
+        }
+        $('insight').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2">月投 ${ntd(r.P)}、年化 ${num('ret')}%、投 ${r.years} 年，最後約 <strong>${wan(last.fv)}</strong>，其中 <strong style="color:#C5611A">${wan(last.gain)}（${(last.ratio * 100).toFixed(0)}%）是複利長出來的</strong>，不是你存的。</p>
+          <p>${crossText}</p>`;
+
+        // Table（五年節點 + 最後一年）
+        const marks = [];
+        for (let y = 5; y <= r.years; y += 5) marks.push(y);
+        if (marks[marks.length - 1] !== r.years) marks.push(r.years);
+        $('tbody').innerHTML = marks.map(y => {
+          const row = r.rows[y - 1];
+          return `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-4">${y} 年</td>
+            <td class="py-2 px-4 text-right text-gray-500">${wan(row.principal)}</td>
+            <td class="py-2 px-4 text-right font-medium text-gray-900">${wan(row.fv)}</td>
+            <td class="py-2 px-4 text-right" style="color:#C5611A">${wan(row.gain)}</td>
+            <td class="py-2 pl-4 text-right text-gray-500">${(row.ratio * 100).toFixed(0)}%</td>
+          </tr>`;
+        }).join('');
+
+        // Chart：堆疊面積（本金下層 + 複利上層）
+        const W = 640, H = 280, padL = 48, padR = 16, padT = 12, padB = 28;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const maxV = last.fv || 1;
+        const xAt = (i) => padL + (r.years <= 1 ? plotW / 2 : (plotW * i) / (r.years - 1));
+        const yAt = (v) => padT + plotH - (plotH * v) / maxV;
+        const prinPts = r.rows.map((row, i) => [xAt(i), yAt(row.principal)]);
+        const fvPts = r.rows.map((row, i) => [xAt(i), yAt(row.fv)]);
+        // 複利面積 = 介於本金線與終值線之間
+        const gainArea = `M ${fvPts.map(p => p.join(',')).join(' L ')} L ${[...prinPts].reverse().map(p => p.join(',')).join(' L ')} Z`;
+        // 本金面積 = 0 到本金線
+        const base = yAt(0);
+        const prinArea = `M ${padL},${base} L ${prinPts.map(p => p.join(',')).join(' L ')} L ${xAt(r.years - 1)},${base} Z`;
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = (maxV * g) / 4;
+          const yy = yAt(v);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${wan(v)}</text>`;
+        }
+        const xl = [...new Set([0, Math.floor((r.years - 1) / 2), r.years - 1])];
+        let xlabels = '';
+        xl.forEach(i => {
+          xlabels += `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#9ca3af">第${i + 1}年</text>`;
+        });
+        // 交叉點標記
+        let crossMark = '';
+        if (r.crossYear) {
+          const cx = xAt(r.crossYear - 1);
+          crossMark = `<line x1="${cx}" y1="${padT}" x2="${cx}" y2="${padT + plotH}" stroke="#9ca3af" stroke-dasharray="3 3"/>
+            <text x="${cx}" y="${padT + 10}" text-anchor="middle" font-size="9" fill="#6b7280">複利&gt;本金</text>`;
+        }
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="本金與複利堆疊面積圖">
+          ${grid}${xlabels}
+          <path d="${prinArea}" fill="#cbd5e1" opacity="0.85"/>
+          <path d="${gainArea}" fill="#C5611A" opacity="0.85"/>
+          <polyline fill="none" stroke="#fff" stroke-width="1.5" points="${prinPts.map(p => p.join(',')).join(' ')}"/>
+          ${crossMark}
+        </svg>`;
+      }
+
+      ids.forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>
