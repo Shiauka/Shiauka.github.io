@@ -1,0 +1,210 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="換匯成本比較器"
+  description="台幣換美元，現鈔、即期＋電匯、Wise 哪條管道最便宜？把金額填進去，看三層成本攤開比一次，還有電匯費被攤薄的轉折——對應 EP22。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP22</p>
+      <h1 class="text-3xl font-bold mb-3">換匯成本比較器</h1>
+      <p class="text-gray-600 leading-relaxed">
+        台幣換美元，成本不在牌告匯率上，而藏在<strong>匯差</strong>、<strong>電匯費</strong>兩層裡。
+        同一筆錢，走<strong>即期＋電匯</strong>、<strong>臨櫃現鈔</strong>、還是 <strong>Wise</strong>，差多少？把你的換匯金額填進去，自己算一次。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的換匯計畫</h2>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">這次要換多少（NT$）</span>
+          <input id="amt" type="number" min="0" step="10000" value="100000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">電匯費 / 筆（NT$）</span>
+          <input id="wire" type="number" min="0" step="100" value="400"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+
+      <details class="mt-4 group">
+        <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 進階參數（各管道費率）</summary>
+        <div class="grid sm:grid-cols-3 gap-4 mt-4">
+          <label class="block">
+            <span class="text-sm text-gray-600">即期匯差（%）</span>
+            <input id="spot" type="number" min="0" step="0.05" value="0.4"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">現鈔比即期多（%）</span>
+            <input id="cashExtra" type="number" min="0" step="0.1" value="0.8"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">Wise 服務費（%）</span>
+            <input id="wiseFee" type="number" min="0" step="0.1" value="0.5"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">「即期＋電匯」與「臨櫃現鈔＋電匯」各含一筆電匯費；Wise 把換匯與跨境轉帳合成一步，不另計電匯費。匯差／費率隨銀行與市場浮動，以上為常見區間中值，可自行調整。股利稅、券商手續費不在此比較。</p>
+      </details>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">成本佔比 vs 換匯金額</h2>
+      <p class="text-xs text-gray-400 mb-4">每條線是該管道「總成本 ÷ 換匯金額」的百分比。金額越大，固定電匯費被攤得越薄——這就是「累積一點再一次換」的價值。直線（Wise）沒有固定費，所以是水平的。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#2563eb"></span>即期＋電匯</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#C5611A"></span>臨櫃現鈔＋電匯</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:#16a34a"></span>Wise</span>
+      </div>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 三件這張表沒算、但你該知道的事</p>
+      <p><strong>機會成本：</strong>為了等更好的匯率而延後進場，那段時間錢沒在市場裡工作。十萬等一個月、年化 7% 估，機會成本約 0.6%、六百塊——跟可見的換匯費同一量級。多數情況「快換快投」比等時機划算。</p>
+      <p><strong>台幣匯不進境外券商：</strong>IB、第一證券、嘉信入金都要美元，台幣沒辦法直接電匯進去，得先在台灣換好。見 <a class="text-brand hover:underline" href="/articles/ep19-firstrade-ib-account">第一證券 vs IB 開戶實戰</a>。</p>
+      <p><strong>結匯限額：</strong>個人每年累積結匯門檻 1,000 萬美元（2024/11 從 500 萬調高），一般投資人遠遠碰不到；單筆大額銀行會問資金來源，講清楚即可。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採用簡化假設（固定匯差與電匯費、不含個別銀行促銷與議價），不構成投資、稅務或法律建議。實際費用以各銀行／平台當期條件為準。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep22-currency-exchange" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP22 換匯的學問 →</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ids = ['amt','wire','spot','cashExtra','wiseFee'];
+      const num = (id) => parseFloat($(id).value) || 0;
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const pct = (n) => (n * 100).toFixed(2) + '%';
+
+      // 回傳某金額下三管道的成本（NT$）
+      function costs(amt) {
+        const wire = num('wire');
+        const spot = num('spot') / 100;
+        const cashExtra = num('cashExtra') / 100;
+        const wiseFee = num('wiseFee') / 100;
+        return {
+          spot: amt * spot + wire,
+          cash: amt * (spot + cashExtra) + wire,
+          wise: amt * wiseFee,
+        };
+      }
+
+      function render() {
+        const amt = Math.max(0, num('amt'));
+        const c = costs(amt);
+        const rows = [
+          { key: 'spot', label: '即期＋電匯', val: c.spot, color: '#2563eb' },
+          { key: 'cash', label: '臨櫃現鈔＋電匯', val: c.cash, color: '#C5611A' },
+          { key: 'wise', label: 'Wise', val: c.wise, color: '#16a34a' },
+        ];
+        const cheapest = rows.reduce((a, b) => (b.val < a.val ? b : a));
+
+        // Verdict cards
+        $('cards').innerHTML = rows.map(r => {
+          const win = r.key === cheapest.key;
+          const diff = r.val - cheapest.val;
+          const ratio = amt ? r.val / amt : 0;
+          return `<div class="rounded-2xl border p-5 ${win ? 'border-brand bg-brand/5' : 'border-gray-200'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium" style="color:${r.color}">${r.label}</span>
+              ${win ? '<span class="text-[10px] font-bold bg-brand text-white px-2 py-0.5 rounded-full">最便宜</span>' : ''}
+            </div>
+            <div class="text-2xl font-bold text-gray-900">${ntd(r.val)}</div>
+            <div class="text-xs text-gray-500 mt-1">佔換匯金額 ${pct(ratio)}${win ? '' : `<br>比最低多付 ${ntd(diff)}`}</div>
+          </div>`;
+        }).join('');
+
+        // Insight
+        const sorted = [...rows].sort((a, b) => a.val - b.val);
+        const best = sorted[0], worst = sorted[2];
+        // 即期 vs Wise 的交叉金額：amt*spot + wire = amt*wiseFee → amt = wire / (wiseFee - spot)
+        const spot = num('spot') / 100, wiseFee = num('wiseFee') / 100, wire = num('wire');
+        let crossText = '';
+        if (wiseFee > spot) {
+          const cross = wire / (wiseFee - spot);
+          crossText = `在這組費率下，換匯金額大約超過 <strong>${ntd(cross)}</strong> 時，即期＋電匯就會反超 Wise 變得更便宜（金額越大，那筆固定電匯費被攤得越薄）；低於這個數，Wise 的純比例費率較有利。`;
+        } else {
+          crossText = `在這組費率下，即期匯差已經低於或等於 Wise 服務費，所以不論金額多大，即期＋電匯都不會比 Wise 貴太多，主要差在那筆固定電匯費。`;
+        }
+        $('insight').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2">換 ${ntd(amt)}，最便宜的是 <strong style="color:${best.color}">${best.label}</strong>（${ntd(best.val)}）：比最貴的 ${worst.label} 省 <strong>${ntd(worst.val - best.val)}</strong>。</p>
+          <p class="mb-2">${crossText}</p>
+          <p class="text-xs text-gray-500">現鈔幾乎永遠最貴，投資匯款別用；日常用網銀即期就夠，偶爾大額再評估 Wise 值不值得多開一個帳戶。</p>`;
+
+        // Chart：成本佔比 vs 金額（1萬 ~ 50萬）
+        const W = 640, H = 260, padL = 44, padR = 16, padT = 12, padB = 28;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const xs = [];
+        for (let a = 10000; a <= 500000; a += 10000) xs.push(a);
+        const series = { spot: [], cash: [], wise: [] };
+        let maxPct = 0;
+        xs.forEach(a => {
+          const cc = costs(a);
+          series.spot.push(cc.spot / a);
+          series.cash.push(cc.cash / a);
+          series.wise.push(cc.wise / a);
+          maxPct = Math.max(maxPct, cc.cash / a);
+        });
+        maxPct = Math.max(maxPct, 0.005);
+        const xAt = (i) => padL + (plotW * i) / (xs.length - 1);
+        const yAt = (v) => padT + plotH - (plotH * v) / maxPct;
+        const line = (arr, color) => {
+          const pts = arr.map((v, i) => `${xAt(i)},${yAt(v)}`).join(' ');
+          return `<polyline fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" points="${pts}"/>`;
+        };
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = (maxPct * g) / 4;
+          const yy = yAt(v);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${(v * 100).toFixed(1)}%</text>`;
+        }
+        let xlabels = '';
+        [0, Math.floor((xs.length - 1) / 2), xs.length - 1].forEach(i => {
+          xlabels += `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#9ca3af">${Math.round(xs[i] / 10000)}萬</text>`;
+        });
+        // 目前金額的參考線
+        let marker = '';
+        if (amt >= 10000 && amt <= 500000) {
+          const mi = (amt - 10000) / 10000;
+          const mx = xAt(mi);
+          marker = `<line x1="${mx}" y1="${padT}" x2="${mx}" y2="${padT + plotH}" stroke="#cbd5e1" stroke-dasharray="3 3"/>`;
+        }
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="成本佔比走勢圖">
+          ${grid}${xlabels}${marker}
+          ${line(series.wise, '#16a34a')}${line(series.spot, '#2563eb')}${line(series.cash, '#C5611A')}
+        </svg>`;
+      }
+
+      ids.forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>

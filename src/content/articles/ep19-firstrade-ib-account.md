@@ -130,6 +130,10 @@ W-8BEN 還是要填（它確立你的外國人身分，避免被當成身分不�
 
 如果你還沒有一份屬於自己的投資政策聲明，建議先看 EP04——怎麼設計一份能執行的 IPS。
 
+下一篇：[我的 IPS 全文公開：一份可執行的投資政策聲明](/articles/ep20-investment-policy-statement)
+
+---
+
 ## 延伸閱讀
 
 - [複委託 vs 直接開戶：真實費用完整比較](/articles/ep18-brokerage-comparison)
