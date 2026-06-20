@@ -1,0 +1,321 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="買房 vs 租房 試算器"
+  description="買房三十年後是一間房，租房把頭期款和每月差額投進市場是一個投資組合——哪邊大？填入房價、頭期款、利率、月租與你對房價、股市的假設，看兩條資產曲線怎麼賽跑，以及房價要漲多少買房才反超。對應 EP24。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP24</p>
+      <h1 class="text-3xl font-bold mb-3">買房 vs 租房 試算器</h1>
+      <p class="text-gray-600 leading-relaxed">
+        買房和租房吵不出結果，是因為兩邊算的不是同一筆帳。這個工具幫你把它變成<strong>同一筆帳</strong>：
+        買房派最後拿到一間房子；租房派把省下的頭期款、加上每個月的租買差額，全部投進市場，最後拿到一個投資組合。
+        填入你的數字，看三十年後兩邊各自長成多大——以及這個答案對「房價漲多少」有多敏感。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60 space-y-5">
+      <div>
+        <h2 class="font-semibold text-gray-900 mb-3">🏠 房子</h2>
+        <div class="grid sm:grid-cols-4 gap-4">
+          <label class="block">
+            <span class="text-sm text-gray-600">房屋總價（NT$）</span>
+            <input id="price" type="number" min="0" step="500000" value="20000000"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">自備款成數（%）</span>
+            <input id="downPct" type="number" min="0" max="100" step="5" value="30"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">房貸利率（%）</span>
+            <input id="rate" type="number" min="0" max="10" step="0.1" value="2"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">貸款年限（年）</span>
+            <input id="term" type="number" min="5" max="40" step="1" value="30"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <label class="block mt-4 max-w-xs">
+          <span class="text-sm text-gray-600">每年持有成本（佔總價 %）</span>
+          <input id="holdPct" type="number" min="0" max="5" step="0.1" value="1"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400 mt-1 block">稅費、修繕、管理費、折舊的綜合估計。台灣自住偏低，抓 0.5%~1% 較常見。</span>
+        </label>
+      </div>
+
+      <div class="border-t border-gray-200 pt-5">
+        <h2 class="font-semibold text-gray-900 mb-3">🔑 租金</h2>
+        <div class="grid sm:grid-cols-2 gap-4 max-w-md">
+          <label class="block">
+            <span class="text-sm text-gray-600">同等級月租（NT$）</span>
+            <input id="rent" type="number" min="0" step="1000" value="40000"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">租金每年漲幅（%）</span>
+            <input id="rentGrow" type="number" min="0" max="10" step="0.5" value="2"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-200 pt-5">
+        <h2 class="font-semibold text-gray-900 mb-3">📈 兩個假設（這兩格才是真正決定答案的東西）</h2>
+        <div class="grid sm:grid-cols-3 gap-4">
+          <label class="block">
+            <span class="text-sm text-gray-600">房價年增率（名目 %）</span>
+            <input id="appr" type="number" min="-5" max="15" step="0.5" value="2"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">投資年化報酬（名目 %）</span>
+            <input id="ret" type="number" min="0" max="20" step="0.5" value="7"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">比較年限（年）</span>
+            <input id="horizon" type="number" min="5" max="40" step="1" value="30"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">兩個報酬都是「名目」、未扣通膨——通膨會同時吃掉兩邊，所以實質差距比帳面小。預設房價 2%、股市 7% 是長期歷史概數、刻意偏保守，非保證；改一改就會看到天平翻過去。</p>
+      </div>
+    </div>
+
+    <!-- Monthly line -->
+    <div id="monthly" class="rounded-2xl border border-gray-200 bg-white p-5 mb-6 text-sm text-gray-700 leading-relaxed"></div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">兩條資產曲線賽跑</h2>
+      <p class="text-xs text-gray-400 mb-4">一條是買房派手上房子的淨值（房價減未還貸款），一條是租房派的投資組合（頭期款＋每月差額的複利）。看它們三十年怎麼拉開，以及有沒有交叉。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#C5611A"></span>買房派（房子淨值）</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#2563eb"></span>租房派（投資組合）</span>
+      </div>
+    </div>
+
+    <!-- Year table -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 五年節點明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-4 font-medium">年</th>
+              <th class="py-2 px-4 font-medium text-right">買房派淨值</th>
+              <th class="py-2 px-4 font-medium text-right">租房派組合</th>
+              <th class="py-2 pl-4 font-medium text-right">差距</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 用這個工具前要懂的三件事</p>
+      <p><strong>租房要贏有一個鐵前提：</strong>你必須真的、有紀律地把「省下的頭期款」和「每月租買差額」投進市場。花掉了，租房就只是消費，這個工具的結論全部不算數。怎麼把投入自動化、靠系統不靠意志力，見 <a class="text-brand hover:underline" href="/articles/ep04-investment-discipline">EP04 投資紀律</a>。</p>
+      <p><strong>買房是有槓桿的：</strong>你用頭期款控制了整間房子，房價的漲幅是乘在「全額房價」上、不是乘在你的頭期款上。所以房價年增率只要往上挪一兩個百分點，買房終點就會快速逼近、甚至超過租房——這就是上面那個「翻盤點」的由來。槓桿是雙面刃，跌的時候也一樣放大。</p>
+      <p><strong>這是框架、不是答案：</strong>答案幾乎完全取決於你對「房價年增」和「投資報酬」的假設。別把這裡算出來的數字當成預言，把它當成一面鏡子——照出你心裡那組假設，到底把天平壓向哪一邊。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採固定報酬率與簡化假設，實際房價與市場報酬逐年波動、無法保證，過去績效不代表未來結果。買房另涉自住效用、生活安定感等無法量化的價值，不在試算範圍內。未計入交易稅費的完整細節與通膨。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/tools/retirement-number-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">算我的財務自由數字 →</a>
+      <a href="/tools/dca-snowball-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">定期定額複利雪球</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ids = ['price','downPct','rate','term','holdPct','rent','rentGrow','appr','ret','horizon'];
+      const num = (id) => parseFloat($(id).value) || 0;
+      const wan = (n) => Math.round(n / 10000).toLocaleString('en-US') + ' 萬';
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+
+      function pmtMonthly(loan, annualRatePct, termYears) {
+        const rm = annualRatePct / 100 / 12, n = termYears * 12;
+        if (n <= 0) return 0;
+        if (rm === 0) return loan / n;
+        return loan * rm / (1 - Math.pow(1 + rm, -n));
+      }
+      function balanceAt(loan, annualRatePct, termYears, m) {
+        const rm = annualRatePct / 100 / 12, n = termYears * 12;
+        if (m >= n) return 0;
+        if (rm === 0) return loan * (1 - m / n);
+        const pmt = pmtMonthly(loan, annualRatePct, termYears);
+        return loan * Math.pow(1 + rm, m) - pmt * ((Math.pow(1 + rm, m) - 1) / rm);
+      }
+
+      function compute() {
+        const price = Math.max(0, num('price'));
+        const downPct = Math.min(100, Math.max(0, num('downPct')));
+        const rate = num('rate');
+        const term = Math.min(40, Math.max(5, Math.round(num('term'))));
+        const holdPct = Math.max(0, num('holdPct'));
+        const rent0 = Math.max(0, num('rent'));
+        const rentGrow = num('rentGrow') / 100;
+        const appr = num('appr') / 100;
+        const ret = num('ret') / 100;
+        const H = Math.min(40, Math.max(5, Math.round(num('horizon'))));
+
+        const down = price * downPct / 100;
+        const loan = price - down;
+        const pmt = pmtMonthly(loan, rate, term);
+        const holdM = price * holdPct / 100 / 12;
+        const mr = Math.pow(1 + ret, 1 / 12) - 1; // 有效年化 = ret
+        const buyMonthly0 = pmt + holdM;
+
+        // 月度模擬：租房派投資組合（頭期款本金 + 每月差額複利）
+        let port = down;
+        const series = [{ y: 0, buyNet: price - loan, rentNet: down }];
+        for (let y = 1; y <= H; y++) {
+          for (let k = 0; k < 12; k++) {
+            const m = (y - 1) * 12 + k;
+            const buyM = (m < term * 12 ? pmt : 0) + holdM;
+            const rentM = rent0 * Math.pow(1 + rentGrow, Math.floor(m / 12));
+            const diff = Math.max(0, buyM - rentM);
+            port = (port + diff) * (1 + mr);
+          }
+          const house = price * Math.pow(1 + appr, y);
+          const buyNet = house - balanceAt(loan, rate, term, y * 12);
+          series.push({ y, buyNet, rentNet: port });
+        }
+
+        const last = series[series.length - 1];
+        // 翻盤：房價年增率多少時買房終點 = 租房終點（其餘條件不變）
+        const balH = balanceAt(loan, rate, term, H * 12);
+        const target = last.rentNet + balH; // 需要的房屋市值
+        const breakeven = price > 0 ? (Math.pow(target / price, 1 / H) - 1) : null;
+
+        return { price, down, loan, term, H, pmt, holdM, buyMonthly0, rent0, series, last, breakeven, appr, ret };
+      }
+
+      function render() {
+        const r = compute();
+        const last = r.last;
+        const diff0 = r.buyMonthly0 - r.rent0;
+        const buyWins = last.buyNet >= last.rentNet;
+        const gap = Math.abs(last.buyNet - last.rentNet);
+
+        // Monthly line
+        $('monthly').innerHTML = `每個月：買房派現金支出約 <strong>${ntd(r.buyMonthly0)}</strong>（房貸 ${ntd(r.pmt)} ＋ 持有成本 ${ntd(r.holdM)}）；租房派付房租 <strong>${ntd(r.rent0)}</strong>，把差額 <strong>${diff0 >= 0 ? ntd(diff0) : 'NT$0（這個情境租金比買房月支出還高）'}</strong> 投進市場。`;
+
+        // Cards
+        $('cards').innerHTML = `
+          <div class="rounded-2xl border p-5 ${buyWins ? 'border-brand bg-brand/5' : 'border-gray-200'}">
+            <div class="text-sm font-medium text-gray-600 mb-1">${r.H} 年後 · 買房派淨值</div>
+            <div class="text-2xl font-bold" style="color:#C5611A">${wan(last.buyNet)}</div>
+            <div class="text-xs text-gray-500 mt-1">一間房子（已扣未還貸款）</div>
+          </div>
+          <div class="rounded-2xl border p-5 ${buyWins ? 'border-gray-200' : 'border-brand bg-brand/5'}">
+            <div class="text-sm font-medium text-gray-600 mb-1">${r.H} 年後 · 租房派組合</div>
+            <div class="text-2xl font-bold" style="color:#2563eb">${wan(last.rentNet)}</div>
+            <div class="text-xs text-gray-500 mt-1">頭期款＋每月差額的投資組合</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">${buyWins ? '買房' : '租房'}多出</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(gap)}</div>
+            <div class="text-xs text-gray-500 mt-1">${buyWins ? '在這組假設下買房勝出' : '在這組假設下租房勝出'}</div>
+          </div>`;
+
+        // Insight
+        let beText = '';
+        if (r.breakeven != null && isFinite(r.breakeven)) {
+          const bePct = (r.breakeven * 100).toFixed(1);
+          if (r.breakeven > r.appr) {
+            beText = `<strong>翻盤點：房價年增超過約 ${bePct}%，買房就反超。</strong>你現在設的是 ${(r.appr * 100).toFixed(1)}%，所以租房暫時領先；把房價年增調到 ${bePct}% 以上試試，天平就會倒向買房。`;
+          } else {
+            beText = `<strong>翻盤點：只要房價年增低於約 ${bePct}%，租房才會反超。</strong>你現在設的 ${(r.appr * 100).toFixed(1)}% 已經高過這個門檻，所以買房領先。`;
+          }
+        }
+        $('insight').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2">在你設的假設下，${r.H} 年後${buyWins
+            ? `<strong>買房派</strong>手上的房子淨值約 <strong>${wan(last.buyNet)}</strong>，比租房派的組合多 <strong>${wan(gap)}</strong>`
+            : `<strong>租房派</strong>的投資組合約 <strong>${wan(last.rentNet)}</strong>，比買房派多 <strong>${wan(gap)}</strong>`}。但這只是「財務」這一格——買房還換到住得安定、不怕漲租這些算不進表格的東西。</p>
+          <p>${beText}</p>`;
+
+        // Table
+        const marks = [];
+        for (let y = 5; y <= r.H; y += 5) marks.push(y);
+        if (marks[marks.length - 1] !== r.H) marks.push(r.H);
+        $('tbody').innerHTML = marks.map(y => {
+          const row = r.series[y];
+          const d = row.buyNet - row.rentNet;
+          return `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-4">${y} 年</td>
+            <td class="py-2 px-4 text-right" style="color:#C5611A">${wan(row.buyNet)}</td>
+            <td class="py-2 px-4 text-right" style="color:#2563eb">${wan(row.rentNet)}</td>
+            <td class="py-2 pl-4 text-right text-gray-500">${d >= 0 ? '買 +' : '租 +'}${wan(Math.abs(d))}</td>
+          </tr>`;
+        }).join('');
+
+        // Chart：兩條線賽跑
+        const W = 640, H = 300, padL = 52, padR = 16, padT = 14, padB = 28;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const maxV = Math.max(last.buyNet, last.rentNet, 1) * 1.05;
+        const xAt = (y) => padL + (r.H <= 0 ? 0 : (plotW * y) / r.H);
+        const yAt = (v) => padT + plotH - (plotH * Math.max(0, v)) / maxV;
+        const buyPts = r.series.map(s => [xAt(s.y), yAt(s.buyNet)]);
+        const rentPts = r.series.map(s => [xAt(s.y), yAt(s.rentNet)]);
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = (maxV * g) / 4, yy = yAt(v);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${wan(v)}</text>`;
+        }
+        const xl = [...new Set([0, Math.round(r.H / 2), r.H])];
+        let xlabels = '';
+        xl.forEach(y => { xlabels += `<text x="${xAt(y)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#9ca3af">第${y}年</text>`; });
+        // 交叉點
+        let crossMark = '';
+        for (let i = 1; i < r.series.length; i++) {
+          const a = r.series[i - 1], b = r.series[i];
+          const s1 = a.buyNet - a.rentNet, s2 = b.buyNet - b.rentNet;
+          if ((s1 <= 0 && s2 > 0) || (s1 >= 0 && s2 < 0)) {
+            const t = s1 / (s1 - s2);
+            const cy = b.y; const cx = xAt(a.y + t);
+            crossMark = `<line x1="${cx}" y1="${padT}" x2="${cx}" y2="${padT + plotH}" stroke="#9ca3af" stroke-dasharray="3 3"/>
+              <text x="${cx}" y="${padT + 10}" text-anchor="middle" font-size="9" fill="#6b7280">約第${Math.round(a.y + t)}年黃金交叉</text>`;
+            break;
+          }
+        }
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="買房淨值與租房投資組合的賽跑曲線">
+          ${grid}${xlabels}
+          <polyline fill="none" stroke="#C5611A" stroke-width="2.5" points="${buyPts.map(p => p.join(',')).join(' ')}"/>
+          <polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="${rentPts.map(p => p.join(',')).join(' ')}"/>
+          ${crossMark}
+        </svg>`;
+      }
+
+      ids.forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>
