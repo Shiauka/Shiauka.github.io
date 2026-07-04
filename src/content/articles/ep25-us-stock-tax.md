@@ -113,6 +113,10 @@ draft: false
 
 ---
 
+下一篇：[工程師的三個投資職業病](/articles/ep26-engineer-investment-biases)
+
+---
+
 ## 延伸閱讀
 
 - [複委託 vs 直接開戶：真實費用完整比較](/articles/ep18-brokerage-comparison)（EP18）——把手續費、換匯、不同情境的總成本都算過一遍，跟這篇的稅務架構放在一起看，你會對「哪條路最適合我」有更完整的圖像
