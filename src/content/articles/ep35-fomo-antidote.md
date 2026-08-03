@@ -107,6 +107,8 @@ Morningstar 把這個差距歸因於進出場的時間點——報酬率最亮�
 
 ---
 
+下一篇：[百年大跌史：每一次「這次不一樣」，後來都怎麼了？](/articles/ep36-market-crash-history)
+
 ## 延伸閱讀
 
 - [投資紀律，才是真正的護城河](/articles/ep04-investment-discipline)（EP04）——七十二小時冷卻期、不做清單、崩盤劇本的原始出處
