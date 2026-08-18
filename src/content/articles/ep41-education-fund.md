@@ -141,6 +141,8 @@ draft: false
 
 ---
 
+下一篇：[保險該保多少才夠：工程師的保障思維](/articles/ep42-insurance-coverage-framework)
+
 ## 延伸閱讀
 
 - [我的財務自由數字怎麼算出來的？](/articles/ep15-retirement-number)（EP15）——同一套終值反推算法，目標換成退休那天
