@@ -284,7 +284,7 @@ export const episodes: Episode[] = [
     ep: 40,
     title: '這 26 個問題，看穿你的財務體質',
     desc: '上個月到底花了多少錢，你講得出精確數字，還是只有一個大概的感覺？把過去幾集講過的重點，反過來設計成一份 26 題自我健檢清單，分成收支、儲蓄、負債、投資、保障五類，找出財務體質裡最薄弱的那個環節。',
-    youtubeId: 'NiLU39sC6bk',
+    youtubeId: 'dXY9tZ1wBRo',
     pubDate: '2026-09-01',
   },
 ]
