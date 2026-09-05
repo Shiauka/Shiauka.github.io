@@ -100,6 +100,8 @@ draft: false
 
 ---
 
+下一篇：[存到人生第一桶金 100 萬，然後呢？](/articles/ep44-first-million-next-step)
+
 ## 延伸閱讀
 
 - [薪水該怎麼分配？50、30、20法則在台灣行不行得通](/articles/ep38-503020-rule-taiwan)（EP38）——同一個「先鎖儲蓄比例」原則，這篇談收入普通的人怎麼守住比例
