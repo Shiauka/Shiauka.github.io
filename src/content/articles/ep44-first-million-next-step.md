@@ -201,6 +201,8 @@ draft: false
 
 ---
 
+下一篇：[經濟衰退來了怎麼辦：衰退期的思維框架](/articles/ep45-recession-framework)
+
 ## 延伸閱讀
 
 - [五桶資產配置：完整框架與標的清單](/articles/ep02-five-bucket-framework)（EP02）——「按配置進場」的那個配置，完整長什麼樣
