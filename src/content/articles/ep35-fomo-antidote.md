@@ -107,7 +107,7 @@ Morningstar 把這個差距歸因於進出場的時間點——報酬率最亮�
 
 ---
 
-下一篇：[百年大跌史：每一次「這次不一樣」，後來都怎麼了？](/articles/ep36-market-crash-history)
+下一篇：[股市跌完要多久才回本？1929 用了 25 年，日本用了 34 年](/articles/ep36-market-crash-history)
 
 ## 延伸閱讀
 

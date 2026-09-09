@@ -1,5 +1,5 @@
 ---
-title: '這 26 個問題，看穿你的財務體質'
+title: '你能講 10 分鐘的 ETF，卻答不出自己的儲蓄率？'
 description: '你上個月到底花了多少錢，講得出精確數字，還是只有一個大概的感覺？這篇把過去幾集講過的重點，反過來設計成一份 26 題自我健檢清單，分成收支、儲蓄、負債、投資、保障五類——不是拿來嚇自己，是拿來找出財務體質裡最薄弱的那個環節。'
 pubDate: 2026-09-01
 episode: 40
@@ -17,7 +17,7 @@ draft: false
 
 ## 為什麼是這 26 題
 
-這份清單不是憑空湊出來的。五個類別，剛好對應這個系列過去講過的五個主題群：收支對應[有房貸，還要繼續投資嗎？](/articles/ep16-mortgage-and-investment)和[薪水該怎麼分配？](/articles/ep38-503020-rule-taiwan)（EP38）的預算結構、儲蓄對應[定期定額自動化](/articles/ep23-dca-automation)（EP23）的系統設計、負債對應[緊急備用金](/articles/ep13-emergency-fund)（EP13）裡提過的高利率負債處理原則、投資對應[五桶資產配置](/articles/ep02-five-bucket-framework)（EP02）和[我的財務自由數字怎麼算出來的？](/articles/ep15-retirement-number)（EP15）的框架、保障對應緊急備用金與崩盤應對的規則。
+這份清單不是憑空湊出來的。五個類別，剛好對應這個系列過去講過的五個主題群：收支對應[有房貸，還要繼續投資嗎？](/articles/ep16-mortgage-and-investment)和[我為什麼不用 50／30／20 法則](/articles/ep38-503020-rule-taiwan)（EP38）的預算結構、儲蓄對應[定期定額自動化](/articles/ep23-dca-automation)（EP23）的系統設計、負債對應[緊急備用金](/articles/ep13-emergency-fund)（EP13）裡提過的高利率負債處理原則、投資對應[五桶資產配置](/articles/ep02-five-bucket-framework)（EP02）和[我的財務自由數字怎麼算出來的？](/articles/ep15-retirement-number)（EP15）的框架、保障對應緊急備用金與崩盤應對的規則。
 
 換句話說，這 26 題不是隨機出的考題，是把整個系列拆成可以自己檢查的清單。每一題答不出來，背後幾乎都對應著一集已經講過、可以回頭補的內容。
 
@@ -168,7 +168,7 @@ draft: false
 
 ## 延伸閱讀
 
-- [薪水該怎麼分配？50、30、20法則在台灣行不行得通](/articles/ep38-503020-rule-taiwan)（EP38）——收支結構與生活必需佔比的完整拆解
+- [我為什麼不用 50／30／20 法則：它算的是 2005 年的美國房價](/articles/ep38-503020-rule-taiwan)（EP38）——收支結構與生活必需佔比的完整拆解
 - [定期定額自動化：讓投資紀律不靠意志力](/articles/ep23-dca-automation)（EP23）——把「先轉走」設定成自動扣款的完整步驟
 - [我的財務自由數字怎麼算出來的？](/articles/ep15-retirement-number)（EP15）——財務自由目標金額的完整算法
 - [緊急備用金：要放多少，放在哪裡？](/articles/ep13-emergency-fund)（EP13）——緊急預備金月數與存放位置的具體建議
