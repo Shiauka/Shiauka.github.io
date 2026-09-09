@@ -145,7 +145,7 @@ draft: false
 
 ---
 
-下一篇：[高薪不等於財務自由：月薪十萬為什麼還是存不到錢](/articles/ep43-lifestyle-inflation)
+下一篇：[同樣月薪十萬，十年後差 690 萬](/articles/ep43-lifestyle-inflation)
 
 ## 延伸閱讀
 

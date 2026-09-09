@@ -1,5 +1,5 @@
 ---
-title: '存到人生第一桶金 100 萬，然後呢？'
+title: '存到 100 萬之後，下一個目標不是 200 萬'
 description: '一百萬放進市場，一年大約替你賺七萬——你自己每個月存三萬，不到三個月就超過它整整一年的貢獻。這篇把第一桶金拆成三筆性質完全不同的錢、拆解最常見的三條岔路各自的問題，並給出一個比「再存一百萬」有意義得多的下一個里程碑：交叉點＝年投入 ÷ 報酬率假設。'
 pubDate: 2026-09-15
 episode: 44
@@ -201,7 +201,7 @@ draft: false
 
 ---
 
-下一篇：[經濟衰退來了怎麼辦：衰退期的思維框架](/articles/ep45-recession-framework)
+下一篇：[衰退先砍的是收入不是股票：月薪十萬只能領 27,480](/articles/ep45-recession-framework)
 
 ## 延伸閱讀
 
@@ -210,7 +210,7 @@ draft: false
 - [台幣帳戶 vs 美元帳戶：我的帳戶分工邏輯](/articles/ep03-account-structure)（EP03）——把不同用途的錢放進不同帳戶的完整做法
 - [我的財務自由數字怎麼算出來的？](/articles/ep15-retirement-number)（EP15）——長期目標怎麼算，以及為什麼需要中間站
 - [定期定額 vs 一次投入：數學怎麼說？](/articles/ep29-lump-sum-vs-dca)（EP29）——一次投入還是分批進場的完整比較
-- [高薪不等於財務自由：月薪十萬為什麼還是存不到錢](/articles/ep43-lifestyle-inflation)（EP43）——儲蓄率決定收入與財富之間的落差
+- [同樣月薪十萬，十年後差 690 萬](/articles/ep43-lifestyle-inflation)（EP43）——儲蓄率決定收入與財富之間的落差
 - [買房 vs 租房：工程師版的財務計算](/articles/ep24-buy-vs-rent)（EP24）——頭期款那條岔路的完整算法
 - [有房貸，還要繼續投資嗎？](/articles/ep16-mortgage-and-investment)（EP16）——2–4% 利率區間，該還房貸還是繼續投資的完整算法
 - [我的 IPS 全文公開：一份可執行的投資政策聲明](/articles/ep20-investment-policy-statement)（EP20）——不做清單與 72 小時冷卻期的完整規則

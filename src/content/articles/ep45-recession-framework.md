@@ -1,5 +1,5 @@
 ---
-title: '經濟衰退來了怎麼辦：衰退期的思維框架'
+title: '衰退先砍的是收入不是股票：月薪十萬只能領 27,480'
 description: '2009 年 2 月，台灣有 23.9 萬人在放無薪假；最近的統計只剩兩千多人。大部分人準備衰退時準備的都是錯的東西——盯著股價，卻沒算過收入斷掉自己撐得了幾個月。這篇把失業給付、資遣費、減班休息補貼一項一項算清楚，並解釋為什麼「等衰退過去再進場」永遠會遲到。'
 pubDate: 2026-09-18
 episode: 45
@@ -308,15 +308,15 @@ draft: false
 ## 延伸閱讀
 
 - [市場崩盤時我在做什麼：一次真實熊市的心得](/articles/ep30-market-crash-playbook)（EP30）—— 帳面在跌的那幾個月，腦袋裡實際發生什麼事
-- [百年大跌史：每一次「這次不一樣」，後來都怎麼了？](/articles/ep36-market-crash-history)（EP36）—— 每一次谷底與回復時間的完整攤開
+- [股市跌完要多久才回本？1929 用了 25 年，日本用了 34 年](/articles/ep36-market-crash-history)（EP36）—— 每一次谷底與回復時間的完整攤開
 - [緊急備用金：要準備多少，放在哪裡？](/articles/ep13-emergency-fund)（EP13）——「最低維持支出」這個算法的完整說明
 - [定期定額自動化：讓紀律不靠意志力](/articles/ep23-dca-automation)（EP23）—— 為什麼它的價值不在成本平均那套數學
 - [定期定額 vs 一次投入：數學怎麼說？](/articles/ep29-lump-sum-vs-dca)（EP29）—— 兩種投入方式的期望值比較
 - [RSU 與 ESOP：公司給你的股票，你真的看懂了嗎？](/articles/ep32-rsu-esop)（EP32）—— 未歸屬部位為什麼不是你的資產
 - [投資紀律不是意志力，是系統設計](/articles/ep04-investment-discipline)（EP04）—— 崩盤劇本與 72 小時冷卻期的由來
 - [我的 IPS 全文公開：一份可執行的投資行動綱要](/articles/ep20-investment-policy-statement)（EP20）—— 完整的不做清單與再平衡規則
-- [存到人生第一桶金 100 萬，然後呢？](/articles/ep44-first-million-next-step)（EP44）—— 把第一桶金拆成三筆錢的方法
-- [高薪不等於財務自由：月薪十萬為什麼還是存不到錢](/articles/ep43-lifestyle-inflation)（EP43）—— 儲蓄率才是你真正能控制的變數
+- [存到 100 萬之後，下一個目標不是 200 萬](/articles/ep44-first-million-next-step)（EP44）—— 把第一桶金拆成三筆錢的方法
+- [同樣月薪十萬，十年後差 690 萬](/articles/ep43-lifestyle-inflation)（EP43）—— 儲蓄率才是你真正能控制的變數
 
 ---
 
