@@ -305,6 +305,8 @@ draft: false
 
 ---
 
+下一篇：[你能承受 -30%？先算算那是你幾年的存款](/articles/ep46-risk-tolerance-stress-test)
+
 ## 延伸閱讀
 
 - [市場崩盤時我在做什麼：一次真實熊市的心得](/articles/ep30-market-crash-playbook)（EP30）—— 帳面在跌的那幾個月，腦袋裡實際發生什麼事
