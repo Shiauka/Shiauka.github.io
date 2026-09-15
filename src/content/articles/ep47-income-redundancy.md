@@ -284,6 +284,8 @@ draft: false
 
 ---
 
+下一篇：[月薪三萬，省一成只有 3,000：我不會叫你先拚儲蓄率](/articles/ep48-low-income-flexibility)
+
 ## 延伸閱讀
 
 - [衰退先砍的是收入不是股票：月薪十萬只能領 27,480](/articles/ep45-recession-framework)（EP45）—— 收入真的斷掉時，政府的保護網實際接得住多少
