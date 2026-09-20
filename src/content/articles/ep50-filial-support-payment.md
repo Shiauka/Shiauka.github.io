@@ -495,6 +495,8 @@ A 式因為有一筆固定的加計金額，在年資短的時候明顯有利；
 
 ---
 
+下一篇：[勞退自提 6%：沒提的那八成，不一定是錯的](/articles/ep51-labor-pension-voluntary-contribution)
+
 ## 延伸閱讀
 
 - [退休需要多少錢？把那個數字算出來](/articles/ep15-retirement-number)（EP15）—— 孝親費會直接改變那個數字
