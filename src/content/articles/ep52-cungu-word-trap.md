@@ -197,6 +197,8 @@ draft: false
 
 ---
 
+下一篇：[家庭財富中位數 894 萬，中間那兩成能動用的只有 221 萬](/articles/ep53-ten-million-liquid-wealth)
+
 ## 延伸閱讀
 
 - [00929、0056 高股息 ETF：我為什麼不用它當核心配置？](/articles/ep33-high-dividend-etf)（EP33）—— 除息機制、內扣費用與股利稅的完整計算
