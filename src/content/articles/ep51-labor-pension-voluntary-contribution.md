@@ -228,6 +228,8 @@ draft: false
 
 ---
 
+下一篇：[「存股」這兩個字，讓 130 萬人把中鋼當成定存](/articles/ep52-cungu-word-trap)
+
 ## 延伸閱讀
 
 - [孝親費該給多少：決定的不是你的薪水，是爸媽每月領 19,312 還是 6,381](/articles/ep50-filial-support-payment)（EP50）—— 退休收入的三層框架，本篇講的是第二層
