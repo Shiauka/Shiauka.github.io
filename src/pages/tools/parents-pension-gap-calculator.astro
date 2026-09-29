@@ -15,8 +15,8 @@ const presets = [
   { label: '臺北 20,744', v: 20744 },
 ]
 const presetsSpend = [
-  { label: '全國平均 26,640', v: 26640 },
-  { label: '臺北平均 34,952', v: 34952 },
+  { label: '全國平均 28,513', v: 28513 },
+  { label: '臺北平均 36,654', v: 36654 },
 ]
 const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none'
 ---
@@ -32,7 +32,7 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
       <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP50</p>
       <h1 class="text-3xl font-bold mb-3">爸媽退休金缺口計算機</h1>
       <p class="text-gray-600 leading-relaxed">
-        孝親費該給多少，關鍵不是你賺多少，是<strong>爸媽每個月從年金領到多少</strong>——勞保老年年金平均一萬九，國民年金一般年資只有六千三百八，差了三倍。
+        孝親費該給多少，關鍵不是你賺多少，是<strong>爸媽每個月從年金領到多少</strong>——勞保老年年金 114 年的實際平均約每月一萬九千三；國民年金 2008 年才開辦，現在年資最多十七、八年，全程有繳的人照公式算約六千四——前者是實際平均、後者是公式算出的上限，差距將近三倍。
         先算爸媽那一端的缺口，再把它還原成一條<strong>好幾十年的現金流</strong>，最後才是你跟兄弟姊妹每個月各要補多少。
       </p>
       <p class="text-xs text-gray-400 mt-3">這支計算機只算勞工這條線（勞保、國保、勞退）。爸媽是軍公教的話是另一套退撫制度，不適用。</p>
@@ -90,6 +90,13 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
               <span class="text-xs text-gray-600">已知每月實領（核定通知書上的數字，填了就以它為準）</span>
               <input id={`${p.k}_laborActual`} type="number" min="0" step="1" value="" placeholder="選填" class={inputCls} />
             </label>
+            <label class="block mt-2">
+              <span class="text-xs text-gray-600">年資未滿 15 年、已過法定請領年齡時，老年一次金</span>
+              <select id={`${p.k}_lumpStatus`} class={inputCls}>
+                <option value="taken" selected>已經領了</option>
+                <option value="pending">還沒申請</option>
+              </select>
+            </label>
             <p id={`${p.k}_laborNote`} class="text-xs text-gray-400 mt-1"></p>
           </div>
 
@@ -108,9 +115,26 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
                 <input id={`${p.k}_npActual`} type="number" min="0" step="1" value="" placeholder="選填" class={inputCls} />
               </label>
             </div>
+            <label class="block mt-2">
+              <span class="text-xs text-gray-600">以前領過的其他社會保險老年給付（決定國保能不能用 A 式）</span>
+              <select id={`${p.k}_otherBenefit`} class={inputCls}>
+                <option value="none" selected>沒有，或只有上面填的勞保</option>
+                <option value="labor_pre2009">2009 年以前領過勞保老年一次給付（不影響）</option>
+                <option value="labor_small">2009 年以後領過勞保老年一次給付，年資未滿 15 年或金額未滿 50 萬（不影響）</option>
+                <option value="labor_big">2009 年以後領過勞保老年一次給付，年資 15 年以上且金額 50 萬以上（只能 B 式）</option>
+                <option value="labor_annuity">正在領勞保老年年金（只能 B 式）</option>
+                <option value="gov_small">領過公保養老或軍保退伍一次給付，年資未滿 15 年或金額未滿 50 萬</option>
+                <option value="gov_big">領過公保養老或軍保退伍一次給付，年資 15 年以上且金額 50 萬以上（只能 B 式）</option>
+                <option value="gov_annuity">正在領公保養老年金（只能 B 式）</option>
+              </select>
+            </label>
+            <label class="block mt-2">
+              <span class="text-xs text-gray-600">公保／軍保一次給付的總額（上一題選「未滿 15 年或未滿 50 萬」才需要填）</span>
+              <input id={`${p.k}_govLump`} type="number" min="0" step="10000" value="0" class={inputCls} />
+            </label>
             <label class="text-xs text-gray-600 inline-flex items-start gap-1.5 mt-2">
               <input id={`${p.k}_npOnlyB`} type="checkbox" class="accent-[#E87930] mt-0.5" />
-              <span>只能用 B 式：領過勞保／公保／軍保老年給付，或領老農津貼、中低收入老人生活津貼、榮民就養給付等（勞保局列的八種情形）</span>
+              <span>只能用 B 式的其他情形：領老農津貼、中低收入（或低收入）老人生活津貼、身心障礙者生活補助、榮民就養給付，或有欠費沒補</span>
             </label>
             <p id={`${p.k}_npNote`} class="text-xs text-gray-400 mt-1"></p>
           </div>
@@ -167,7 +191,7 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
           ))}
         </div>
         <p class="text-gray-400 leading-relaxed">
-          兩組數字<strong>都是「每人每月」</strong>，但口徑完全不同：上面是衛福部 115 年度最低生活費，是低收入戶的認定線，<strong>是生存線不是生活線</strong>；下面是主計總處 113 年家庭收支調查的平均每人消費支出（全年齡平均），約是前者的 1.7 倍，兩者不可互換。臺北 20,744 不等於「雙北」，新北是 17,750。
+          兩組數字<strong>都是「每人每月」</strong>，但口徑完全不同：上面是衛福部 115 年度最低生活費，是低收入戶的認定線，<strong>是生存線不是生活線</strong>；下面是主計總處 114 年家庭收支調查的平均每人消費支出（全年齡平均），約是前者的 1.8 倍，兩者不可互換。臺北 20,744 不等於「雙北」，新北是 17,750。
         </p>
       </div>
 
@@ -242,15 +266,15 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
     <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
       <p class="font-semibold text-gray-900">💡 算之前先知道的五件事</p>
       <p><strong>一、真實數字要爸媽本人查。</strong>請爸媽本人用健保卡或自然人憑證登入勞保局 e 化服務系統或行動服務 APP，看得到每一筆給付的名稱和金額；子女拿爸媽身分證去臨櫃辦不成，要委託書。銀行對帳單只能拿來對照——好幾項給付都是勞保局合併匯進來的，看不出名目。</p>
-      <p><strong>二、遺屬年金是原年金的一半，而且跟自己的勞保年金只能擇一。</strong>爸爸已在領勞保老年年金時過世，媽媽可以領一半（最低 3,000），條件是年滿 55 歲且婚姻滿 1 年。它跟媽媽自己的國保老年年金能不能同時領，我查到的規定都只講到「同一個制度裡面要擇一」，跨制度這一組找不到明文——所以上面讓你兩種都算。只有國保的人走的是國保遺屬年金，公式不同，這裡不算。</p>
-      <p><strong>三、列報扶養父母之前，先算一筆帳。</strong>你一報扶養，自己就被算進爸媽那一戶的應計算人口（社會救助法第 5 條），可能害他們失去中低收入老人生活津貼（每月 8,329 或 4,164）。省下的稅是 101,000 × 你的邊際稅率，5% 級距只有 5,050。</p>
+      <p><strong>二、遺屬年金是原年金的一半，而且跟自己的勞保年金只能擇一。</strong>爸爸在領勞保老年年金期間過世，媽媽可以領一半（最低 3,000）；年資滿 15 年、已到請領年齡但<strong>還沒開始領（例如選了延後）就過世</strong>，遺屬一樣可以請領（勞保條例 §63-1 第 3 項）。配偶的條件是年滿 55 歲且婚姻滿 1 年，另外年滿 45 歲且婚姻滿 1 年、每月工作收入不超過投保薪資第一級，或無謀生能力、扶養符合條件的子女，也可以領——這裡為了保守，一律從 55 歲起算。遺屬年金跟媽媽自己的國保老年年金能不能同時領，我查不到明文（勞保條例 §74-2 管的是同一位過世者的勞保與國保死亡給付擇一，不是這一組），所以上面讓你兩種都算。只有國保的人走的是國保遺屬年金，公式不同，這裡不算。</p>
+      <p><strong>三、列報扶養父母之前，先算一筆帳。</strong>你一報扶養，自己就被算進爸媽那一戶的應計算人口（社會救助法第 5 條），可能害他們失去中低收入老人生活津貼（每月 8,329 或 4,164）。省下的稅是 101,000 × 你的邊際稅率（父母年滿 70 歲是 151,500），5% 級距只有 5,050（70 歲以上 7,575）。</p>
       <p><strong>四、勞保年金的物價調整不是人人有份。</strong>累計漲幅達 5% 才調，而且按「請領年度」分別算基期：2026 年 5 月那次只有 6 個請領年度、約 78 萬人調到。不要假設你爸媽的年金會自動跟上物價。</p>
-      <p><strong>五、國民年金的年資現在最多十七、八年。</strong>國保 2008 年 10 月才開辦，網路上「國保可以領一萬一」是 40 年年資的數字，要到 2048 年才會出現第一批。</p>
+      <p><strong>五、國民年金的年資現在最多十七、八年。</strong>國保 2008 年 10 月才開辦，網路上「國保可以領一萬一」是 40 年年資的數字，要到 2048 年才會出現第一批。另外，<strong>勞保年資不滿 15 年、但加上國保年資滿 15 年</strong>，65 歲時可以併計請領勞保老年年金（勞保條例 §74-2 第 2 項），不一定只能領一次金；只是走這條路之後，國保那邊只能用 B 式。上面兩條路都會幫你算，取總額較多的那條。</p>
     </div>
 
     <!-- Disclaimer + CTA -->
     <p class="text-xs text-gray-400 leading-relaxed mb-6">
-      本計算機僅供一般資訊參考，所有計算都在你的瀏覽器裡完成，不會送出任何資料。公式與金額依 2026 年 9 月公開資訊整理（勞工保險條例第 19、58、58-1、58-2、63-1、65-3 條；勞保局國民年金給付試算；衛福部 115 年度最低生活費；主計總處 113 年家庭收支調查；65 歲平均餘命男約 18 年、女約 22 年），各項金額與請領條件逐年調整；遺屬年金另有加發、再婚停發等規定未納入。爸媽實際可領多少，一定要以他們本人的核定通知為準。不構成投資、稅務或法律建議。
+      本計算機僅供一般資訊參考，所有計算都在你的瀏覽器裡完成，不會送出任何資料。公式與金額依 2026 年 9 月公開資訊整理（勞工保險條例第 19、58、58-1、58-2、63-1、65-3 條；勞保局國民年金給付試算；衛福部 115 年度最低生活費；主計總處 114 年家庭收支調查；勞保局「國保老年年金給付金額」A 式排除情形；65 歲平均餘命男約 18 年、女約 22 年），各項金額與請領條件逐年調整；遺屬年金另有加發、再婚停發等規定未納入。爸媽實際可領多少，一定要以他們本人的核定通知為準。不構成投資、稅務或法律建議。
     </p>
     <div class="flex flex-wrap gap-3">
       <a href="/articles/ep50-filial-support-payment" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP50 孝親費該給多少 →</a>
@@ -287,20 +311,44 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
         const f = 1 + 0.04 * k;
         return (f * claimAge - statAge) / (0.04 * k);
       }
-      // 老年一次金：§58 年資未滿 15 年，每滿 1 年發 1 個月
+      // 老年一次金：§58、§59 年資未滿 15 年，每滿 1 年發 1 個月（未滿 1 年按比例）
       function laborLumpSum(avg, years) {
         return Math.round(avg * Math.min(years, 15));
       }
-      // 國民年金老年年金（115 年度）：月投保 21,103、加計 4,049，擇優；八種排除情形只能 B 式
+      // 國民年金老年年金（115 年度）：月投保 21,103、加計 4,049，擇優
       const NP_INSURED = 21103, NP_ADD = 4049;
       function npPension(years, onlyB) {
         const a = NP_INSURED * years * 0.0065 + NP_ADD;
         const b = NP_INSURED * years * 0.013;
         return { a: Math.round(a), b: Math.round(b), best: Math.round(onlyB ? b : Math.max(a, b)) };
       }
-      // 勞保遺屬年金：§63-1，原領老年年金半數，最低 3,000
-      function survivorPension(deceasedLaborMonthly) {
-        return deceasedLaborMonthly > 0 ? Math.max(3000, Math.round(deceasedLaborMonthly * 0.5)) : 0;
+      // 國保能不能用 A 式（國民年金法 §7、§30 II；勞保局「國保老年年金給付金額」八種排除情形，2026-08-28）
+      // 回傳：從幾歲起可以用 A 式（Infinity＝永遠只能 B 式）
+      //  - 只領過勞保老年一次給付：2009 年以前領的不影響；2009 年以後領的，年資 ≥15 且金額 ≥50 萬才只能 B 式
+      //  - 領勞保老年年金或公保養老年金：只能 B 式
+      //  - 公保／軍保一次給付：年資 ≥15 且金額 ≥50 萬 → 只能 B 式；否則自 65 歲起以每月 3,000 累計達原領總額前只能 B 式
+      //  - 領社福津貼、欠費未補：只能 B 式
+      function npAFromAge(o) {
+        if (o.welfareOrArrears) return Infinity;
+        if (o.laborAnnuity) return Infinity;
+        switch (o.otherBenefit) {
+          case 'labor_big': case 'labor_annuity': case 'gov_big': case 'gov_annuity': return Infinity;
+          case 'gov_small': return 65 + Math.ceil(Math.max(0, o.govLump) / 3000 / 12);
+          default: return 65;
+        }
+      }
+      // 勞保遺屬年金：§63-2，原老年年金（依給付標準計算後金額）半數，最低 3,000
+      function survivorPension(base) {
+        return base > 0 ? Math.max(3000, Math.round(base * 0.5)) : 0;
+      }
+      // 另一半過世時留下的遺屬年金基準（§63-1）
+      //  - 在領老年年金期間過世：以實際領的金額計
+      //  - 年資滿 15 年、已到請領年齡但還沒開始領（例如延後）就過世：§63-1 第 3 項，以未增減的年金金額估算
+      function survivorBase(sp) {
+        if (!sp.on) return 0;
+        if (sp.labor.monthly > 0 && sp.life > sp.labor.claimAge) return sp.labor.monthly;
+        if (sp.labor.base > 0 && sp.life > sp.statAge) return sp.labor.base;
+        return 0;
       }
       // 一人在世時的收入：§65-3 自己的勞保年金與遺屬年金擇一；跨制度（遺屬＋自己國保）依情境
       function soloIncome(ownLabor, ownNP, surv, mode) {
@@ -308,13 +356,16 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
         if (mode === 'both') return Math.max(ownLabor, surv) + ownNP;
         return Math.max(ownLabor + ownNP, surv);
       }
+      function npAt(p, age) {
+        if (age < 65 || !p.np.hasNP) return 0;
+        return age >= p.np.aFrom ? p.np.best : p.np.b;
+      }
       // 逐年模擬（名目、未折現）
-      // p = { on, birth, life, labor:{monthly, claimAge, lump}, np:{monthly}, lrp, lrpEnd, other }
       function simulate(ps, opt) {
         const alive = (p, age) => p.on && age < p.life;
         const rows = [];
         const livingYears = ps.filter(p => p.on).map(p => p.birth + p.life);
-        if (!livingYears.length) return { rows, totalGap: 0 };
+        if (!livingYears.length) return { rows, sumGap: 0, totalAfterSavings: 0, lumpAdded: 0, fixedPerKid: 0 };
         const endYear = Math.min(Math.max(...livingYears), opt.startYear + 60);  // 防呆：輸入異常大時不跑到當機
         let savings = opt.savings;
         let sumGap = 0, lumpAdded = 0;
@@ -326,21 +377,21 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
           const inc = ps.map((p, i) => {
             const age = ages[i];
             const labor = p.labor.monthly > 0 && age >= p.labor.claimAge ? p.labor.monthly : 0;
-            const np = age >= 65 ? p.np.monthly : 0;
+            const np = npAt(p, age);
             const lrp = age < p.lrpEnd ? p.lrp : 0;
             return { labor, np, lrp, other: p.other };
           });
-          // 老年一次金在法定年齡那一年併入存款
-          ps.forEach((p, i) => { if (liv[i] && p.labor.lump > 0 && ages[i] === p.labor.claimAge) { savings += p.labor.lump; lumpAdded += p.labor.lump; } });
+          // 老年一次金在領取那一年併入存款
+          let lumpThisYear = 0;
+          ps.forEach((p, i) => { if (liv[i] && p.labor.lump > 0 && y === p.labor.lumpYear) { lumpThisYear += p.labor.lump; } });
+          savings += lumpThisYear; lumpAdded += lumpThisYear;
           let income = 0;
           if (nAlive === 2) {
             income = inc.reduce((s, x) => s + x.labor + x.np + x.lrp + x.other, 0);
           } else {
             const i = liv[0] ? 0 : 1, j = 1 - i;
-            const spouse = ps[j];
-            // 另一半已在領勞保年金時過世，才有遺屬年金；只有國保的走國保遺屬，不在此算
-            const deadWasClaiming = spouse.on && spouse.labor.monthly > 0 && spouse.life > spouse.labor.claimAge;
-            const surv = deadWasClaiming && ages[i] >= 55 ? survivorPension(spouse.labor.monthly) : 0;
+            const sBase = survivorBase(ps[j]);
+            const surv = sBase > 0 && ages[i] >= 55 ? survivorPension(sBase) : 0;
             income = soloIncome(inc[i].labor, inc[i].np, surv, opt.survMode) + inc[i].lrp + inc[i].other;
           }
           const need = nAlive === 2 ? opt.need * 2 : (opt.oecd ? Math.round(opt.need * 2 / 1.5) : opt.need);
@@ -350,10 +401,17 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
           const fromSavings = Math.min(savings, yearGap);
           savings -= fromSavings;
           const kids = (yearGap - fromSavings) / 12 / opt.sibs;
-          rows.push({ y, ages, liv, income, need, gap, savings, kids });
+          rows.push({ y, ages, liv, income, need, gap, savings, kids, yearGap, lumpThisYear });
         }
         const totalAfterSavings = Math.max(0, sumGap + opt.ltc - opt.savings - lumpAdded);
-        return { rows, sumGap, totalAfterSavings, lumpAdded };
+        // 從今年起每人每月「固定」給多少，才能每一年都撐得過去（長照預留視為最後一年要備好）
+        let cumNeed = 0, cumRes = opt.savings, fixedPerKid = 0;
+        rows.forEach((x, t) => {
+          cumNeed += x.yearGap + (t === rows.length - 1 ? opt.ltc : 0);
+          cumRes += x.lumpThisYear;
+          fixedPerKid = Math.max(fixedPerKid, (cumNeed - cumRes) / (12 * opt.sibs * (t + 1)));
+        });
+        return { rows, sumGap, totalAfterSavings, lumpAdded, fixedPerKid: Math.max(0, fixedPerKid) };
       }
       // ==CALC-END==
 
@@ -369,52 +427,99 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
       function readPerson(k) {
         const on = $(k + '_on').checked;
         const birth = Math.round(num(k + '_birth'));
+        const life = Math.round(num(k + '_life'));
         const statAge = statutoryAge(birth);
+        const ageNow = thisYear - birth;
         const claimEl = $(k + '_claimAge');
         if (claimEl.value === '') claimEl.value = statAge;
-        let claimAge = Math.round(num(k + '_claimAge'));
-        claimAge = Math.max(statAge - 5, Math.min(statAge + 5, claimAge));
+        const rawClaim = Math.round(num(k + '_claimAge'));
+        let claimAge = Math.max(statAge - 5, Math.min(statAge + 5, rawClaim));
         const hasLabor = $(k + '_hasLabor').checked;
         const rawAvg = num(k + '_laborAvg');
         const avg = Math.min(45800, Math.max(0, rawAvg));
-        const years = Math.max(0, num(k + '_laborYears'));
+        const years = Math.min(50, Math.max(0, num(k + '_laborYears')));
         const actual = num(k + '_laborActual');
         const lp = laborPension(avg, years);
-        let monthly = 0, lump = 0, laborNote = '';
+        const hasNPbox = $(k + '_hasNP').checked;
+        const npYears = hasNPbox ? Math.min(40, Math.max(0, num(k + '_npYears'))) : 0;
+        const npActual = hasNPbox ? num(k + '_npActual') : 0;
+        const otherBenefit = $(k + '_otherBenefit').value;
+        const govLump = Math.max(0, num(k + '_govLump'));
+        const welfare = $(k + '_npOnlyB').checked;
+        const lumpStatus = $(k + '_lumpStatus').value;
+        const npOpts = (laborAnnuity) => ({ welfareOrArrears: welfare, laborAnnuity, otherBenefit, govLump });
+        const npSum = (aFrom, fromAge, toAge) => {
+          let s = 0; const p = { np: { hasNP: true, b: npPension(npYears, true).b, best: npPension(npYears, false).best, aFrom } };
+          for (let a = fromAge; a < toAge; a++) s += npAt(p, a) * 12;
+          return s;
+        };
+
+        let monthly = 0, lump = 0, lumpYear = null, base = 0, laborAnnuity = false, laborNote = '', path = '';
         if (hasLabor) {
           if (actual > 0) {
-            monthly = actual;
+            monthly = actual; laborAnnuity = true; path = 'actual';
             laborNote = `以你填的實領 ${ntd(actual)} 計算。`;
           } else if (years >= 15) {
+            laborAnnuity = true; path = 'annuity'; base = lp.best;
             monthly = Math.round(lp.best * claimFactor(claimAge, statAge));
             const k2 = claimAge - statAge;
             laborNote = `法定請領年齡 ${statAge} 歲。A 式 ${ntd(lp.a)}、B 式 ${ntd(lp.b)}，取 ${lp.formula} 式` +
               (k2 ? `，${k2 < 0 ? '提前' : '延後'} ${Math.abs(k2)} 年 ${k2 < 0 ? '減' : '加'} ${Math.abs(k2) * 4}% → ${ntd(monthly)}` : ` → ${ntd(monthly)}`) + '。';
+            if (rawClaim !== claimAge) laborNote += ` 最多只能提前或延後 5 年，已用 ${claimAge} 歲計算。`;
           } else if (years > 0) {
-            lump = laborLumpSum(avg, years);
-            laborNote = `勞保年資未滿 15 年，不能領年金，只能領老年一次金（每滿 1 年發 1 個月）約 ${ntd(lump)}，併入存款計算。2009 年以前就有勞保年資的人，另可能選「一次請領老年給付」，算法不同，請用勞保局試算。`;
+            const lumpAmt = laborLumpSum(avg, years);
+            const lumpAge = Math.max(statAge, Math.min(rawClaim, statAge + 30));
+            const lumpYr = birth + lumpAge;
+            const past = lumpYr < thisYear;
+            const taken = past && lumpStatus === 'taken';
+            let lumpNote = '';
+            if (rawClaim < statAge) lumpNote += ` 老年一次金不能提前領，已改用法定年齡 ${statAge} 歲。`;
+            if (past) lumpNote += taken ? ' 你選了「已經領了」，這筆錢不再另外計入（如果還放在爸媽帳上，請算進存款）。' : ' 你選了「還沒申請」，這筆錢今年併入存款。';
+            // 併計國保年資請領勞保老年年金（勞保條例 §74-2 第 2 項；國民年金法 §32 II）：65 歲起、各按各的年資算，國保只能 B 式
+            const combinedOK = hasNPbox && npActual === 0 && npYears > 0 && years + npYears >= 15 && !taken;
+            let useCombined = false, totC = 0, totL = 0;
+            if (combinedOK) {
+              const from = Math.max(65, ageNow), to = Math.max(from, life);
+              const npB = npPension(npYears, true).b;
+              totC = (lp.best + npB) * 12 * (to - from);
+              totL = lumpAmt + npSum(npAFromAge(npOpts(false)), from, to);
+              useCombined = totC > totL;
+            }
+            if (useCombined) {
+              laborAnnuity = true; path = 'combined'; monthly = lp.best; claimAge = 65;
+              laborNote = `勞保年資 ${years} 年未滿 15 年，但加上國保 ${npYears} 年滿 15 年，65 歲起可以併計請領勞保老年年金：A 式 ${ntd(lp.a)}、B 式 ${ntd(lp.b)}，取 ${lp.formula} 式 ${ntd(lp.best)}（國保那邊改用 B 式）。` +
+                `比較兩條路領到預期壽命的總額：併計年金約 ${wan(totC)}、一次金 ${ntd(lumpAmt)}＋國保約 ${wan(totL)}，採用併計年金。實際以勞保局核定為準。`;
+            } else {
+              path = 'lump'; lump = taken ? 0 : lumpAmt; lumpYear = taken ? null : Math.max(lumpYr, thisYear);
+              laborNote = `勞保年資未滿 15 年，不能單獨領年金，這裡算老年一次金（每滿 1 年發 1 個月）約 ${ntd(lumpAmt)}${past ? '' : `，${lumpAge} 歲時併入存款`}。` + lumpNote +
+                (combinedOK ? ` 也可以併計國保年資請領勞保年金，但照你填的壽命，總額約 ${wan(totC)}，比一次金這條路（約 ${wan(totL)}）少。` : '') +
+                ' 2009 年以前就有勞保年資的人，另可能選「一次請領老年給付」，算法不同，請用勞保局試算。';
+            }
           }
           if (rawAvg > 45800) laborNote += ' 投保薪資上限是 45,800，已用上限計算（這是投保級距，不是實拿月薪）。';
         }
-        const hasNP = $(k + '_hasNP').checked;
-        let npYears = Math.max(0, num(k + '_npYears'));
-        const onlyB = $(k + '_npOnlyB').checked || (hasLabor && (monthly > 0 || lump > 0));
-        const npActual = num(k + '_npActual');
-        const np = npPension(npYears, onlyB);
-        let npMonthly = 0, npNote = '';
-        if (hasNP) {
-          if (npActual > 0) { npMonthly = npActual; npNote = `以你填的實領 ${ntd(npActual)} 計算。`; }
+
+        const aFrom = npAFromAge(npOpts(laborAnnuity));
+        const npc = npPension(npYears, false), npcB = npPension(npYears, true);
+        const np = { hasNP: hasNPbox && (npActual > 0 || npYears > 0), b: npActual > 0 ? npActual : npcB.b, best: npActual > 0 ? npActual : npc.best, aFrom: npActual > 0 ? 65 : aFrom };
+        let npNote = '';
+        if (hasNPbox) {
+          if (npActual > 0) npNote = `以你填的實領 ${ntd(npActual)} 計算。`;
           else if (npYears > 0) {
-            npMonthly = np.best;
-            npNote = `65 歲起領。A 式 ${ntd(np.a)}、B 式 ${ntd(np.b)}` + (onlyB ? '，這個人只能用 B 式' : '，擇優') + ` → ${ntd(npMonthly)}。`;
-            if (hasLabor && (monthly > 0 || lump > 0) && !$(k + '_npOnlyB').checked) npNote += ' 有領勞保老年給付，國保只能用 B 式。';
+            const why = welfare ? '領社福津貼或有欠費' :
+              path === 'combined' ? '走併計請領勞保老年年金這條路' :
+              laborAnnuity ? '領勞保老年年金' :
+              ({ labor_big: '2009 年後領過年資 15 年以上、50 萬以上的勞保一次給付', labor_annuity: '領勞保老年年金', gov_big: '領過年資 15 年以上、50 萬以上的公保／軍保一次給付', gov_annuity: '領公保養老年金' })[otherBenefit] || '';
+            if (aFrom === Infinity) npNote = `65 歲起領。A 式 ${ntd(npc.a)}、B 式 ${ntd(npcB.b)}；因為${why}，只能用 B 式 → ${ntd(npcB.b)}。`;
+            else if (aFrom > 65) npNote = `65 歲起領。公保／軍保一次給付 ${ntd(govLump)}，要以每月 3,000 累計到這個金額（約到 ${aFrom} 歲）之前只能用 B 式 ${ntd(npcB.b)}，之後擇優 ${ntd(npc.best)}（以整年估算）。`;
+            else npNote = `65 歲起領。A 式 ${ntd(npc.a)}、B 式 ${ntd(npcB.b)}，擇優 → ${ntd(npc.best)}。`;
           }
           if (npYears > 18) npNote += ' 國保 2008 年 10 月才開辦，到現在最多累積 17、18 年年資，請再確認。';
         }
         return {
-          k, on, birth, statAge, life: Math.round(num(k + '_life')),
-          labor: { monthly, claimAge, lump, base: hasLabor && years >= 15 && !(actual > 0) ? lp.best : 0 },
-          np: { monthly: npMonthly },
+          k, on, birth, statAge, life,
+          labor: { monthly, claimAge, lump, lumpYear, base, path },
+          np,
           lrp: Math.max(0, num(k + '_lrp')), lrpEnd: Math.round(num(k + '_lrpEnd')),
           other: Math.max(0, num(k + '_other')),
           laborNote, npNote,
@@ -443,7 +548,8 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
         const peak = r.rows.reduce((m, x) => (x.gap > m.gap ? x : m), first);
         const years = r.rows.length;
         const perKid = r.totalAfterSavings / base.sibs / (years * 12);
-        const peakKid = Math.max(...r.rows.map(x => x.gap)) / base.sibs;
+        const fixedKid = r.fixedPerKid;
+        const peakRow = r.rows.reduce((m, x) => (x.kids > m.kids ? x : m), first);
         const runOut = r.rows.find(x => x.savings <= 0 && x.gap > 0);
 
         $('cards').innerHTML = `
@@ -455,12 +561,12 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
           <div class="rounded-2xl border border-gray-200 p-5">
             <div class="text-sm font-medium text-gray-600 mb-1">往後 ${years} 年的總缺口</div>
             <div class="text-2xl font-bold" style="color:#C5611A">${wan(r.totalAfterSavings)}</div>
-            <div class="text-xs text-gray-500 mt-1">累計缺口 ${wan(r.sumGap)}${base.ltc ? ' ＋ 長照預留 ' + wan(base.ltc) : ''}，已扣掉存款</div>
+            <div class="text-xs text-gray-500 mt-1">扣掉爸媽存款${r.lumpAdded ? '（含勞保一次金 ' + wan(r.lumpAdded) + '）' : ''}之後；扣之前的累計缺口是 ${wan(r.sumGap)}${base.ltc ? '，另加長照預留 ' + wan(base.ltc) : ''}</div>
           </div>
           <div class="rounded-2xl border border-brand bg-brand/5 p-5">
-            <div class="text-sm font-medium text-gray-600 mb-1">每位子女平均每月</div>
-            <div class="text-2xl font-bold text-gray-900">${ntd(perKid)}</div>
-            <div class="text-xs text-gray-500 mt-1">${base.sibs} 人平分：從今年起每人每月固定給這個數，加上爸媽存款，大致撐完 ${years} 年（不計利息）。最吃緊那年缺口每人約 ${ntd(peakKid)}</div>
+            <div class="text-sm font-medium text-gray-600 mb-1">每位子女每月固定要給</div>
+            <div class="text-2xl font-bold text-gray-900">${ntd(fixedKid)}</div>
+            <div class="text-xs text-gray-500 mt-1">${base.sibs} 人平分、從今年起每人每月固定給這個數，加上爸媽存款，每一年都撐得過去（不計利息）。${fixedKid > perKid + 1 ? `整段平均只要 ${ntd(perKid)}，但前面幾年缺口比較大，固定給平均數會在中途不夠。` : ''}</div>
           </div>`;
 
         const soloRow = r.rows.find(x => x.liv.filter(Boolean).length === 1);
@@ -477,12 +583,13 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
           <p class="mb-2">今年爸媽每月年金和其他收入合計 ${ntd(first.income)}，生活費要 ${ntd(first.need)}，${first.gap > 0 ? `每月缺 <strong>${ntd(first.gap)}</strong>` : `<strong>還有餘裕</strong>——這時候給的孝親費墊高的是生活品質，是象徵性的那一種，金額可以誠實地跟爸媽討論`}。</p>
           ${soloText}
           <p class="mb-2">爸媽的存款 ${wan(base.savings)} 是存量，不是月收入：它決定這個缺口可以自己撐幾年。${runOut ? `照這樣算，存款大約在 <strong>${runOut.y} 年</strong>用完，之後就要靠子女補。` : (r.sumGap > 0 ? '照這樣算，存款撐得過整段期間。' : '')}</p>
-          <p>整段期間扣掉存款，還要 <strong style="color:#C5611A">${wan(r.totalAfterSavings)}</strong>；${base.sibs} 人平分，平均每人每月 ${ntd(perKid)}。這是用<strong>人數均分的基準</strong>，不是照著執行的金額——民法本來就是依各自經濟能力分擔，有人出錢、有人出時間，都要折算進來談。</p>`;
+          <p class="mb-2">整段期間扣掉存款，還要 <strong style="color:#C5611A">${wan(r.totalAfterSavings)}</strong>；${base.sibs} 人平分，平均每人每月 ${ntd(perKid)}。${fixedKid > perKid + 1 ? `但缺口集中在前面幾年，<strong>固定給的話每人每月要 ${ntd(fixedKid)}</strong> 才不會中途斷掉；如果改成每年只補當年不夠的部分，最多的一年（${peakRow.y} 年）每人每月約 ${ntd(peakRow.kids)}。` : ''}</p>
+          <p>這些都是用<strong>人數均分的基準</strong>，不是照著執行的金額——民法本來就是依各自經濟能力分擔，有人出錢、有人出時間，都要折算進來談。</p>`;
 
         // Timing table
         let timing = '';
         ps.forEach(p => {
-          if (!p.on || !p.labor.base) return;
+          if (!p.on || !p.labor.base || p.labor.path !== 'annuity') return;
           const rowsT = [];
           for (let a = p.statAge - 5; a <= p.statAge + 5; a++) {
             const m = Math.round(p.labor.base * claimFactor(a, p.statAge));
@@ -507,7 +614,8 @@ const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:
         });
         $('timing').innerHTML = timing ||
           '<p class="text-sm text-gray-500">勾選「有勞保年資」、年資滿 15 年，而且沒有填「已知實領」，這裡才會列出比較。</p>';
-        if (timing) $('timing').innerHTML += '<p class="text-xs text-gray-400">讀法：提前那幾列的損益兩平，是「活過這一歲，準時請領就比較划算」；延後那幾列反過來，是「要活過這一歲，延後才划算」。提前 5 年的兩平大約在 85 歲，延後 5 年要活過 95 歲。</p>';
+        const tp = ps.find(p => p.on && p.labor.base);
+        if (timing && tp) $('timing').innerHTML += `<p class="text-xs text-gray-400">讀法：提前那幾列的損益兩平，是「活過這一歲，準時請領就比較划算」；延後那幾列反過來，是「要活過這一歲，延後才划算」。以${names[tp.k]}法定 ${tp.statAge} 歲來說，提前 5 年的兩平大約在 ${tp.statAge + 20} 歲，延後 5 年要活過 ${tp.statAge + 30} 歲。<strong>延後期間如果過世，本人那幾年等於一毛都沒領到</strong>；配偶仍可以請領遺屬年金（勞保條例 §63-1 第 3 項），這裡以未增減的年金金額一半估算，實際以勞保局核定為準。</p>`;
 
         // Table
         $('tbody').innerHTML = r.rows.map(x => `<tr class="border-b border-gray-100">
