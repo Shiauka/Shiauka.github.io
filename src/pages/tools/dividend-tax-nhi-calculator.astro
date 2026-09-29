@@ -30,9 +30,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         </label>
         <label class="block">
           <span class="text-sm text-gray-600">其他綜合所得淨額（不含股利，NT$）</span>
-          <input id="net" type="number" min="0" step="10000" value="800000"
+          <input id="net" type="number" step="10000" value="800000"
             class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
-          <span class="block text-xs text-gray-400 mt-1">＝所得總額扣掉免稅額與各項扣除額之後的數字。<button id="helpBtn" type="button" class="text-brand hover:underline">不知道？用年薪估算</button></span>
+          <span class="block text-xs text-gray-400 mt-1">＝所得總額扣掉免稅額與各項扣除額之後的數字，<strong>可以是負的</strong>：只有股利收入的人，這欄就是負的（免稅額加扣除額沒用完的部分，例如單身約 −237,000），合併計稅時可以拿來抵股利。<button id="helpBtn" type="button" class="text-brand hover:underline">不知道？用年薪估算</button></span>
         </label>
       </div>
 
@@ -45,7 +45,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           </label>
           <button id="applySalary" type="button" class="px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">帶入估算淨額</button>
         </div>
-        <p class="text-xs text-gray-400 mt-2">115 年度單身、只有薪資、用標準扣除額：淨額 ≈ 年薪 − 免稅額 101,000 − 標準扣除額 136,000 − 薪資特別扣除額 227,000（合計 46.4 萬）。有扶養、已婚或列舉扣除的人請以自己的試算為準。</p>
+        <p class="text-xs text-gray-400 mt-2">115 年度單身、只有薪資、用標準扣除額：淨額 ≈ 年薪 − 免稅額 101,000 − 標準扣除額 136,000 − 薪資特別扣除額 227,000（合計 46.4 萬；薪資特別扣除額以薪資為限，年薪低於 46.4 萬時結果是負的）。有扶養、已婚或列舉扣除的人請以自己的試算為準。</p>
       </div>
 
       <div class="mt-5">
@@ -57,9 +57,10 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           <button type="button" data-n="12" class="freq px-3 py-1.5 rounded-lg border text-sm">月配（12 次）</button>
           <button type="button" data-n="0" class="freq px-3 py-1.5 rounded-lg border text-sm">逐筆輸入</button>
         </div>
-        <textarea id="custom" rows="2" placeholder="每一筆股利金額，用逗號或換行分隔，例如：120000, 95000, 18000"
+        <textarea id="custom" rows="2" placeholder="每一筆股利金額，一行一筆或用頓號分隔，例如：&#10;120,000&#10;95,000&#10;1.8萬"
           class="hidden mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"></textarea>
-        <p class="text-xs text-gray-400 mt-2">選年配／季配／月配時，視為全年股利平均分成那幾筆。逐筆輸入時，全年股利以各筆加總為準。</p>
+        <p id="customWarn" class="hidden text-xs text-red-600 mt-1"></p>
+        <p class="text-xs text-gray-400 mt-2">選年配／季配／月配時，視為全年股利平均分成那幾筆。逐筆輸入時，全年股利以各筆加總為準；可寫千分位（120,000）、「NT$」或「萬」（12萬），金額四捨五入到元後再判斷 2 萬門檻。</p>
       </div>
     </div>
 
@@ -91,7 +92,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     <!-- NHI -->
     <div class="rounded-2xl border border-gray-200 p-6 mb-8">
       <h2 class="font-semibold text-gray-900 mb-1">二代健保補充保費：看的是「單次」</h2>
-      <p class="text-xs text-gray-400 mb-4">單次給付的股利達 20,000 元就按 2.11% 扣，未達不扣；單次超過 1,000 萬的部分不計。直接從配息裡扣掉，報稅時不會退。</p>
+      <p class="text-xs text-gray-400 mb-4">單次給付的股利達 20,000 元就按 2.11% 扣，未達不扣；單次超過 1,000 萬的部分不計。配息入帳時直接扣掉、報稅時不會退回；不過它算健保費，選列舉扣除的人可以列入保險費扣除額。</p>
       <div class="overflow-x-auto">
         <table class="w-full text-sm border-collapse">
           <thead>
@@ -105,7 +106,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           <tbody id="nhiBody"></tbody>
         </table>
       </div>
-      <p class="text-xs text-gray-400 mt-3">這張表只是讓你看出「單次門檻」這條規則的效果：全年股利夠大的時候，不管分幾次，每一筆都會超過 2 萬，保費一樣；只有每筆落在 2 萬上下的人，配息頻率才會影響保費。挑 ETF 應該看總報酬與費用，不是看它一年配幾次。</p>
+      <p class="text-xs text-gray-400 mt-3">這張表只是讓你看出「單次門檻」這條規則的效果：全年股利夠大的時候，不管分幾次，每一筆都會超過 2 萬，保費大致一樣；只有每筆落在 2 萬上下的人，配息頻率才會影響保費。兩個例外：單筆超過 1,000 萬時，超過的部分不計，分越多次反而扣越多；持有好幾檔 ETF 時，每一檔的每一次配息都是各自的給付，實際每筆金額比「全年股利 ÷ 次數」小，要用「逐筆輸入」才準。挑 ETF 應該看總報酬與費用，不是看它一年配幾次。</p>
     </div>
 
     <!-- Per-payment details -->
@@ -129,7 +130,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     <!-- Note -->
     <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
       <p class="font-semibold text-gray-900">💡 幾個常被搞錯的地方</p>
-      <p><strong>合併計稅不一定比較貴：</strong>股利併入綜合所得，但可以拿股利的 8.5% 抵減應納稅額，每一申報戶上限 8 萬元。所得不高的人，8.5% 可能比股利多繳的稅還多，會變成退稅。夫妻合併申報時，8 萬上限是兩個人共用的。</p>
+      <p><strong>合併計稅不一定比較貴：</strong>股利併入綜合所得，但可以拿股利的 8.5% 抵減應納稅額，每一申報戶上限 8 萬元。所得不高的人，8.5% 可能比股利多繳的稅還多，等於合併計稅讓整戶少繳；整戶應納稅額被抵到負的，才會真的退稅。夫妻合併申報時，8 萬上限是兩個人共用的。</p>
       <p><strong>分開計稅是固定 28%：</strong>股利不併入綜合所得，另外按 28% 算，不能再用 8.5% 抵減。按 115 年度級距逐一驗算，綜合所得淨額加上股利之後如果還在 519 萬以內（最高只到 30% 級距），合併計稅一定比較省；要有一段進到 40% 級距，分開計稅才可能比較划算。</p>
       <p><strong>補充保費和所得稅是兩件事：</strong>選哪種計稅方式都不影響補充保費，它在配息入帳時就已經扣掉了。改成「全年累計、隔年多退少補」的年度結算制曾被研議，目前暫緩、沒有實施，本工具照現行的單次制計算。</p>
       <p><strong>配息不是多出來的錢：</strong>除息那天淨值就先少掉同樣的金額，稅和保費卻是在配出來之後才開始算。為什麼我不拿高股息 ETF 當核心配置，見 <a class="text-brand hover:underline" href="/articles/ep33-high-dividend-etf">EP33</a>；資產到一千萬之後會碰到的其他幾條線，見 <a class="text-brand hover:underline" href="/articles/ep53-ten-million-liquid-wealth">EP53</a>。</p>
@@ -179,8 +180,26 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         return bracketTax(net) + Math.round(div * SEP_RATE);
       }
       function nhiOne(amount) {
-        if (amount < NHI_MIN) return 0;
-        return Math.round(Math.min(amount, NHI_MAX) * NHI_RATE);
+        const a = Math.round(amount);
+        if (a < NHI_MIN) return 0;
+        return Math.round(Math.min(a, NHI_MAX) * NHI_RATE);
+      }
+      // 逐筆輸入解析：千分位、換行、頓號、分號、逗號、空白；NT$ 前綴；「萬」單位。回傳有效金額與無法解讀的序號
+      function parsePayments(text) {
+        const s = String(text || '')
+          .replace(/NT\$?\s*/gi, '').replace(/\$\s*/g, '')
+          .replace(/(\d)\s+萬/g, '$1萬')
+          .replace(/(\d)[,，](?=\d{3}(?!\d))/g, '$1');
+        const tokens = s.split(/[\r\n、;；，,\s\u3000]+/).filter(x => x !== '');
+        const pays = [], bad = [];
+        tokens.forEach((tok, i) => {
+          const m = tok.match(/^(\d+(?:\.\d+)?)(萬)?(元)?$/);
+          if (!m) { bad.push(i + 1); return; }
+          const v = Math.round(parseFloat(m[1]) * (m[2] ? 10000 : 1));
+          if (!(v > 0)) { bad.push(i + 1); return; }
+          pays.push(v);
+        });
+        return { pays, bad };
       }
       function nhiTotal(payments) {
         return payments.reduce((s, a) => s + nhiOne(a), 0);
@@ -203,6 +222,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
       const $ = (id) => document.getElementById(id);
       const num = (id) => Math.max(0, parseFloat($(id).value) || 0);
+      const numSigned = (id) => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
       const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
       const ntd = (n) => (n < 0 ? '−' : '') + 'NT$' + Math.abs(Math.round(n)).toLocaleString('en-US');
       const pct = (x) => (x * 100).toFixed(1) + '%';
@@ -210,8 +230,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
       function paymentsNow() {
         if (freq === 0) {
-          return $('custom').value.split(/[,，\s]+/).map(s => parseFloat(s.replace(/[^\d.]/g, ''))).filter(x => x > 0);
+          const r = parsePayments($('custom').value);
+          const w = $('customWarn');
+          w.classList.toggle('hidden', !r.bad.length);
+          w.textContent = r.bad.length ? `第 ${r.bad.join('、')} 筆無法解讀（負數、零或看不懂的寫法），已略過。` : '';
+          return r.pays;
         }
+        $('customWarn').classList.add('hidden');
         return splitEven(Math.round(num('div')), freq);
       }
 
@@ -226,7 +251,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         const pays = paymentsNow();
         const div = freq === 0 ? pays.reduce((s, a) => s + a, 0) : Math.round(num('div'));
         if (freq === 0) $('div').value = Math.round(div);
-        const net = Math.round(num('net'));
+        const net = Math.round(numSigned('net'));
 
         const base = bracketTax(net);
         const comb = combinedTax(net, div), sep = separateTax(net, div);
@@ -246,19 +271,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           <div class="rounded-2xl border border-gray-200 p-5">
             <div class="text-sm font-medium text-gray-600 mb-1">股利造成的所得稅（${bestName}）</div>
             <div class="text-2xl font-bold text-gray-900">${ntd(best)}</div>
-            <div class="text-xs text-gray-500 mt-1">${best < 0 ? '負數＝8.5% 抵減比多繳的稅還多，會退稅' : '佔股利 ' + (div ? pct(best / div) : '—')}</div>
+            <div class="text-xs text-gray-500 mt-1">${best < 0 ? (comb < 0 ? `負數＝合併計稅讓你整戶少繳；你的整戶應納稅額是負的，會退稅約 ${ntd(-comb)}` : '負數＝8.5% 抵減讓你整戶少繳這麼多（整戶仍要繳稅，不是退稅）') : '佔股利 ' + (div ? pct(best / div) : '—')}</div>
           </div>
           <div class="rounded-2xl border border-gray-200 p-5">
             <div class="text-sm font-medium text-gray-600 mb-1">二代健保補充保費</div>
             <div class="text-2xl font-bold" style="color:#C5611A">${ntd(nhi)}</div>
-            <div class="text-xs text-gray-500 mt-1">${pays.filter(a => a >= NHI_MIN).length} / ${pays.length} 筆達 2 萬門檻</div>
+            <div class="text-xs text-gray-500 mt-1">${pays.filter(a => Math.round(a) >= NHI_MIN).length} / ${pays.length} 筆達 2 萬門檻</div>
           </div>`;
 
         const diff = Math.abs(combInc - sepInc);
         $('insight').innerHTML = `
           <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
-          <p class="mb-2">其他所得淨額 ${wan(net)}（邊際稅率 ${Math.round(marginalRate(net) * 100)}%），一年股利 ${wan(div)}：選<strong>${bestName}</strong>比較省，兩者差 <strong>${ntd(diff)}</strong>。</p>
-          <p>稅加上補充保費，這筆股利大約有 <strong style="color:#C5611A">${div ? pct(cost / div) : '—'}</strong> ${cost >= 0 ? '在進到你口袋之前就先付掉了' : '——這個所得水準下，8.5% 抵減反而讓你整體多拿回一點'}。殖利率 5% 的配息，實際到手的報酬率約是 ${div ? (5 * keep).toFixed(2) + '%' : '—'}。</p>`;
+          <p class="mb-2">其他所得淨額 ${ntd(net)}，加上一年股利 ${wan(div)} 之後，淨額最高那一段落在 <strong>${Math.round(marginalRate(net + div) * 100)}% 級距</strong>：選<strong>${bestName}</strong>比較省，兩者差 <strong>${ntd(diff)}</strong>。${bestName === '分開計稅' ? '（有一段進到 40% 級距，28% 才會比較便宜。）' : ''}</p>
+          <p>${cost >= 0 ? `稅加上補充保費，這筆股利大約有 <strong style="color:#C5611A">${div ? pct(cost / div) : '—'}</strong> 要付出去：補充保費在配息入帳時就先扣掉，所得稅則是隔年五月報稅時才算` : `這個所得水準下，8.5% 抵減比稅加補充保費還多，整體反而多拿回股利的 <strong style="color:#C5611A">${div ? pct(-cost / div) : '—'}</strong>（補充保費配息時先扣，抵減的好處要到隔年報稅時少繳或退稅才拿到）`}。以示範用的殖利率 5% 來說，實際到手的報酬率約是 ${div ? (5 * keep).toFixed(2) + '%' : '—'}（5% 是假設值，不是從你的輸入算出來的）。</p>`;
 
         $('taxBody').innerHTML = `
           <tr class="border-b border-gray-100"><td class="py-2 pr-4 text-gray-500">含股利的應納稅額</td><td class="py-2 px-4 text-right">${ntd(comb)}</td><td class="py-2 pl-4 text-right">${ntd(sep)}</td></tr>
@@ -271,6 +296,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         const t = turningNet(div);
         $('turning').innerHTML = t === null
           ? '在這個股利金額下，合併計稅一直比較省。'
+          : t <= 0
+          ? (net >= 0 ? '以你的股利金額，分開計稅一定比較省。' : '以你的股利金額，其他所得淨額在 0 以上時分開計稅一定比較省；你的淨額是負的，請以上表的比較為準。')
           : `轉折點：一年股利 ${wan(div)} 的話，<strong>其他所得淨額大約 ${wan(t)} 以上</strong>，分開計稅才開始比較省，也就是加上股利之後的淨額有一段進到 40% 級距。股利越大，8.5% 抵減越早碰到 8 萬上限，這條線會越往下移。`;
 
         const rows = [[1, '年配 1 次'], [2, '半年配 2 次'], [4, '季配 4 次'], [12, '月配 12 次']].map(([n, label]) => {
@@ -287,7 +314,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         $('payBody').innerHTML = pays.length ? pays.map((a, i) => `<tr class="border-b border-gray-100">
             <td class="py-2 pr-4">第 ${i + 1} 筆</td>
             <td class="py-2 px-4 text-right">${ntd(a)}</td>
-            <td class="py-2 px-4 text-right text-gray-500">${a >= NHI_MIN ? '是' : '否'}</td>
+            <td class="py-2 px-4 text-right text-gray-500">${Math.round(a) >= NHI_MIN ? '是' : '否'}</td>
             <td class="py-2 pl-4 text-right" style="color:#C5611A">${ntd(nhiOne(a))}</td></tr>`).join('')
           : '<tr><td class="py-2 text-gray-400" colspan="4">還沒有輸入任何一筆</td></tr>';
       }
@@ -296,7 +323,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       ['div', 'net', 'custom'].forEach(id => $(id).addEventListener('input', render));
       $('helpBtn').addEventListener('click', () => $('helpBox').classList.toggle('hidden'));
       $('applySalary').addEventListener('click', () => {
-        $('net').value = Math.max(0, Math.round(num('salary')) - 464000);
+        const sal = Math.round(num('salary'));
+        // 薪資特別扣除額以薪資為限
+        $('net').value = sal - 101000 - 136000 - Math.min(sal, 227000);
         render();
       });
       render();
