@@ -1,0 +1,366 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none'
+---
+
+<BaseLayout
+  title="勞退自提真實效益計算機"
+  description="自提 6% 值不值得，看的是你的稅率級距，不是複利。填入月薪與級距，算出對應的月提繳工資、每年省下的稅，再把「自提進勞退」和「不提、拿稅後的錢自己投資」並排算到請領那一天，含退職所得稅——對應 EP51。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP51</p>
+      <h1 class="text-3xl font-bold mb-3">勞退自提真實效益計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        自提省下來的稅＝<strong>你自提的金額 × 你的邊際稅率</strong>。級距是 0 的人省下的是零，40% 級距的人每十塊退四塊——同一個動作，差八倍。
+        填入你的數字，看自提對你到底是什麼：月提繳工資對到哪一級、一年省多少稅，以及把「自提進勞退」和「不提、拿稅後的錢自己投資」並排算到請領那一天，誰多、多多少。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的薪資與稅率</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">每月工資（NT$）</span>
+          <input id="salary" type="number" min="0" step="1000" value="100000" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">年終獎金（幾個月）</span>
+          <input id="bonus" type="number" min="0" max="24" step="0.5" value="0" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">自提比例</span>
+          <select id="ratePct" class={inputCls}>
+            <option value="6" selected>6%（提滿）</option>
+            <option value="5">5%</option>
+            <option value="4">4%</option>
+            <option value="3">3%</option>
+            <option value="2">2%</option>
+            <option value="1">1%</option>
+          </select>
+        </label>
+        <label class="block sm:col-span-3">
+          <span class="text-sm text-gray-600">你的綜所稅級距</span>
+          <select id="taxMode" class={inputCls}>
+            <option value="auto" selected>幫我估算（單身、只有薪資、標準扣除額）</option>
+            <option value="0">不用繳稅（0%）</option>
+            <option value="0.05">5%</option>
+            <option value="0.12">12%</option>
+            <option value="0.20">20%</option>
+            <option value="0.30">30%</option>
+            <option value="0.40">40%</option>
+          </select>
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">「每月工資」用勞基法的工資口徑：含全勤、固定津貼等經常性給與，不是本薪、也不是實領。最準的做法是回推——薪資單上公司幫你提的勞退金額 ÷ 6%。年終只用來估稅率，不影響月提繳工資。有配偶、扶養親屬或列舉扣除額的人，請改用下拉選單直接選級距（對照下面的級距表）。</p>
+
+      <h2 class="font-semibold text-gray-900 mt-6 mb-4">到請領那一天</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">目前年齡</span>
+          <input id="age" type="number" min="15" max="64" step="1" value="35" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預計請領年齡（60 以上）</span>
+          <input id="claimAge" type="number" min="60" max="75" step="1" value="60" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">已有新制提繳年資（年）</span>
+          <input id="pastYears" type="number" min="0" max="45" step="1" value="5" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">個人專戶目前餘額（NT$，可填 0）</span>
+          <input id="balance" type="number" min="0" step="10000" value="0" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">勞退基金假設年報酬（%）</span>
+          <input id="rPension" type="number" min="-5" max="20" step="0.5" value="5" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">自己投資假設年報酬（%）</span>
+          <input id="rEtf" type="number" min="-5" max="20" step="0.5" value="5" class={inputCls} />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">二年期定存利率（%）</span>
+          <input id="rFloor" type="number" min="0" max="10" step="0.05" value="1.73" class={inputCls} />
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">專戶餘額可以在勞保局 e 化服務系統或「勞動保險 APP」查到，只用來判斷請領時會不會超過退職所得的免稅額度。兩個報酬率都是假設值、無法保證，預設故意設成一樣，讓你先看到「只差在稅」的結果，再自己調（兩者風險結構不同，不能直接拿歷史數字比，見 EP51 文章）；二年期定存預設值為臺灣銀行 2026/9/29 牌告（二年期定期存款 1.73%），請自行更新。試算假設薪資與報酬率在這段期間固定不變、每月月底投入、按月複利，雇主 6% 與你的自提都一路提到請領為止。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Two paths -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">兩條路走到請領那一天</h2>
+      <p class="text-xs text-gray-400 mb-4">A：這筆錢自提進勞退，稅前的錢整筆進去，領的時候算退職所得。B：不自提，這筆錢照常課稅，拿稅後剩下的每個月自己投資（假設投資收益不再課稅——台股證所稅停徵；未計配息所得稅、證交稅與手續費）。兩條路每個月從薪水少掉的可支配現金一樣多。</p>
+      <div id="paths" class="grid sm:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- Details -->
+    <details class="mb-4">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 115 年度綜所稅級距對照表</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-4 font-medium">綜合所得淨額</th>
+              <th class="py-2 px-4 font-medium text-right">級距</th>
+              <th class="py-2 pl-4 font-medium text-right">一進場的即期加成 t ÷ (1 − t)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">0（本來就不用繳稅）</td><td class="py-2 px-4 text-right">0%</td><td class="py-2 pl-4 text-right text-gray-500">0%</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">61 萬以下</td><td class="py-2 px-4 text-right">5%</td><td class="py-2 pl-4 text-right text-gray-500">5.3%</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">61 ～ 138 萬</td><td class="py-2 px-4 text-right">12%</td><td class="py-2 pl-4 text-right text-gray-500">13.6%</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">138 ～ 277 萬</td><td class="py-2 px-4 text-right">20%</td><td class="py-2 pl-4 text-right text-gray-500">25.0%</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">277 ～ 519 萬</td><td class="py-2 px-4 text-right">30%</td><td class="py-2 pl-4 text-right text-gray-500">42.9%</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-4">519 萬以上</td><td class="py-2 px-4 text-right">40%</td><td class="py-2 pl-4 text-right text-gray-500">66.7%</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-gray-400 mt-2">綜合所得淨額＝年收入扣掉免稅額和各項扣除額之後的數字，不是年薪。115 年度單身、只有薪資、標準扣除額：免稅額 101,000＋標準扣除額 136,000＋薪資特別扣除額 227,000＝464,000，約等於月薪 38,667（不含年終），這條線以下自提省下的稅是零。即期加成是「一進場」的價差，一次性，不是年化報酬。</p>
+      </div>
+    </details>
+
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 請領時的退職所得怎麼算</summary>
+      <div id="retDetail" class="mt-3 text-sm text-gray-600 leading-relaxed space-y-2"></div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 提之前要知道的幾件事</p>
+      <p><strong>先後順序：</strong>高利負債先清掉、緊急備用金先補滿，然後才輪到自提。自提的節稅是一次性的，負債的利息是每年都在跑。</p>
+      <p><strong>已經提進去的錢鎖到 60 歲：</strong>自提本身是水龍頭不是合約——可以隨時申報停止，提繳率一年內可以調整兩次，自通知之次月 1 日生效；但已經提進去的錢要到 60 歲才領得到。未來三到五年有頭期款、進修、空窗期這類大額支出，可以先提 1% 到 2%。</p>
+      <p><strong>年資未滿 15 年只能一次領：</strong>年滿 60 歲且提繳年資滿 15 年，才能在月領和一次領之間選。這個計算機一律用一次領試算退職所得。</p>
+      <p><strong>離職會自動停提：</strong>到新公司要重新申請，不會自動接上，留職停薪期間也是停的。換完工作記得回頭看薪資單。</p>
+      <p><strong>不影響勞保投保薪資和健保：</strong>勞保年金、失業給付、育嬰留停津貼都按投保薪資算，跟自提無關。自提動到的只有課稅所得——連帶讓扣繳憑單上的給付總額變少，兩三年內要辦房貸的人要注意。</p>
+      <p><strong>國庫補足的是下限，不是報酬率：</strong>勞工退休金條例第 23 條第 2 項，運用收益不得低於以當地銀行二年定期存款利率計算之收益，不足由國庫補足。它是請領時才結算一次的累積比較，中間任何一年都可能是負的，不是「每年最差就是定存」。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，不構成任何投資、稅務或法律建議。月提繳工資依勞動部 115 年 1 月 1 日生效之勞工退休金月提繳分級表；綜所稅級距、免稅額與扣除額、退職所得定額免稅金額依 115 年度公告，各項金額逐年調整，本工具未推估未來年度的調整。「幫我估算」僅適用單身、只有薪資所得、採標準扣除額者；退職所得稅以「請領當年沒有其他所得、單身、標準扣除額」估算。兩個報酬率都是假設值，實際報酬逐年波動、無法保證，過去績效不代表未來結果。實際請以財政部、勞動部勞工保險局最新公告與你本人的報稅資料為準。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep51-labor-pension-voluntary-contribution" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP51 勞退自提完整分析 →</a>
+      <a href="/tools/retirement-number-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">算我的財務自由數字</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const num = (id) => parseFloat($(id).value) || 0;
+      const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const pct = (r, d = 1) => (r * 100).toFixed(d) + '%';
+
+      // ===== 純函式（改動後請重跑驗算：分級表、級距、退職所得的已知例子） =====
+      // 勞工退休金月提繳分級表（115/1/1 生效，勞動部勞動福3字第1140153598號令）各級月提繳工資
+      const GRADES = [1500,3000,4500,6000,7500,8700,9900,11100,12540,13500,15840,16500,17280,17880,19047,20008,21009,22000,23100,24000,25250,26400,27600,28590,29500,30300,31800,33300,34800,36300,38200,40100,42000,43900,45800,48200,50600,53000,55400,57800,60800,63800,66800,69800,72800,76500,80200,83900,87600,92100,96600,101100,105600,110100,115500,120900,126300,131700,137100,142500,147900,150000];
+      // 回傳 { level, wage }：實際工資落在「上一級+1 ～ 本級」即對應本級；147,901 以上為第 62 級 150,000
+      function gradeOf(salary) {
+        const s = Math.max(0, Math.round(salary));
+        for (let i = 0; i < 61; i++) if (s <= GRADES[i]) return { level: i + 1, wage: GRADES[i] };
+        return { level: 62, wage: 150000 };
+      }
+      // 115 年度綜所稅：綜合所得淨額 → 應納稅額（累進差額法）
+      const BRACKETS = [[610000,0.05,0],[1380000,0.12,42700],[2770000,0.20,153100],[5190000,0.30,430100],[Infinity,0.40,949100]];
+      function incomeTax(net) {
+        if (net <= 0) return 0;
+        for (const [cap, r, d] of BRACKETS) if (net <= cap) return Math.round(net * r - d);
+      }
+      function marginalRate(net) {
+        if (net <= 0) return 0;
+        for (const [cap, r] of BRACKETS) if (net <= cap) return r;
+      }
+      // 115 年度單身、只有薪資、標準扣除：免稅額 101,000＋標準扣除額 136,000＋薪資特別扣除額 227,000
+      const SINGLE_SALARY_THRESHOLD = 464000;
+      // 年度自提額與省稅：mode='auto' 用單身標準扣除估算（省稅＝提前稅額−提後稅額，自動處理「最多歸零」）；否則 rate 為使用者選的邊際稅率
+      function yearlySaving(annualIncome, contrib, mode, rate) {
+        if (mode === 'auto') {
+          const netBefore = annualIncome - SINGLE_SALARY_THRESHOLD;
+          const before = incomeTax(netBefore);
+          const after = incomeTax(netBefore - contrib);
+          return { saving: before - after, rate: marginalRate(netBefore), taxBefore: before };
+        }
+        return { saving: Math.round(contrib * rate), rate, taxBefore: null };
+      }
+      // 退職所得（115 年度，一次領）：206,000×年資 以內免稅；206,000～414,000×年資 半數；超過 414,000×年資 全數
+      function retirementTaxable(amount, years) {
+        const a = 206000 * years, b = 414000 * years;
+        if (amount <= a) return 0;
+        if (amount <= b) return (amount - a) / 2;
+        return (b - a) / 2 + (amount - b);
+      }
+      // 退休當年假設沒有其他所得、單身標準扣除：免稅額 101,000＋標準扣除額 136,000（退職所得不適用薪資特別扣除額）
+      const RETIREE_DEDUCTION = 237000;
+      function retirementTax(amount, years) {
+        return incomeTax(retirementTaxable(amount, years) - RETIREE_DEDUCTION);
+      }
+      // 每月定額投入、月複利的年金終值
+      function fvMonthly(pmt, annualRate, months) {
+        const m = annualRate / 12;
+        if (months <= 0) return 0;
+        if (Math.abs(m) < 1e-12) return pmt * months;
+        return pmt * ((Math.pow(1 + m, months) - 1) / m);
+      }
+      function fvLump(pv, annualRate, months) {
+        return pv * Math.pow(1 + annualRate / 12, months);
+      }
+      // 兩條路比較。p：{ salary, bonusMonths, ratePct(自提%), taxMode, manualRate, age, claimAge, pastYears, balance, rPension, rEtf, rFloor }
+      function compare(p, rPensionOverride) {
+        const g = gradeOf(p.salary);
+        const monthly = Math.round(g.wage * p.ratePct / 100);
+        const annual = monthly * 12;
+        const employerMonthly = Math.round(g.wage * 0.06);
+        const annualIncome = p.salary * (12 + p.bonusMonths);
+        const sv = yearlySaving(annualIncome, annual, p.taxMode, p.manualRate);
+        const n = Math.max(0, Math.round(p.claimAge - p.age)) * 12;
+        const years = p.pastYears + n / 12;
+        const r = rPensionOverride === undefined ? p.rPension : rPensionOverride;
+        // A：自提進勞退。專戶＝既有餘額＋雇主 6%＋自提；稅只算「因為自提而多出來」的那一段
+        const base = fvLump(p.balance, r, n) + fvMonthly(employerMonthly, r, n);
+        const vol = fvMonthly(monthly, r, n);
+        const taxWith = retirementTax(base + vol, years);
+        const taxWithout = retirementTax(base, years);
+        const extraTax = taxWith - taxWithout;
+        const A = vol - extraTax;
+        // B：不自提，拿稅後現金（自提額−省下的稅）每月自己投資
+        const B = fvMonthly((annual - sv.saving) / 12, p.rEtf, n);
+        return { g, monthly, annual, employerMonthly, sv, n, years, base, vol, extraTax, A, B, principal: annual * n / 12, cash: (annual - sv.saving) * n / 12 };
+      }
+      // 勞退報酬要低到多少，A 才會輸給 B（二分法）；若 −5% 仍贏回傳 -Infinity，若 30% 仍輸回傳 Infinity
+      function breakEven(p) {
+        const f = (r) => { const c = compare(p, r); return c.A - c.B; };
+        let lo = -0.05, hi = 0.30;
+        if (f(lo) >= 0) return -Infinity;
+        if (f(hi) < 0) return Infinity;
+        for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (f(mid) >= 0) hi = mid; else lo = mid; }
+        return hi;
+      }
+      // ===== 純函式結束 =====
+
+      function read() {
+        const mode = $('taxMode').value;
+        const age = Math.round(num('age'));
+        return {
+          salary: Math.max(0, num('salary')),
+          bonusMonths: Math.max(0, num('bonus')),
+          ratePct: parseInt($('ratePct').value, 10),
+          taxMode: mode === 'auto' ? 'auto' : 'manual',
+          manualRate: mode === 'auto' ? 0 : parseFloat(mode),
+          age,
+          claimAge: Math.max(60, Math.round(num('claimAge'))),
+          pastYears: Math.max(0, Math.round(num('pastYears'))),
+          balance: Math.max(0, num('balance')),
+          rPension: num('rPension') / 100,
+          rEtf: num('rEtf') / 100,
+          rFloor: num('rFloor') / 100,
+        };
+      }
+
+      function render() {
+        const p = read();
+        const c = compare(p);
+        const floor = compare(p, p.rFloor);
+        const be = breakEven(p);
+        const yrs = c.n / 12;
+        const rate = c.sv.rate;
+        const capped = c.g.level === 62;
+        const naive = Math.round(p.salary * p.ratePct / 100) * 12;
+
+        // Cards
+        $('cards').innerHTML = `
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">月提繳工資（第 ${c.g.level} 級）</div>
+            <div class="text-2xl font-bold text-gray-900">${ntd(c.g.wage)}</div>
+            <div class="text-xs text-gray-500 mt-1">自提 ${p.ratePct}%：每月 ${ntd(c.monthly)}、每年 ${ntd(c.annual)}</div>
+          </div>
+          <div class="rounded-2xl border ${c.sv.saving > 0 ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">每年省下的所得稅</div>
+            <div class="text-2xl font-bold" style="color:#C5611A">${ntd(c.sv.saving)}</div>
+            <div class="text-xs text-gray-500 mt-1">${p.taxMode === 'auto' ? '估算級距 ' : '你選的級距 '}${pct(rate, 0)}</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">勞退報酬要低於多少，自提才輸</div>
+            <div class="text-2xl font-bold text-gray-900">${yrs <= 0 ? '—' : be === -Infinity ? '低於 −5% 才輸' : be === Infinity ? '高於 30% 才贏' : pct(be)}</div>
+            <div class="text-xs text-gray-500 mt-1">對比自己投資 ${pct(p.rEtf)}、${yrs} 年</div>
+          </div>`;
+
+        // Insight
+        const lines = [];
+        const gradeNote = capped
+          ? `你的月提繳工資已經<strong>封頂在 150,000</strong>（最高第 62 級從 147,901 元開始），自提上限每月 9,000、每年 108,000。自己拿月薪乘 ${p.ratePct}% 會算成 ${ntd(naive)}，${naive > c.annual ? '<strong>多算了 ' + ntd(naive - c.annual) + '</strong>' : '剛好一樣'}。`
+          : `6% 是算在分級表的級距上，不是實際月薪：你的 ${ntd(p.salary)} 對到第 ${c.g.level} 級 ${ntd(c.g.wage)}，一年自提 ${ntd(c.annual)}${naive !== c.annual ? '（自己拿月薪乘 ' + p.ratePct + '% 會算成 ' + ntd(naive) + '）' : ''}。`;
+        lines.push(gradeNote);
+        if (c.sv.saving === 0) {
+          lines.push(`<strong>你省下的稅是零。</strong>${p.taxMode === 'auto' ? '依單身、標準扣除額估算，你的綜合所得淨額是 0，本來就不用繳稅。' : ''}對你來說，自提剩下的理由只有國庫補足的下限和強制儲蓄——這兩樣自動轉帳也做得到，而且隨時拿得回來。這時候要把「鎖到 60 歲」放在同一張秤上重新秤一次。`);
+        } else {
+          const boost = c.annual > 0 ? c.sv.saving / (c.annual - c.sv.saving) : 0;
+          const shortfall = p.taxMode === 'auto' && c.sv.saving < Math.round(c.annual * rate) - 1;
+          const shortNote = !shortfall ? ''
+            : c.sv.saving === c.sv.taxBefore
+              ? '（你的綜合所得淨額不高，全年應納稅額本來就只有 ' + ntd(c.sv.taxBefore) + '，稅最多只能省到歸零，所以省下的比「自提額 × 級距」少。）'
+              : '（自提讓你有一部分所得掉回下一個較低的級距，所以省下的比「自提額 × 級距」少一點。）';
+          lines.push(`不提的話，這 ${ntd(c.annual)} 扣完稅進你口袋的是 <strong>${ntd(c.annual - c.sv.saving)}</strong>；提了，帳戶裡進去的是整筆 ${ntd(c.annual)}。所以你實際放棄的可支配現金是 ${ntd(c.annual - c.sv.saving)}，一進場就先多了 <strong>${pct(boost)}</strong>——這是一次性的價差，每年的錢各自算一次，不是年化報酬。${shortNote}`);
+        }
+        if (yrs > 0) {
+          const diff = c.A - c.B;
+          lines.push(`照你填的假設，到 ${p.claimAge} 歲：自提這條路（扣完因自提多繳的退職所得稅）約 <strong>${wan(c.A)}</strong>，自己投資約 <strong>${wan(c.B)}</strong>，${diff >= 0 ? '自提多 ' : '自己投資多 '}<strong>${wan(Math.abs(diff))}</strong>。${isFinite(be) ? `勞退基金的年報酬只要高於 <strong>${pct(be)}</strong>，自提就會贏過年化 ${pct(p.rEtf)} 的自己投資。` : ''}`);
+        } else {
+          lines.push('你已經到了預計請領的年齡，沒有可以比較的累積期間。');
+        }
+        $('insight').innerHTML = `<p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>` + lines.map(l => `<p class="mb-2">${l}</p>`).join('');
+
+        // Paths
+        const betterA = c.A >= c.B;
+        $('paths').innerHTML = `
+          <div class="rounded-xl border ${betterA ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">A　自提進勞退（年報酬 ${pct(p.rPension)}）</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(c.A)}</div>
+            <div class="text-xs text-gray-500 mt-2 space-y-1">
+              <p>自提累積 ${wan(c.vol)}（本金 ${wan(c.principal)}）</p>
+              <p>因自提多繳的退職所得稅 ${ntd(c.extraTax)}</p>
+              <p>最差情況：勞退只拿到二年定存 ${pct(p.rFloor, 2)} → 約 ${wan(floor.A)}</p>
+            </div>
+          </div>
+          <div class="rounded-xl border ${!betterA ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">B　不提，稅後自己投資（年報酬 ${pct(p.rEtf)}）</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(c.B)}</div>
+            <div class="text-xs text-gray-500 mt-2 space-y-1">
+              <p>每年投入稅後 ${ntd(c.annual - c.sv.saving)}（本金 ${wan(c.cash)}）</p>
+              <p>隨時拿得回來，不用等到 ${p.claimAge} 歲</p>
+              <p>報酬率是你自己選的標的，沒有國庫補足的下限</p>
+            </div>
+          </div>`;
+
+        // Retirement detail
+        const Y = c.years;
+        const a = 206000 * Y, b = 414000 * Y;
+        const total = c.base + c.vol;
+        const warn15 = Y < 15 ? `<p>⚠️ 你到請領時的提繳年資約 ${Y} 年，<strong>未滿 15 年只能一次領</strong>。</p>` : `<p>你到請領時的提繳年資約 ${Y} 年，滿 15 年可以選月領（月領一年 894,000 以內免稅），這裡仍以一次領試算。</p>`;
+        $('retDetail').innerHTML = `
+          ${warn15}
+          <p>115 年度一次領的退職所得（年資 ${Y} 年）：<strong>${ntd(a)} 以內全部免稅</strong>；${ntd(a)} ～ ${ntd(b)} 的部分<strong>半數</strong>計入所得；超過 ${ntd(b)} 的部分全數計入。</p>
+          <p>你的專戶到請領時估計約 ${wan(total)}（既有餘額＋雇主 6%＋自提），不自提則約 ${wan(c.base)}。因為自提而多繳的退職所得稅約 <strong>${ntd(c.extraTax)}</strong>。</p>
+          <p class="text-xs text-gray-400">退職所得稅以「請領當年沒有其他所得、單身、標準扣除額（免稅額 101,000＋標準扣除額 136,000）」估算，只算因自提多出來的那一段。免稅額度用 115 年度的金額，未推估未來調整；遞延課稅，不是永久免稅。</p>`;
+      }
+
+      ['salary','bonus','ratePct','taxMode','age','claimAge','pastYears','balance','rPension','rEtf','rFloor']
+        .forEach(id => { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
+      render();
+    })();
+  </script>
+</BaseLayout>

@@ -6,6 +6,46 @@ import { openTs, isPublished } from '@/lib/publish'
 // pubDate = 對應集數的公開日；公開日 19:00（台灣）前不在列表顯示，到時前端自動現身。
 const tools = [
   {
+    href: '/tools/leveraged-etf-drawdown-calculator',
+    title: '正 2 腰斬壓力測試',
+    desc: '00631L 十一年腰斬三次，最深一次跌 55%。填入你的正 2、台股與其他資產，算出它腰斬那一天你整體少多少、正 2 最多能放幾成，以及今年漲完之後比例偏掉多少。',
+    episode: 54,
+    pubDate: '2026-10-20',
+    tags: ['00631L', '槓桿ETF', '再平衡'],
+  },
+  {
+    href: '/tools/dividend-tax-nhi-calculator',
+    title: '股利所得稅 × 二代健保補充保費計算機',
+    desc: '一年領 50 萬股利，真正拿到手的是多少？算出合併計稅 vs 分開計稅哪個省、每一筆配息會不會被扣 2.11% 補充保費，以及稅加保費吃掉股利的幾成。',
+    episode: 53,
+    pubDate: '2026-10-16',
+    tags: ['股利所得', '補充保費', '合併計稅'],
+  },
+  {
+    href: '/tools/labor-pension-voluntary-calculator',
+    title: '勞退自提真實效益計算機',
+    desc: '自提 6% 值不值得，看的是你的稅率級距。填入月薪，算出月提繳工資級距、每年省下的稅，再把「自提進勞退」和「不提、拿稅後的錢自己投資」並排算到請領那天，含退職所得稅。',
+    episode: 51,
+    pubDate: '2026-10-09',
+    tags: ['勞退自提', '節稅', '退職所得'],
+  },
+  {
+    href: '/tools/parents-pension-gap-calculator',
+    title: '爸媽退休金缺口計算機',
+    desc: '孝親費該給多少，看的是爸媽每月從勞保、國保領多少。填入爸媽的年資與投保薪資，算出每月缺口、要補幾年、兄弟姊妹每人每月該分多少，以及勞保提前或延後請領的損益兩平年齡。',
+    episode: 50,
+    pubDate: '2026-10-06',
+    tags: ['孝親費', '勞保年金', '國民年金'],
+  },
+  {
+    href: '/tools/overseas-income-amt-checker',
+    title: '海外所得兩道門檻檢查器',
+    desc: '海外所得 100 萬決定要不要算進去，750 萬決定算完要不要繳錢——而且薪水已經先佔掉一塊。填入股息、利息、實現價差與綜合所得淨額，看你卡在哪一道門檻、要補多少。',
+    episode: 49,
+    pubDate: '2026-10-02',
+    tags: ['海外所得', '最低稅負制', '美股'],
+  },
+  {
     href: '/tools/buy-vs-rent-calculator',
     title: '買房 vs 租房 試算器',
     desc: '買房三十年後是一間房，租房把頭期款和每月差額投進市場是一個組合——哪邊大？填入房價、利率、月租與你的假設，看兩條資產曲線賽跑，以及房價要漲多少買房才反超。',

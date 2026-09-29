@@ -135,6 +135,12 @@ draft: false
 
 ---
 
+## 用計算機算你自己的數字
+
+**[正 2 腰斬壓力測試](/tools/leveraged-etf-drawdown-calculator)**：上面那個算式做成了計算機：填入你的正 2、台股與其他資產，看腰斬那天整體少多少、正 2 最多能放幾成。
+
+---
+
 ## 延伸閱讀
 
 - [攻擊桶：QQQ 和 00631L 的邏輯與倉位控制](/articles/ep08-attack-bucket)（EP08）

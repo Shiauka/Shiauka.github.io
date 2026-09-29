@@ -1,0 +1,338 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="海外所得兩道門檻檢查器"
+  description="海外所得 100 萬決定要不要算進去，750 萬決定算完要不要繳錢——而且 750 萬不是海外所得獨享，你的薪水已經先佔掉一塊。填入今年的股息、利息、實現價差與綜合所得淨額，看你卡在哪一道門檻、要不要填申報表、要補多少——對應 EP49。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP49</p>
+      <h1 class="text-3xl font-bold mb-3">海外所得兩道門檻檢查器</h1>
+      <p class="text-gray-600 leading-relaxed">
+        最低稅負制有兩道門檻：<strong>100 萬</strong>是開關，決定海外所得要不要算進去；<strong>750 萬</strong>是水位，決定算完之後要不要繳錢。
+        會被課到的，通常不是資產多的人，而是<strong>今年一次實現一大筆的人</strong>。把今年的數字填進去，看你卡在哪一道。
+      </p>
+      <p class="text-xs text-gray-400 mt-3">以「一申報戶」為單位：本人、配偶，以及你申報扶養的親屬，名下的海外所得全部加在一起算。僅適用中華民國稅務居民。</p>
+    </div>
+
+    <!-- Inputs：海外所得 -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-6 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-1">① 今年的海外所得（全申報戶合計，新台幣）</h2>
+      <p class="text-xs text-gray-400 mb-4">算的是<strong>今年實現</strong>的金額，不是帳面市值；跟錢有沒有匯回台灣無關。美元換算依規定用<strong>給付日</strong>臺銀即期買賣平均價，抓量級先用 32 塊乘一遍即可。</p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">股利（<strong>扣稅前全額</strong>）</span>
+          <input id="div" type="number" min="0" step="10000" value="200000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400">美國預扣 30% 前的數字。只知道實際入帳的話，約等於入帳 ÷ 0.7。</span>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">利息（券商現金、貨幣型商品等）</span>
+          <input id="int" type="number" min="0" step="10000" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">賣股獲利（財產交易所得）</span>
+          <input id="gain" type="number" min="0" step="10000" value="7000000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400">賺的那一段（賣出價 − 成本 − 費用），<strong>不是賣出金額</strong>。只加有賺的那幾筆。</span>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">同年度賣股虧損（財產交易損失）</span>
+          <input id="loss" type="number" min="0" step="10000" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400">只能扣同一年的賣股獲利，不能扣股利利息，也不能留到明年。</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Inputs：其他基本所得額 -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-1">② 你的綜合所得淨額（薪水已經先佔掉一塊）</h2>
+      <p class="text-xs text-gray-400 mb-4">750 萬不是海外所得的免稅額度。基本所得額＝綜合所得淨額＋計入的海外所得＋其他項目。去年報稅資料上就有「綜合所得淨額」這個數字。</p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">綜合所得淨額</span>
+          <input id="net" type="number" min="0" step="10000" value="2500000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他應計入項目（選填）</span>
+          <input id="other" type="number" min="0" step="10000" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400">例如選擇分開計稅的股利、未上市櫃股票交易所得、95 年後訂立且受益人≠要保人的保險給付中應計入的部分。一般上班族多半是 0。</span>
+        </label>
+      </div>
+
+      <details class="mt-4">
+        <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 不知道淨額？用年薪粗估</summary>
+        <div class="grid sm:grid-cols-3 gap-4 mt-3 items-end">
+          <label class="block">
+            <span class="text-sm text-gray-600">本人年薪</span>
+            <input id="sal1" type="number" min="0" step="10000" value="2000000"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">配偶年薪（合併申報才填）</span>
+            <input id="sal2" type="number" min="0" step="10000" value="0"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <button id="useEst" type="button" class="rounded-lg bg-brand text-white text-sm font-medium px-4 py-2 hover:bg-brand-dark transition-colors">帶入估算值</button>
+        </div>
+        <p id="estText" class="text-xs text-gray-500 mt-3"></p>
+      </details>
+
+      <details class="mt-3">
+        <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 進階：一般所得稅額、已繳外國稅</summary>
+        <div class="grid sm:grid-cols-2 gap-4 mt-3">
+          <label class="block">
+            <span class="text-sm text-gray-600">一般所得稅額（選填，留空則由淨額估算）</span>
+            <input id="gen" type="number" min="0" step="1000" placeholder="例如 346900"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            <span class="text-xs text-gray-400">大部分只領薪水的人，就是去年報稅單上的「應納稅額」。</span>
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">已在國外繳的所得稅（選填）</span>
+            <input id="ftax" type="number" min="0" step="1000" value="0"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            <span class="text-xs text-gray-400">例如股利被美國預扣的 30%。法律上可扣抵，但要來源國稅務機關的納稅證明並經駐外館處簽證，券商給的 1042-S 不算——實務上多半扣不到。</span>
+          </label>
+        </div>
+      </details>
+
+      <p class="text-xs text-gray-400 mt-4">一般所得稅額估算採 115 年度綜合所得稅級距（5%／12%／20%／30%／40%）；粗估淨額採單身或夫妻合併、標準扣除額、115 年度免稅額 101,000、標準扣除額 136,000（夫妻 272,000）、薪資特別扣除額每人最多 227,000。實際請以申報資料為準。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart：第一道門檻的跳階 -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">第一道門檻不是「超過的部分」，是整筆跳進去</h2>
+      <p class="text-xs text-gray-400 mb-4">橫軸是今年海外所得，縱軸是計入基本所得額的金額。99 萬 → 計入 0；100 萬 → 計入 100 萬；101 萬 → 計入 101 萬（不是 1 萬）。橘點是你。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+    </div>
+
+    <!-- Detail table -->
+    <details class="mb-8" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 逐步計算明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 四個最容易搞錯的地方</p>
+      <p><strong>錢沒匯回台灣也要算：</strong>判斷依據是所得發生，不是資金流向。股息進到美國券商、賣股的錢留在那邊繼續買別的，所得在今年就已經發生。</p>
+      <p><strong>下載的資料裡沒有，不代表沒有：</strong>海外所得不會出現在扣繳憑單上，也不在自然人憑證下載的所得資料裡（複委託也一樣），是<strong>自行申報制</strong>。台灣的 CRS 交換對象目前只有日本、澳洲、英國，美國不在內——但結匯紀錄有痕跡、國稅局可以選案調查。漏報的罰則分兩層：有申報但短報，罰所漏稅額 <strong>2 倍以下</strong>；根本沒申報被查到，按補徵稅額罰 <strong>3 倍以下</strong>。在被檢舉或調查前自己補報補繳，加計利息但免罰。</p>
+      <p><strong>交易紀錄要留：</strong>拿不出成本證明時，有價證券按<strong>成交價的 20%</strong> 設算所得——虧錢的那一年也照樣算出 20% 的所得，沒辦法主張損失。對帳單定期下載存檔。</p>
+      <p><strong>年底要提早處理：</strong>有價證券按交割日所屬年度認定，美股 T+1，十二月最後一兩個交易日賣出可能算到隔年。想把大額實現拆成兩個年度，提早到十二月上旬處理；但不要為了省稅做不合理的投資決定。完整說明見 <a class="text-brand hover:underline" href="/articles/ep49-overseas-income-amt">EP49 海外所得 100 萬、750 萬</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本檢查器僅供一般資訊參考，採 115 年度公告金額與簡化假設，不構成稅務或法律建議。一般所得稅額估算未計入股利分開計稅應納稅額與投資抵減；海外已納稅額扣抵以單一來源國簡化計算，實際須按比例並經舉證審查；依所得稅法得免辦結算申報者，基本所得額超過門檻仍應申報。非居住者、信託、境外保單、受控外國企業等情形不適用。各項金額逐年調整，請以財政部及各地區國稅局最新公告為準，必要時請洽國稅局或會計師。所有數字只在你的瀏覽器計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep49-overseas-income-amt" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP49 完整試算 →</a>
+      <a href="/articles/ep25-us-stock-tax" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">美股的其他幾種稅（EP25）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    (function () {
+      // CALC-START
+      const OVERSEAS_THRESHOLD = 1000000;   // 一申報戶全年海外所得未達 100 萬免予計入，100 萬以上全數計入
+      const AMT_EXEMPTION = 7500000;        // 基本所得額扣除額（113 年度起，115 年度維持）
+      const AMT_RATE = 0.2;
+      // 115 年度綜合所得稅級距：[上限, 稅率, 累進差額]
+      const BRACKETS = [
+        [610000, 0.05, 0],
+        [1380000, 0.12, 42700],
+        [2770000, 0.20, 153100],
+        [5190000, 0.30, 430100],
+        [Infinity, 0.40, 949100],
+      ];
+      const EXEMPTION = 101000, STD_SINGLE = 136000, STD_MARRIED = 272000, SALARY_SPECIAL = 227000;
+
+      function generalTax(net) {
+        if (net <= 0) return 0;
+        for (const [cap, rate, diff] of BRACKETS) {
+          if (net <= cap) return Math.max(0, Math.round(net * rate - diff));
+        }
+        return 0;
+      }
+
+      function estimateNet(sal1, sal2) {
+        const married = sal2 > 0;
+        const deductions = (married ? 2 : 1) * EXEMPTION
+          + (married ? STD_MARRIED : STD_SINGLE)
+          + Math.min(sal1, SALARY_SPECIAL) + (married ? Math.min(sal2, SALARY_SPECIAL) : 0);
+        return Math.max(0, sal1 + sal2 - deductions);
+      }
+
+      function basicTaxOf(basicIncome) {
+        return Math.max(0, Math.round((basicIncome - AMT_EXEMPTION) * AMT_RATE));
+      }
+
+      function compute(p) {
+        const propertyNet = Math.max(0, p.gain - p.loss);
+        const wastedLoss = Math.max(0, p.loss - p.gain);
+        const overseas = p.div + p.int + propertyNet;
+        const counted = overseas >= OVERSEAS_THRESHOLD ? overseas : 0;
+        const nonOverseas = p.net + p.other;
+        const basicIncome = nonOverseas + counted;
+        const mustFile = counted > 0 && basicIncome > AMT_EXEMPTION;
+        const basicTax = basicTaxOf(basicIncome);
+        const general = p.gen != null ? p.gen : generalTax(p.net);
+        const pay = Math.max(0, basicTax - general);
+        // 海外已納稅額扣抵：上限＝因加計海外所得而增加的基本稅額（單一來源國簡化）
+        const increase = basicTax - basicTaxOf(nonOverseas);
+        const credit = counted > 0 ? Math.min(p.ftax, Math.max(0, increase)) : 0;
+        const payWithCredit = Math.max(0, basicTax - credit - general);
+        // 還剩多少空間
+        const roomToBasicTax = AMT_EXEMPTION - nonOverseas;              // 基本稅額開始 > 0 之前
+        const roomToPay = AMT_EXEMPTION + general / AMT_RATE - nonOverseas; // 基本稅額開始 > 一般稅額之前
+        return { propertyNet, wastedLoss, overseas, counted, nonOverseas, basicIncome, mustFile,
+          basicTax, general, pay, increase, credit, payWithCredit, roomToBasicTax, roomToPay };
+      }
+      // CALC-END
+
+      const $ = (id) => document.getElementById(id);
+      const num = (id) => Math.max(0, parseFloat($(id).value) || 0);
+      const wan = (n) => {
+        const v = n / 10000;
+        return (Math.abs(v) >= 100 ? v.toLocaleString('en-US', { maximumFractionDigits: 0 })
+          : v.toLocaleString('en-US', { maximumFractionDigits: 1 })) + ' 萬';
+      };
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+
+      function params() {
+        const genRaw = $('gen').value.trim();
+        return {
+          div: num('div'), int: num('int'), gain: num('gain'), loss: num('loss'),
+          net: num('net'), other: num('other'),
+          gen: genRaw === '' ? null : Math.max(0, parseFloat(genRaw) || 0),
+          ftax: num('ftax'),
+        };
+      }
+
+      function roomText(room) {
+        if (room <= 0) return '已經沒有空間：就算海外所得未滿 100 萬，其他項目本身就超過 750 萬';
+        if (room < OVERSEAS_THRESHOLD) return `海外所得只要維持在 100 萬以下都不計入；一旦到 100 萬就會超過（剩餘空間只有 ${wan(room)}）`;
+        return `海外所得還能到約 <strong>${wan(room)}</strong>`;
+      }
+
+      function renderEstimate() {
+        const est = estimateNet(num('sal1'), num('sal2'));
+        $('estText').innerHTML = `估算綜合所得淨額約 <strong>${wan(est)}</strong>（${ntd(est)}）。有列舉扣除、扶養親屬、其他所得的人會不一樣，請以實際申報資料為準。`;
+        return est;
+      }
+
+      function render() {
+        const p = params();
+        const r = compute(p);
+        renderEstimate();
+
+        const gate1 = r.counted > 0;
+        const gate2 = r.mustFile;
+        const card = (active, label, big, sub) => `
+          <div class="rounded-2xl border ${active ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">${label}</div>
+            <div class="text-2xl font-bold ${active ? '' : 'text-gray-900'}" ${active ? 'style="color:#C5611A"' : ''}>${big}</div>
+            <div class="text-xs text-gray-500 mt-1">${sub}</div>
+          </div>`;
+        $('cards').innerHTML =
+          card(gate1, '① 100 萬開關', gate1 ? '全數計入' : '免予計入',
+            `今年海外所得 ${wan(r.overseas)}；計入 ${wan(r.counted)}`) +
+          card(gate2, '② 750 萬水位', gate2 ? '要填申報表' : '不用填申報表',
+            `基本所得額 ${wan(r.basicIncome)}`) +
+          card(r.pay > 0, '要多繳的稅（實務預期）', r.pay > 0 ? wan(r.pay) : '0',
+            r.pay > 0 ? `基本稅額 ${wan(r.basicTax)} − 一般所得稅額 ${wan(r.general)}` : '基本稅額沒有超過一般所得稅額');
+
+        // Insight
+        let lines = [];
+        if (!gate1) {
+          lines.push(`你今年的海外所得是 <strong>${wan(r.overseas)}</strong>，未達 100 萬，<strong>免予計入</strong>。最低稅負制今年跟你無關，綜所稅照常申報即可。`);
+          if (r.overseas >= 800000) lines.push(`⚠️ 你離 100 萬的開關已經不遠了：多賣一點、股息多一些就會整筆跳進去。真的貼近門檻，要逐筆用給付日匯率重算。`);
+        } else if (!gate2) {
+          lines.push(`海外所得 <strong>${wan(r.overseas)}</strong> 跨過 100 萬，要全數計入；但加上綜合所得淨額後，基本所得額 <strong>${wan(r.basicIncome)}</strong> 還沒超過 750 萬，所以<strong>不用填「個人所得基本稅額申報表」</strong>，也不用多繳錢——綜所稅照常申報。`);
+          lines.push(`達到 100 萬是要你自己把它算進去，不是多一張表要交。`);
+        } else {
+          lines.push(`基本所得額 <strong>${wan(r.basicIncome)}</strong> 超過 750 萬，<strong>要填申報表</strong>。基本稅額＝（${wan(r.basicIncome)} − 750 萬）× 20% ＝ <strong>${wan(r.basicTax)}</strong>。`);
+          if (r.pay > 0) {
+            lines.push(`拿它跟一般所得稅額 ${wan(r.general)} 比，基本稅額比較高，要補差額約 <strong style="color:#C5611A">${wan(r.pay)}</strong>。`);
+          } else {
+            lines.push(`但一般所得稅額 ${wan(r.general)} 比基本稅額高，所以<strong>不用多繳</strong>，只是要填表。`);
+          }
+          if (p.ftax > 0 && r.pay > 0) {
+            lines.push(`已在國外繳的 ${wan(p.ftax)}，法律上可扣抵的上限是「因加計海外所得而增加的基本稅額」${wan(r.increase)}，理論上補稅可降到約 <strong>${wan(r.payWithCredit)}</strong>。但要拿到來源國稅務機關的納稅證明並經駐外館處簽證，券商給的 1042-S 不算，一般散戶多半湊不齊，務實的預期仍是 ${wan(r.pay)}。`);
+          }
+        }
+        if (r.wastedLoss > 0) {
+          lines.push(`你的賣股虧損比獲利多出 ${wan(r.wastedLoss)}：這一段不能扣股利利息，也不能留到明年，就是浪費掉。`);
+        }
+        lines.push(`<span class="text-gray-500">剩餘空間：在基本稅額開始出現之前，${roomText(r.roomToBasicTax)}；在真的要補錢之前（基本稅額超過一般所得稅額 ${wan(r.general)}），${roomText(r.roomToPay)}。這些空間是「今年」的，門檻按年度計算。</span>`);
+        $('insight').innerHTML = `<p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>` + lines.map(l => `<p class="mb-2">${l}</p>`).join('');
+
+        // Table
+        const row = (k, v, strong) => `<tr class="border-b border-gray-100">
+          <td class="py-2 pr-4 text-gray-600">${k}</td>
+          <td class="py-2 pl-4 text-right ${strong ? 'font-semibold text-gray-900' : 'text-gray-700'}">${v}</td></tr>`;
+        $('tbody').innerHTML = [
+          row('股利（扣稅前）＋利息', ntd(p.div + p.int)),
+          row('賣股獲利 − 同年度虧損（不低於 0）', ntd(r.propertyNet)),
+          row('今年海外所得合計', ntd(r.overseas), true),
+          row('計入基本所得額的海外所得', r.counted > 0 ? `${ntd(r.counted)}（≥ 100 萬，全數計入）` : 'NT$0（未達 100 萬）', true),
+          row('＋ 綜合所得淨額', ntd(p.net)),
+          row('＋ 其他應計入項目', ntd(p.other)),
+          row('＝ 基本所得額', ntd(r.basicIncome), true),
+          row('基本稅額 ＝（基本所得額 − 7,500,000）× 20%', ntd(r.basicTax)),
+          row(`一般所得稅額${p.gen == null ? '（依淨額與 115 年度級距估算）' : '（你填的）'}`, ntd(r.general)),
+          row('要多繳（基本稅額 − 一般所得稅額，不低於 0）', ntd(r.pay), true),
+          row('若海外已納稅額可扣抵：扣抵額／扣抵後要多繳', `${ntd(r.credit)} ／ ${ntd(r.payWithCredit)}`),
+        ].join('');
+
+        // Chart：跳階圖
+        const W = 640, H = 240, padL = 56, padR = 16, padT = 16, padB = 32;
+        const plotW = W - padL - padR, plotH = H - padT - padB;
+        const maxX = Math.max(2000000, Math.ceil(r.overseas * 1.25 / 500000) * 500000);
+        const xAt = (v) => padL + plotW * Math.min(v, maxX) / maxX;
+        const yAt = (v) => padT + plotH - plotH * Math.min(v, maxX) / maxX;
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = maxX * g / 4;
+          grid += `<line x1="${padL}" y1="${yAt(v)}" x2="${W - padR}" y2="${yAt(v)}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yAt(v) + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${wan(v)}</text>`;
+          grid += `<text x="${xAt(v)}" y="${H - 10}" text-anchor="middle" font-size="10" fill="#9ca3af">${wan(v)}</text>`;
+        }
+        const t = OVERSEAS_THRESHOLD;
+        const steps = `<line x1="${xAt(0)}" y1="${yAt(0)}" x2="${xAt(t)}" y2="${yAt(0)}" stroke="#94a3b8" stroke-width="2.5"/>
+          <line x1="${xAt(t)}" y1="${yAt(0)}" x2="${xAt(t)}" y2="${yAt(t)}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="${xAt(t)}" y1="${yAt(t)}" x2="${xAt(maxX)}" y2="${yAt(maxX)}" stroke="#94a3b8" stroke-width="2.5"/>
+          <circle cx="${xAt(t)}" cy="${yAt(0)}" r="3.5" fill="#fff" stroke="#94a3b8" stroke-width="1.5"/>
+          <circle cx="${xAt(t)}" cy="${yAt(t)}" r="3.5" fill="#94a3b8"/>
+          <text x="${xAt(t) + 6}" y="${yAt(t) - 6}" font-size="10" fill="#6b7280">100 萬起整筆計入</text>`;
+        const me = `<circle cx="${xAt(r.overseas)}" cy="${yAt(r.counted)}" r="6" fill="#E87930" stroke="#fff" stroke-width="2"/>
+          <text x="${xAt(r.overseas)}" y="${yAt(r.counted) - 10}" text-anchor="middle" font-size="10" font-weight="600" fill="#C5611A">你</text>`;
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:520px" role="img" aria-label="海外所得與計入金額的跳階圖">${grid}${steps}${me}</svg>`;
+      }
+
+      $('useEst').addEventListener('click', () => { $('net').value = Math.round(renderEstimate()); render(); });
+      ['div','int','gain','loss','net','other','gen','ftax','sal1','sal2'].forEach(id => $(id).addEventListener('input', render));
+      render();
+    })();
+  </script>
+</BaseLayout>
