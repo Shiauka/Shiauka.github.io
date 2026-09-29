@@ -30,12 +30,12 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         </label>
         <label class="block">
           <span class="text-sm text-gray-600">其他台股部位（0050、台積電等）</span>
-          <input id="tw" type="number" min="0" step="10000" value="1200000"
+          <input id="tw" type="number" min="0" step="10000" value="300000"
             class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
         </label>
         <label class="block">
           <span class="text-sm text-gray-600">其他資產（美股、債券、現金…）</span>
-          <input id="other" type="number" min="0" step="10000" value="1500000"
+          <input id="other" type="number" min="0" step="10000" value="2400000"
             class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
         </label>
       </div>
@@ -65,11 +65,11 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       </div>
       <label class="block mt-4 sm:w-1/3">
         <span class="text-sm text-gray-600">那一天你最多能接受整體少幾 %</span>
-        <input id="accept" type="number" min="0" max="100" step="1" value="6"
+        <input id="accept" type="number" min="0" max="100" step="1" value="10"
           class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
       </label>
       <p class="text-xs text-gray-400 mt-3">
-        「台股部位跌幅是正 2 的幾成」是假設值：過去四次大跌，0050 的跌幅大約是正 2 的一半到三分之二（例如 2020 年正 2 −52.1%、0050 −28.2%；2022 年 −51.3% 對 −33.8%），預設取五成。個股（如台積電）可能跌得比 0050 深，請自行調整。其他資產預設不跌，但大跌時美股、甚至債券也可能一起跌。
+        「台股部位跌幅是正 2 的幾成」是假設值：過去四次大跌，0050 的跌幅大約是正 2 的一半上下（0.48～0.66 倍，例如 2020 年正 2 −52.1%、0050 −28.2%；2022 年 −51.3% 對 −33.8%），預設取五成。個股（如台積電）可能跌得比 0050 深，請自行調高（最多填 100，也就是跟正 2 跌一樣多）。其他資產預設不跌，但大跌時美股、甚至債券也可能一起跌。
       </p>
     </div>
 
@@ -128,7 +128,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <p><strong>跌一半，要漲一倍才回來：</strong>100 萬跌到 50 萬，漲五成只回到 75 萬。</p>
       <p><strong>過去最深不代表最壞：</strong>十一年最深一次是 −55.1%（2024/7 高點到 2025/4），那只是過去的樣本。保守一點，就用 −60% 算。</p>
       <p><strong>這些錢不要放：</strong>幾年內就要用的錢（頭期款、學費）、還沒準備好的緊急備用金、借來的錢——跌一半的時候，不是你想賣，是不得不賣。槓桿上面再疊一層槓桿，更不要。</p>
-      <p><strong>它原本不是設計來長抱的：</strong>元大投信的公開資料寫明，這檔僅適合符合資格的投資人<strong>短期交易</strong>，不適合長期持有。長抱是在控制比例前提下的做法，風險要自己承擔。</p>
+      <p><strong>它原本不是設計來長抱的：</strong>元大投信的公開資料寫明，這檔是<strong>策略交易型產品</strong>、具槓桿操作風險，<strong>不適合長期持有</strong>，僅符合資格的投資人可以交易。長抱是在控制比例前提下的做法，風險要自己承擔。</p>
       <p><strong>再平衡寫成規則：</strong>我自己看的是整個攻擊桶（正 2＋QQQ），偏離目標 5 個百分點以上就調回來；沒有攻擊桶概念的人，直接看正 2 占整體資產的比例即可。詳見 <a class="text-brand hover:underline" href="/articles/ep54-00631l-long-hold">EP54 正 2 能不能長抱</a>。</p>
     </div>
 
@@ -167,7 +167,12 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     // 反推：可接受整體損失 ÷ 跌幅 ＝ 正 2 占總資產的上限（只算正 2 這一塊）
     function capShare(acceptPct, dropPct) {
       if (dropPct <= 0) return Infinity;
-      return acceptPct / dropPct;
+      return Math.min(1, acceptPct / dropPct);
+    }
+    // 計入其他部位後的上限：先扣掉其他部位那天會少的比例，剩下的額度才留給正 2（上限 100%、下限 0）
+    function capShareAll(acceptPct, dropPct, otherLossShare) {
+      if (dropPct <= 0) return Infinity;
+      return Math.max(0, Math.min(1, (acceptPct / 100 - otherLossShare) / (dropPct / 100)));
     }
     // 漂移：年初比例、兩邊倍數 → 現在比例
     function drift(startPct, levMult, restMult) {
@@ -176,8 +181,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       return a + b > 0 ? a / (a + b) : 0;
     }
     // 再平衡規則：偏離目標 5 個百分點以上就調回來（與 EP54 文章一致）
+    // 判定用顯示到小數一位的值，避免畫面寫「5.0 個百分點」卻判定「不到 5」
     function driftTriggered(nowShare, targetPct) {
-      return Math.abs(nowShare * 100 - targetPct) >= 5 - 1e-9;
+      return Math.round(Math.abs(nowShare * 100 - targetPct) * 10) / 10 >= 5;
     }
     // 跌掉 d 之後，要漲多少才回原點
     function recoverNeeded(dropPct) {
@@ -218,8 +224,10 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         const otherDrop = clamp(num('otherDrop'), 0, 100);
         const accept = clamp(num('accept'), 0, 100);
         const r = stressTest(lev, tw, other, drop, twRatio, otherDrop);
-        const cap = capShare(accept, drop);
+        const capOnly = capShare(accept, drop);
+        const cap = capShareAll(accept, drop, r.total ? (r.twLoss + r.otherLoss) / r.total : 0);
         const over = r.levShare > cap + 1e-9;
+        const othersAlone = r.total ? (r.twLoss + r.otherLoss) / r.total : 0;
 
         if (r.total <= 0) {
           $('cards').innerHTML = '';
@@ -241,24 +249,30 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
             <div class="text-xs text-gray-500 mt-1">總資產 ${wan(r.total)} → ${wan(r.after)}</div>
           </div>
           <div class="rounded-2xl border ${over ? 'border-red-300 bg-red-50' : 'border-gray-200'} p-5">
-            <div class="text-sm font-medium text-gray-600 mb-1">正 2 的上限（只算它這一塊）</div>
+            <div class="text-sm font-medium text-gray-600 mb-1">正 2 的上限（其他部位一起跌也算進去）</div>
             <div class="text-2xl font-bold ${over ? 'text-red-600' : 'text-gray-900'}">${isFinite(cap) ? pct(cap) : '—'}</div>
-            <div class="text-xs text-gray-500 mt-1">${isFinite(cap) ? `${accept}% ÷ ${drop}%；你現在 ${pct(r.levShare)}，${over ? '已超過' : '在範圍內'}` : '跌幅填 0 無法反推'}</div>
+            <div class="text-xs text-gray-500 mt-1">${isFinite(cap) ? `你現在 ${pct(r.levShare)}，${over ? '已超過' : '在範圍內'}；只算正 2 這一塊是 ${pct(capOnly)}` : '跌幅填 0 無法反推'}</div>
           </div>`;
 
         const rec = recoverNeeded(drop);
-        const overText = over
-          ? `<p class="mb-2"><strong class="text-red-600">你的正 2 已經超過上限。</strong>照你設定的「最多少 ${accept}%」，正 2 最多只能占 ${pct(cap)}，你現在占 ${pct(r.levShare)}；光是它就會讓你少 ${pct(r.levOnlyPct)}。</p>`
-          : `<p class="mb-2">照你設定的「最多少 ${accept}%」，正 2 最多可以占 ${isFinite(cap) ? pct(cap) : '—'}，你現在占 ${pct(r.levShare)}，<strong>在範圍內</strong>。</p>`;
-        const allOver = r.allPct > accept / 100 + 1e-9 && tw + other > 0
-          ? `<p class="mb-2">⚠️ 不過把台股其他部位一起跌算進去，整體會少 <strong>${pct(r.allPct)}</strong>，已經超過你設定的 ${accept}%。上限公式只算正 2 這一塊；如果你同時抱 0050 或台積電，實際能放的會更少。</p>`
-          : '';
+        let capText;
+        if (!isFinite(cap)) {
+          capText = `<p class="mb-2">跌幅填 0 時無法反推上限。</p>`;
+        } else if (othersAlone >= accept / 100 - 1e-9 && r.twLoss + r.otherLoss > 0) {
+          capText = `<p class="mb-2"><strong class="text-red-600">光是其他部位那天就會讓你整體少 ${pct(othersAlone)}，已經用完你設定的 ${accept}%。</strong>在這個情境下，正 2 沒有剩下的空間；你現在放了 ${pct(r.levShare)}。要嘛降低其他台股部位，要嘛重新想一下自己真的能接受少多少。（只算正 2 這一塊的話，上限是 ${pct(capOnly)}——但那忽略了其他部位會一起跌。）</p>`;
+        } else if (over) {
+          capText = `<p class="mb-2"><strong class="text-red-600">你的正 2 已經超過上限。</strong>照你設定的「最多少 ${accept}%」，扣掉其他部位那天會少的 ${pct(othersAlone)}，正 2 最多只能占 ${pct(cap)}，你現在占 ${pct(r.levShare)}。</p>`;
+        } else {
+          capText = `<p class="mb-2">照你設定的「最多少 ${accept}%」，扣掉其他部位那天會少的 ${pct(othersAlone)}，正 2 最多可以占 ${pct(cap)}，你現在占 ${pct(r.levShare)}，<strong>在範圍內</strong>。</p>`;
+        }
+        const recText = drop <= 0 ? '' : (isFinite(rec)
+          ? `<p>跌 ${drop}% 之後，正 2 要再漲 <strong>${pct(rec, 0)}</strong> 才回得到原點。真正要問的是：那一天你會不會賣。</p>`
+          : `<p>跌 100% 就是歸零，漲多少都回不來——這也是為什麼它一天最多只能跌 20%，但連續重挫仍可能讓它所剩無幾。</p>`);
         $('insight').innerHTML = `
           <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
-          <p class="mb-2">正 2 跌 ${drop}% 的那一天，光是它就讓你整體少 <strong style="color:#C5611A">${pct(r.levOnlyPct)}（${wan(r.levLoss)}）</strong>。台股其他部位假設跌 ${pct(r.twDrop, 0)}${otherDrop > 0 ? `、其他資產跌 ${otherDrop}%` : ''}，合起來整體少 <strong>${pct(r.allPct)}</strong>。</p>
-          ${overText}
-          ${allOver}
-          <p>跌 ${drop}% 之後，正 2 要再漲 <strong>${isFinite(rec) ? pct(rec, 0) : '—'}</strong> 才回得到原點。真正要問的是：那一天你會不會賣。</p>`;
+          <p class="mb-2">正 2 跌 ${drop}% 的那一天，光是它就讓你整體少 <strong style="color:#C5611A">${pct(r.levOnlyPct)}（${wan(r.levLoss)}）</strong>。台股其他部位假設跌 ${pct(r.twDrop)}${otherDrop > 0 ? `、其他資產跌 ${otherDrop}%` : ''}，合起來整體少 <strong>${pct(r.allPct)}</strong>。</p>
+          ${capText}
+          ${recText}`;
 
         // Chart：兩根堆疊長條（現在 vs 跌完）
         const W = 640, H = 260, padL = 56, padR = 16, padT = 12, padB = 28;
@@ -309,12 +323,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         $('drift').innerHTML = `
           <p class="mb-1">年初 ${s}% 的正 2，現在約占 <strong>${pct(now)}</strong>，比目標 ${t}% ${dev >= 0 ? '多' : '少'}了 <strong>${Math.abs(dev).toFixed(1)} 個百分點</strong>。</p>
           <p>${off
-            ? `<strong class="text-red-600">已經偏離 5 個百分點以上。</strong>${dev > 0 ? '什麼都沒做，風險已經比你年初設定的多了一截。這時最常見的反應是「漲這麼好再多放一點」——那正是再平衡要擋的東西。' : '跌多了，照規則要補回來，能用新資金就先用新資金。'}`
+            ? `<strong class="text-red-600">已經偏離 5 個百分點以上。</strong>${dev > 0 ? (now * 100 > s + 1e-9 ? '正 2 漲得比別人快，比例自己變大了，風險也跟著變大。這時最常見的反應是「漲這麼好再多放一點」——那正是再平衡要擋的東西。' : '比目標多，照規則把多出來的部分調回來。') : '比目標少，照規則要補回來，能用新資金就先用新資金。'}`
             : '偏離還不到 5 個百分點，照規則不用動。'}</p>`;
       }
 
       ['lev','tw','other','drop','twRatio','otherDrop','accept','d_start','d_lev','d_rest','d_target']
         .forEach(id => $(id).addEventListener('input', render));
+      // 離開欄位時把超出範圍的值改回實際計算用的值，避免畫面與計算不一致
+      const bounds = { lev:[0,Infinity], tw:[0,Infinity], other:[0,Infinity], drop:[0,100], twRatio:[0,100], otherDrop:[0,100], accept:[0,100], d_start:[0,100], d_lev:[0,Infinity], d_rest:[0,Infinity], d_target:[0,100] };
+      Object.keys(bounds).forEach(id => $(id).addEventListener('change', () => {
+        if ($(id).value === '') return;
+        const v = clamp(num(id), bounds[id][0], bounds[id][1]);
+        if (String(v) !== $(id).value) { $(id).value = v; render(); }
+      }));
       paintScen();
       render();
     })();
