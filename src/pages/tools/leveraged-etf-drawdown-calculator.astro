@@ -1,0 +1,322 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="正 2 腰斬壓力測試"
+  description="00631L 十一年腰斬三次，最深一次跌 55%。填入你的正 2、台股與其他資產，算出它腰斬那一天你整體少多少、正 2 最多能放幾成，以及今年漲完之後比例偏掉多少——對應 EP54。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP54</p>
+      <h1 class="text-3xl font-bold mb-3">正 2 腰斬壓力測試</h1>
+      <p class="text-gray-600 leading-relaxed">
+        00631L 過去十一年變成原來的 22 倍多，但中間<strong>腰斬了三次</strong>，最深一次跌 55%。
+        它的報酬只屬於跌掉一半那一天還在場上的人。這個計算機不猜會不會跌，只算一件事：
+        <strong>如果明天就是那一天，你的整體資產會少多少，撐不撐得住。</strong>
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你現在的部位（NT$）</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">00631L 市值</span>
+          <input id="lev" type="number" min="0" step="10000" value="300000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他台股部位（0050、台積電等）</span>
+          <input id="tw" type="number" min="0" step="10000" value="1200000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他資產（美股、債券、現金…）</span>
+          <input id="other" type="number" min="0" step="10000" value="1500000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+
+      <h2 class="font-semibold text-gray-900 mt-6 mb-3">假設那一天正 2 跌多少</h2>
+      <div class="flex flex-wrap gap-2 mb-3" id="scen">
+        <button type="button" data-v="55" class="scen-btn text-sm px-3 py-1.5 rounded-lg border">歷史最深 −55%</button>
+        <button type="button" data-v="60" class="scen-btn text-sm px-3 py-1.5 rounded-lg border">保守 −60%</button>
+        <button type="button" data-v="custom" class="scen-btn text-sm px-3 py-1.5 rounded-lg border">自訂</button>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">正 2 跌幅（%）</span>
+          <input id="drop" type="number" min="0" max="100" step="1" value="60"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">台股部位跌幅是正 2 的幾成（假設）</span>
+          <input id="twRatio" type="number" min="0" max="100" step="5" value="50"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他資產同時跌幅（%，假設）</span>
+          <input id="otherDrop" type="number" min="0" max="100" step="1" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <label class="block mt-4 sm:w-1/3">
+        <span class="text-sm text-gray-600">那一天你最多能接受整體少幾 %</span>
+        <input id="accept" type="number" min="0" max="100" step="1" value="6"
+          class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+      </label>
+      <p class="text-xs text-gray-400 mt-3">
+        「台股部位跌幅是正 2 的幾成」是假設值：過去四次大跌，0050 的跌幅大約是正 2 的一半到三分之二（例如 2020 年正 2 −52.1%、0050 −28.2%；2022 年 −51.3% 對 −33.8%），預設取五成。個股（如台積電）可能跌得比 0050 深，請自行調整。其他資產預設不跌，但大跌時美股、甚至債券也可能一起跌。
+      </p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Chart -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">那一天前後：總資產怎麼變</h2>
+      <p class="text-xs text-gray-400 mb-4">左邊是現在，右邊是跌完之後。橘色是正 2、灰藍是其他台股、淺灰是其他資產；右側虛線框是少掉的部分。</p>
+      <div id="chart" class="w-full overflow-x-auto"></div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#C5611A"></span>00631L</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#94a3b8"></span>其他台股</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 inline-block rounded-sm" style="background:#e2e8f0"></span>其他資產</span>
+      </div>
+    </div>
+
+    <!-- Drift check -->
+    <details class="mb-8 rounded-2xl border border-gray-200 p-6">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none">▸ 選填：今年漲完，你的比例偏掉多少？</summary>
+      <p class="text-sm text-gray-600 mt-3 mb-4">正 2 漲得比別人快，什麼都沒做，它在資產裡的比例也會自己變大——風險也跟著變大。填年初的比例和兩邊今年的漲幅，看現在偏離多少。</p>
+      <div class="grid sm:grid-cols-4 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">年初正 2 比例（%）</span>
+          <input id="d_start" type="number" min="0" max="100" step="1" value="20"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">正 2 今年變成幾倍</span>
+          <input id="d_lev" type="number" min="0" step="0.01" value="2.28"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他部位變成幾倍</span>
+          <input id="d_rest" type="number" min="0" step="0.01" value="1.71"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">你的目標比例（%）</span>
+          <input id="d_target" type="number" min="0" max="100" step="1" value="20"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">預設值是 EP54 的例子：2026/1/2 → 9/24，00631L 約 ×2.28、0050 約 ×1.71，年初正 2 兩成、其他八成全放 0050。其他部位的漲幅請依你實際持有的東西填。</p>
+      <div id="drift" class="mt-4 rounded-xl bg-gray-50 p-4 text-sm leading-relaxed"></div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 算之前先知道的幾件事</p>
+      <p><strong>它不會一天歸零：</strong>台股單日漲跌幅限制 10%，槓桿型 ETF 是 10% × 倍數，一天最多跌 20%。真正的風險不是歸零，是腰斬之後你還在不在場上。</p>
+      <p><strong>跌一半，要漲一倍才回來：</strong>100 萬跌到 50 萬，漲五成只回到 75 萬。</p>
+      <p><strong>過去最深不代表最壞：</strong>十一年最深一次是 −55.1%（2024/7 高點到 2025/4），那只是過去的樣本。保守一點，就用 −60% 算。</p>
+      <p><strong>這些錢不要放：</strong>幾年內就要用的錢（頭期款、學費）、還沒準備好的緊急備用金、借來的錢——跌一半的時候，不是你想賣，是不得不賣。槓桿上面再疊一層槓桿，更不要。</p>
+      <p><strong>它原本不是設計來長抱的：</strong>元大投信的公開資料寫明，這檔僅適合符合資格的投資人<strong>短期交易</strong>，不適合長期持有。長抱是在控制比例前提下的做法，風險要自己承擔。</p>
+      <p><strong>再平衡寫成規則：</strong>我自己看的是整個攻擊桶（正 2＋QQQ），偏離目標 5 個百分點以上就調回來；沒有攻擊桶概念的人，直接看正 2 占整體資產的比例即可。詳見 <a class="text-brand hover:underline" href="/articles/ep54-00631l-long-hold">EP54 正 2 能不能長抱</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採「單一天整批下跌」的簡化情境，跌幅與各部位連動程度都是假設值，實際市場走勢無法預測；歷史數據以含息還原價計算，過去績效不代表未來結果。槓桿型 ETF 波動大，不構成投資建議。所有數字只在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep54-00631l-long-hold" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP54 正 2 能不能長抱 →</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ==CALC START==
+    // 單日整批下跌情境下的整體損失
+    function stressTest(lev, tw, other, dropPct, twRatioPct, otherDropPct) {
+      const total = lev + tw + other;
+      const d = dropPct / 100;
+      const twD = d * (twRatioPct / 100);
+      const oD = otherDropPct / 100;
+      const levLoss = lev * d;
+      const twLoss = tw * twD;
+      const otherLoss = other * oD;
+      const allLoss = levLoss + twLoss + otherLoss;
+      return {
+        total, levLoss, twLoss, otherLoss, allLoss,
+        levShare: total ? lev / total : 0,
+        levOnlyPct: total ? levLoss / total : 0,
+        allPct: total ? allLoss / total : 0,
+        twDrop: twD,
+        after: total - allLoss,
+      };
+    }
+    // 反推：可接受整體損失 ÷ 跌幅 ＝ 正 2 占總資產的上限（只算正 2 這一塊）
+    function capShare(acceptPct, dropPct) {
+      if (dropPct <= 0) return Infinity;
+      return acceptPct / dropPct;
+    }
+    // 漂移：年初比例、兩邊倍數 → 現在比例
+    function drift(startPct, levMult, restMult) {
+      const a = (startPct / 100) * levMult;
+      const b = (1 - startPct / 100) * restMult;
+      return a + b > 0 ? a / (a + b) : 0;
+    }
+    // 再平衡規則：偏離目標 5 個百分點以上就調回來（與 EP54 文章一致）
+    function driftTriggered(nowShare, targetPct) {
+      return Math.abs(nowShare * 100 - targetPct) >= 5 - 1e-9;
+    }
+    // 跌掉 d 之後，要漲多少才回原點
+    function recoverNeeded(dropPct) {
+      const d = dropPct / 100;
+      return d >= 1 ? Infinity : d / (1 - d);
+    }
+    // ==CALC END==
+
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const num = (id) => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+      const pct = (x, dp = 1) => (x * 100).toFixed(dp) + '%';
+
+      let mode = '60';
+      function paintScen() {
+        document.querySelectorAll('.scen-btn').forEach(b => {
+          const on = b.dataset.v === mode;
+          b.className = 'scen-btn text-sm px-3 py-1.5 rounded-lg border ' +
+            (on ? 'border-brand bg-brand text-white' : 'border-gray-300 text-gray-700 hover:border-brand');
+        });
+        $('drop').readOnly = mode !== 'custom';
+        $('drop').classList.toggle('bg-gray-100', mode !== 'custom');
+      }
+      document.querySelectorAll('.scen-btn').forEach(b => b.addEventListener('click', () => {
+        mode = b.dataset.v;
+        if (mode !== 'custom') $('drop').value = mode;
+        paintScen(); render();
+      }));
+
+      function render() {
+        const lev = Math.max(0, num('lev'));
+        const tw = Math.max(0, num('tw'));
+        const other = Math.max(0, num('other'));
+        const drop = clamp(num('drop'), 0, 100);
+        const twRatio = clamp(num('twRatio'), 0, 100);
+        const otherDrop = clamp(num('otherDrop'), 0, 100);
+        const accept = clamp(num('accept'), 0, 100);
+        const r = stressTest(lev, tw, other, drop, twRatio, otherDrop);
+        const cap = capShare(accept, drop);
+        const over = r.levShare > cap + 1e-9;
+
+        if (r.total <= 0) {
+          $('cards').innerHTML = '';
+          $('insight').innerHTML = '<p>先填入你的部位金額。</p>';
+          $('chart').innerHTML = '';
+          renderDrift();
+          return;
+        }
+
+        $('cards').innerHTML = `
+          <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">光是正 2 讓整體少</div>
+            <div class="text-2xl font-bold" style="color:#C5611A">${pct(r.levOnlyPct)}</div>
+            <div class="text-xs text-gray-500 mt-1">少 ${wan(r.levLoss)}（正 2 占 ${pct(r.levShare)} × 跌 ${drop}%）</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">加上其他部位一起跌</div>
+            <div class="text-2xl font-bold text-gray-900">${pct(r.allPct)}</div>
+            <div class="text-xs text-gray-500 mt-1">總資產 ${wan(r.total)} → ${wan(r.after)}</div>
+          </div>
+          <div class="rounded-2xl border ${over ? 'border-red-300 bg-red-50' : 'border-gray-200'} p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">正 2 的上限（只算它這一塊）</div>
+            <div class="text-2xl font-bold ${over ? 'text-red-600' : 'text-gray-900'}">${isFinite(cap) ? pct(cap) : '—'}</div>
+            <div class="text-xs text-gray-500 mt-1">${isFinite(cap) ? `${accept}% ÷ ${drop}%；你現在 ${pct(r.levShare)}，${over ? '已超過' : '在範圍內'}` : '跌幅填 0 無法反推'}</div>
+          </div>`;
+
+        const rec = recoverNeeded(drop);
+        const overText = over
+          ? `<p class="mb-2"><strong class="text-red-600">你的正 2 已經超過上限。</strong>照你設定的「最多少 ${accept}%」，正 2 最多只能占 ${pct(cap)}，你現在占 ${pct(r.levShare)}；光是它就會讓你少 ${pct(r.levOnlyPct)}。</p>`
+          : `<p class="mb-2">照你設定的「最多少 ${accept}%」，正 2 最多可以占 ${isFinite(cap) ? pct(cap) : '—'}，你現在占 ${pct(r.levShare)}，<strong>在範圍內</strong>。</p>`;
+        const allOver = r.allPct > accept / 100 + 1e-9 && tw + other > 0
+          ? `<p class="mb-2">⚠️ 不過把台股其他部位一起跌算進去，整體會少 <strong>${pct(r.allPct)}</strong>，已經超過你設定的 ${accept}%。上限公式只算正 2 這一塊；如果你同時抱 0050 或台積電，實際能放的會更少。</p>`
+          : '';
+        $('insight').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2">正 2 跌 ${drop}% 的那一天，光是它就讓你整體少 <strong style="color:#C5611A">${pct(r.levOnlyPct)}（${wan(r.levLoss)}）</strong>。台股其他部位假設跌 ${pct(r.twDrop, 0)}${otherDrop > 0 ? `、其他資產跌 ${otherDrop}%` : ''}，合起來整體少 <strong>${pct(r.allPct)}</strong>。</p>
+          ${overText}
+          ${allOver}
+          <p>跌 ${drop}% 之後，正 2 要再漲 <strong>${isFinite(rec) ? pct(rec, 0) : '—'}</strong> 才回得到原點。真正要問的是：那一天你會不會賣。</p>`;
+
+        // Chart：兩根堆疊長條（現在 vs 跌完）
+        const W = 640, H = 260, padL = 56, padR = 16, padT = 12, padB = 28;
+        const plotH = H - padT - padB;
+        const maxV = r.total;
+        const yAt = (v) => padT + plotH - (plotH * v) / maxV;
+        const bw = 150;
+        const xs = [padL + 90, padL + 350];
+        function bar(x, parts) {
+          let acc = 0, s = '';
+          parts.forEach(([v, c]) => {
+            if (v <= 0) return;
+            const y1 = yAt(acc + v), y0 = yAt(acc);
+            s += `<rect x="${x}" y="${y1}" width="${bw}" height="${Math.max(0, y0 - y1)}" fill="${c}"/>`;
+            acc += v;
+          });
+          return s;
+        }
+        let grid = '';
+        for (let g = 0; g <= 4; g++) {
+          const v = (maxV * g) / 4, yy = yAt(v);
+          grid += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="#f1f1f1"/>`;
+          grid += `<text x="${padL - 6}" y="${yy + 3}" text-anchor="end" font-size="10" fill="#9ca3af">${wan(v)}</text>`;
+        }
+        const before = bar(xs[0], [[other, '#e2e8f0'], [tw, '#94a3b8'], [lev, '#C5611A']]);
+        const after = bar(xs[1], [[other - r.otherLoss, '#e2e8f0'], [tw - r.twLoss, '#94a3b8'], [lev - r.levLoss, '#C5611A']]);
+        const lossBox = r.allLoss > 0
+          ? `<rect x="${xs[1]}" y="${yAt(r.total)}" width="${bw}" height="${yAt(r.after) - yAt(r.total)}" fill="none" stroke="#dc2626" stroke-dasharray="4 3"/>
+             <text x="${xs[1] + bw / 2}" y="${(yAt(r.total) + yAt(r.after)) / 2 + 4}" text-anchor="middle" font-size="11" fill="#dc2626">−${pct(r.allPct)}</text>`
+          : '';
+        $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:420px" role="img" aria-label="壓力測試前後總資產長條圖">
+          ${grid}${before}${after}${lossBox}
+          <text x="${xs[0] + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#6b7280">現在</text>
+          <text x="${xs[1] + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#6b7280">正 2 跌 ${drop}% 那天</text>
+        </svg>`;
+
+        renderDrift();
+      }
+
+      function renderDrift() {
+        const s = clamp(num('d_start'), 0, 100);
+        const lm = Math.max(0, num('d_lev'));
+        const rm = Math.max(0, num('d_rest'));
+        const t = clamp(num('d_target'), 0, 100);
+        const now = drift(s, lm, rm);
+        const dev = now * 100 - t;
+        const off = driftTriggered(now, t);
+        $('drift').innerHTML = `
+          <p class="mb-1">年初 ${s}% 的正 2，現在約占 <strong>${pct(now)}</strong>，比目標 ${t}% ${dev >= 0 ? '多' : '少'}了 <strong>${Math.abs(dev).toFixed(1)} 個百分點</strong>。</p>
+          <p>${off
+            ? `<strong class="text-red-600">已經偏離 5 個百分點以上。</strong>${dev > 0 ? '什麼都沒做，風險已經比你年初設定的多了一截。這時最常見的反應是「漲這麼好再多放一點」——那正是再平衡要擋的東西。' : '跌多了，照規則要補回來，能用新資金就先用新資金。'}`
+            : '偏離還不到 5 個百分點，照規則不用動。'}</p>`;
+      }
+
+      ['lev','tw','other','drop','twRatio','otherDrop','accept','d_start','d_lev','d_rest','d_target']
+        .forEach(id => $(id).addEventListener('input', render));
+      paintScen();
+      render();
+    })();
+  </script>
+</BaseLayout>
