@@ -189,6 +189,8 @@ draft: false
 
 ---
 
+下一篇：[00631L 十一年變二十二倍：真正要問的，是你撐不撐得過跌掉一半的那一年](/articles/ep54-00631l-long-hold)
+
 ## 延伸閱讀
 
 - [存到 100 萬之後，下一個目標不是 200 萬](/articles/ep44-first-million-next-step)（EP44）—— 交叉點與第一桶金的拆法
