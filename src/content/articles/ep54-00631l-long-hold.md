@@ -141,6 +141,8 @@ draft: false
 
 ---
 
+下一篇：[新青安月付 1.5 萬跳到 3.1 萬：漲的不是利率，是寬限期到期那一天](/articles/ep55-xinqingan-grace-period)
+
 ## 延伸閱讀
 
 - [攻擊桶：QQQ 和 00631L 的邏輯與倉位控制](/articles/ep08-attack-bucket)（EP08）
