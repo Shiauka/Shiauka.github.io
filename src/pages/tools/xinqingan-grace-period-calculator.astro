@@ -1,0 +1,475 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="房貸寬限期月付時間軸"
+  description="新青安補貼退場＋寬限期到期，你每個月會繳多少？填入貸款金額、年限、寬限期與撥貸年月，算出寬限期結束那個月月付跳多少、其中利率上調只佔多少，以及預演月付存下來的錢拿去提前還款或留現金各差多少——對應 EP55。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP55</p>
+      <h1 class="text-3xl font-bold mb-3">房貸寬限期月付時間軸</h1>
+      <p class="text-gray-600 leading-relaxed">
+        新青安補貼退場＋寬限期到期，你每個月會繳多少？央行沒升息，但寬限期一結束，月付可能直接翻倍——而且其中<strong>利率上調只佔一小塊</strong>，大部分來自開始還本金。
+        填入你的貸款條件，把接下來每一段的月付排成一條時間軸，也比較預演月付存下來的錢，拿去提前還款跟留現金各差多少。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-4">你的房貸</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">貸款金額（萬）</span>
+          <input id="amount" type="text" inputmode="decimal" value="1000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">貸款年限（年，1–40）</span>
+          <input id="years" type="number" min="1" max="40" step="1" value="40"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">寬限期（年，0–5）</span>
+          <input id="grace" type="number" min="0" max="5" step="1" value="3"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">撥貸年月</span>
+          <input id="start" type="month" min="1990-01" max="2035-12" value="2023-09"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">利率模式</span>
+          <select id="mode"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="qa" selected>新青安（一段式機動）</option>
+            <option value="normal">一般房貸（單一利率）</option>
+          </select>
+        </label>
+        <label class="block" id="baseWrap">
+          <span class="text-sm text-gray-600" id="baseLabel">青安原利率（%，補貼退完後）</span>
+          <input id="base" type="number" min="0" max="20" step="0.005" value="2.275"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預演月付：到期前幾個月開始（0–60）</span>
+          <input id="rehearse" type="number" min="0" max="60" step="1" value="24"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預演存款放的利率（%／年）</span>
+          <input id="cash" type="number" min="0" max="10" step="0.1" value="1.7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3" id="modeNote"></p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Rehearsal -->
+    <div id="rehearsal" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Timeline table -->
+    <details class="mb-8" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 月付時間軸（每一段月付變動）</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">期間</th>
+              <th class="py-2 px-3 font-medium text-right">利率</th>
+              <th class="py-2 px-3 font-medium text-right">月付</th>
+              <th class="py-2 pl-3 font-medium">說明</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 先還房貸還是繼續投資？</p>
+      <p><strong>長期不會動用的錢：</strong>房貸利率和投資報酬不能直接比大小——提前還款省下的利息是確定的，投資報酬是會晃動的期望值。我的判準分三段：利率超過約 4–5% 先還；2% 以下的政策性貸款一邊繳一邊投；中間地帶看現金流，機動利率升到 3% 以上才認真考慮拿部分閒錢提前還。首購約 2.6%（永慶自家成交統計 2026Q3 中位數）、新青安退場後 2.275%（2026/10 水準）都在 3% 以下。</p>
+      <p><strong>寬限期到期前兩年要補月付的錢：</strong>不是長期的錢，先留現金、不要放股市。股市不會配合你的合約——到期那年剛好大跌，你就是在最不該賣的時候被迫每月賣一次。</p>
+      <p><strong>真的要提前還款：</strong>辦之前先問銀行有沒有提前清償違約金，並<strong>主動指定「降低月付」或「縮短年限」</strong>——不指定，你以為月付會變少，結果可能只是年限變短。辦完拿新的還款明細確認。月付真的撐不住，在逾期前找承貸銀行談；新青安限申貸一次，轉貸出去就沒有補貼了。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採本息平均攤還、寬限期只繳息、逐月計息的簡化模型；新青安採一段式機動利率與青安 3.0「3＋3」補貼退場規則（2026 年公告），原利率會隨郵局二年期定儲機動利率變動，未來升降息無法預測。二段式、混合式利率、分段式優惠方案、手續費與違約金未納入。實際月付以你的合約與承貸銀行通知為準。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep55-xinqingan-grace-period" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP55 新青安寬限期 →</a>
+      <a href="/articles/ep16-mortgage-and-investment" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">有房貸還要投資嗎（EP16）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式（不碰 DOM；獨立驗證可直接抽出來跑）=====
+    // 月份以「絕對月」表示：abs = 年*12 + (月-1)
+    function ymToAbs(y, m) { return y * 12 + (m - 1); }
+    function absToYm(a) { const y = Math.floor(a / 12); const m = a - y * 12 + 1; return y + '-' + String(m).padStart(2, '0'); }
+
+    // 本息平均攤還月付（年利率 %，期數 n）
+    function annuity(P, ratePct, n) {
+      if (!(P > 0) || !(n > 0)) return 0;
+      const r = ratePct / 100 / 12;
+      if (r === 0) return P / n;
+      return P * r / (1 - Math.pow(1 + r, -n));
+    }
+
+    // 新青安某絕對月的利率（青安 3.0「3＋3」退場）
+    // 補貼起算月 S＝max(撥貸月, 2023-08)；前 3 年 原利率−0.5，第 4/5/6 年 −0.375/−0.25/−0.125，第 7 年起＝原利率
+    const QA_SUBSIDY_FLOOR = ymToAbs(2023, 8);
+    function qaRate(basePct, startAbs, t) {
+      const S = Math.max(startAbs, QA_SUBSIDY_FLOOR);
+      if (t < S) return basePct - 0.5;
+      const y = Math.floor((t - S) / 12);
+      const cut = [0.5, 0.5, 0.5, 0.375, 0.25, 0.125][y];
+      return basePct - (cut === undefined ? 0 : cut);
+    }
+
+    function rateAt(p, t) {
+      return p.mode === 'qa' ? qaRate(p.basePct, p.startAbs, t) : p.basePct;
+    }
+
+    // 逐月模擬。p: {amount(元), years, grace, startAbs, mode, basePct}；lump: 寬限期結束當月月初一次提前還本（降月付、年限不變）
+    // 回傳每月 {t, rate, pay, interestOnly}
+    function simulate(p, lump) {
+      const N = Math.min(480, Math.max(0, Math.round(p.years * 12)));
+      const G = Math.min(N, Math.max(0, Math.round(p.grace * 12)));
+      let bal = Math.max(0, p.amount);
+      let pmt = 0, prevRate = null;
+      const rows = [];
+      for (let k = 0; k < N; k++) {
+        const t = p.startAbs + k;
+        const r = rateAt(p, t);
+        if (k === G && lump > 0) bal = Math.max(0, bal - lump);
+        let pay;
+        if (k < G) {
+          pay = bal * r / 100 / 12;
+          rows.push({ t, rate: r, pay, interestOnly: true });
+        } else {
+          if (k === G || r !== prevRate) pmt = annuity(bal, r, N - k);
+          pay = pmt;
+          const interest = bal * r / 100 / 12;
+          bal = Math.max(0, bal - (pmt - interest));
+          rows.push({ t, rate: r, pay, interestOnly: false });
+        }
+        prevRate = r;
+      }
+      return { N, G, rows };
+    }
+
+    // 長期月付：寬限期結束後、利率已回到最終水準（新青安＝原利率）的第一個月
+    function longTermPay(p, sim) {
+      for (let k = sim.G; k < sim.rows.length; k++) {
+        if (Math.abs(sim.rows[k].rate - p.basePct) < 1e-9) return { pay: sim.rows[k].pay, t: sim.rows[k].t, settled: true };
+      }
+      const last = sim.rows[sim.rows.length - 1];
+      return last ? { pay: last.pay, t: last.t, settled: false } : { pay: 0, t: p.startAbs, settled: false };
+    }
+
+    // 主分析。nowAbs＝「現在」的絕對月；rehearseMonths＝到期前幾個月開始預演；cashPct＝預演存款年利率
+    function analyze(p, nowAbs, rehearseMonths, cashPct) {
+      const sim = simulate(p, 0);
+      const noGrace = simulate(Object.assign({}, p, { grace: 0 }), 0);
+      const lt = longTermPay(p, sim);
+      const ltNo = longTermPay(p, noGrace);
+      const out = { sim, longTerm: lt.pay, longTermAt: lt.t, longTermSettled: lt.settled, longTermNoGrace: ltNo.pay };
+      out.loanEnded = nowAbs >= p.startAbs + sim.N;  // 貸款已還完
+      if (sim.G === 0 || sim.G >= sim.N) { out.hasGrace = false; return out; }
+      out.hasGrace = true;
+      const E = p.startAbs + sim.G;              // 寬限期結束後第一個還本月
+      const before = sim.rows[sim.G - 1];
+      const after = sim.rows[sim.G];
+      out.graceEndAbs = E;
+      out.before = before.pay;
+      out.graceMin = Math.min.apply(null, sim.rows.slice(0, sim.G).map(r => r.pay));
+      out.beforeRate = before.rate;
+      out.after = after.pay;
+      out.afterRate = after.rate;
+      // 反事實：利率維持寬限期最後一個月的利率
+      const balAtG = Math.max(0, p.amount);      // 寬限期只繳息，本金不變
+      out.counterfactual = annuity(balAtG, before.rate, sim.N - sim.G);
+      out.rateEffect = after.pay - out.counterfactual;
+      out.graceEffect = out.counterfactual - before.pay;
+      out.monthsLeft = E - nowAbs;               // >0 表示還沒到期
+
+      // 預演月付：從 max(E−R, now, 撥貸月) 到 E−1，每月存 (到期後首月月付 − 當月實繳)
+      const R = Math.max(0, Math.round(rehearseMonths));
+      const s = Math.max(E - R, nowAbs + 1, p.startAbs);
+      out.rehearseStart = s;
+      out.rehearseMonths = Math.max(0, E - s);
+      let pot = 0, sumDiff = 0;
+      const mr = Math.max(0, cashPct) / 100 / 12;
+      for (let t = s; t < E; t++) {
+        const diff = Math.max(0, after.pay - sim.rows[t - p.startAbs].pay);
+        pot = pot * (1 + mr) + diff;
+        sumDiff += diff;
+      }
+      out.pot = pot;
+      out.sumDiff = sumDiff;
+      // A：全數提前還本（降月付、年限不變）
+      if (pot > 0) {
+        const simA = simulate(p, pot);
+        const ltA = longTermPay(p, simA);
+        out.afterPrepaid = simA.rows[sim.G].pay;
+        out.longTermPrepaid = ltA.pay;
+      } else {
+        out.afterPrepaid = after.pay;
+        out.longTermPrepaid = lt.pay;
+      }
+      // B：留現金可付幾個月到期後月付
+      out.cashMonths = after.pay > 0 ? pot / after.pay : 0;
+      // 已經跳上去：一次移一年差額到現金
+      const nowRow = sim.rows[nowAbs - p.startAbs];
+      out.payNow = nowRow ? nowRow.pay : after.pay;
+      out.yearBuffer = Math.max(0, Math.round(out.payNow) - Math.round(before.pay)) * 12;
+      return out;
+    }
+
+    // 把連續相同（利率、月付取整）的月份合併成區段
+    function segments(sim) {
+      const segs = [];
+      sim.rows.forEach((r, k) => {
+        const pay = Math.round(r.pay);
+        const last = segs[segs.length - 1];
+        if (last && last.pay === pay && Math.abs(last.rate - r.rate) < 1e-9 && last.io === r.interestOnly) {
+          last.to = r.t;
+        } else {
+          segs.push({ from: r.t, to: r.t, rate: r.rate, pay, io: r.interestOnly, k });
+        }
+      });
+      return segs;
+    }
+
+    // 金額字串解析：吃千分位、空白、NT$、「萬」
+    function parseWan(s) {
+      const v = parseFloat(String(s || '').replace(/NT\$|\$|,|，|\s|萬|元/gi, ''));
+      return isFinite(v) ? v : NaN;
+    }
+
+    if (typeof window !== 'undefined') window.__ep55 = { ymToAbs, absToYm, annuity, qaRate, simulate, longTermPay, analyze, segments, parseWan };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const wan = (n) => (n / 10000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+      const pct = (r) => (Math.round(r * 1000) / 1000).toFixed(3).replace(/0$/, '') + '%';
+      const ym = (a) => { const [y, m] = absToYm(a).split('-'); return y + ' 年 ' + Number(m) + ' 月'; };
+      const ymShort = (a) => absToYm(a).replace('-', '/');
+
+      const D = { amount: 1000, years: 40, grace: 3, start: '2023-09', base: 2.275, baseNormal: 2.6, rehearse: 24, cash: 1.7 };
+      let lastMode = 'qa';
+
+      function clampNum(id, lo, hi, def, intOnly, msgs) {
+        let raw = $(id).value;
+        let v = parseFloat(raw);
+        if (raw === '' || !isFinite(v)) { msgs.push(`「${label(id)}」空白或無法辨識，暫用 ${def}`); return def; }
+        if (intOnly) v = Math.round(v);
+        if (v < lo) { msgs.push(`「${label(id)}」最小 ${lo}，已改用 ${lo}`); v = lo; }
+        if (v > hi) { msgs.push(`「${label(id)}」最大 ${hi}，已改用 ${hi}`); v = hi; }
+        return v;
+      }
+      function label(id) {
+        return { years: '貸款年限', grace: '寬限期', base: '利率', rehearse: '預演月數', cash: '存款利率', amount: '貸款金額' }[id] || id;
+      }
+
+      function readInputs(commit) {
+        const msgs = [];
+        let amt = parseWan($('amount').value);
+        if (!isFinite(amt)) { msgs.push(`「貸款金額」無法辨識，暫用 ${D.amount} 萬`); amt = D.amount; }
+        if (amt < 0) { msgs.push('「貸款金額」不能是負數，已改用 0'); amt = 0; }
+        if (amt > 100000) { msgs.push('「貸款金額」最大 100,000 萬，已改用 100,000'); amt = 100000; }
+        const years = clampNum('years', 1, 40, D.years, true, msgs);
+        let grace = clampNum('grace', 0, 5, D.grace, true, msgs);
+        if (grace >= years) { msgs.push(`寬限期必須短於貸款年限，已改用 ${years - 1} 年`); grace = years - 1; }
+        const mode = $('mode').value === 'normal' ? 'normal' : 'qa';
+        const base = clampNum('base', 0, 20, mode === 'qa' ? D.base : D.baseNormal, false, msgs);
+        if (mode === 'qa' && base < 0.5) msgs.push('青安原利率低於 0.5%，補貼期利率會變成負數，請確認輸入');
+        const rehearse = clampNum('rehearse', 0, 60, D.rehearse, true, msgs);
+        const cash = clampNum('cash', 0, 10, D.cash, false, msgs);
+        let st = $('start').value;
+        let sy, sm;
+        const mt = /^(\d{4})-(\d{2})$/.exec(st || '');
+        if (mt) { sy = +mt[1]; sm = +mt[2]; }
+        if (!mt || sy < 1990 || sy > 2035 || sm < 1 || sm > 12) { msgs.push(`「撥貸年月」無法辨識或超出 1990–2035，暫用 ${D.start}`); [sy, sm] = D.start.split('-').map(Number); }
+        if (commit) {
+          $('amount').value = String(amt);
+          $('years').value = years; $('grace').value = grace; $('base').value = base;
+          $('rehearse').value = rehearse; $('cash').value = cash;
+          $('start').value = sy + '-' + String(sm).padStart(2, '0');
+        }
+        return { p: { amount: amt * 10000, years, grace, startAbs: ymToAbs(sy, sm), mode, basePct: base }, rehearse, cash, msgs };
+      }
+
+      function nowAbs() { const d = new Date(); return ymToAbs(d.getFullYear(), d.getMonth() + 1); }
+
+      function render(commit) {
+        const mode = $('mode').value === 'normal' ? 'normal' : 'qa';
+        if (mode !== lastMode) {
+          $('base').value = mode === 'qa' ? D.base : D.baseNormal;
+          lastMode = mode;
+        }
+        $('baseLabel').textContent = mode === 'qa' ? '青安原利率（%，補貼退完後）' : '房貸利率（%）';
+        const { p, rehearse, cash, msgs } = readInputs(commit);
+        const p0 = p;
+        $('modeNote').innerHTML = mode === 'qa'
+          ? '新青安：補貼期利率＝原利率 − 0.5%（預設 1.775%；預設值為 2026/10、郵局二年期定儲機動利率 1.72% 下的水準）。依青安 3.0「3＋3」，補貼滿 3 年後每年加回半碼，第 4／5／6 年 1.9／2.025／2.15%，第 7 年起回到原利率。2023 年 8 月以前撥貸的舊青安，補貼統一從 2023 年 8 月起算。原利率是機動的（郵局二年期定儲機動利率＋0.555%，2026/10 為 2.275%），可自行改。' + (p0.startAbs < ymToAbs(2023, 8) ? '<br>你的撥貸月在 2023/8 之前：2023/8 前的月份以現行利率示意，實際利率以當時合約為準。' : '')
+          : '一般房貸：整段用同一個利率；利率變動、分段式優惠不納入。';
+        const nb = $('notice');
+        if (msgs.length) { nb.textContent = msgs.join('；'); nb.classList.remove('hidden'); } else { nb.classList.add('hidden'); }
+
+        const now = nowAbs();
+        const a = analyze(p, now, rehearse, cash);
+        const sim = a.sim;
+
+        if (p.amount <= 0) {
+          $('cards').innerHTML = '';
+          $('insight').innerHTML = '<p>請輸入貸款金額。</p>';
+          $('rehearsal').innerHTML = '';
+          $('tbody').innerHTML = '';
+          return;
+        }
+
+        if (a.loanEnded) {
+          const lastRow = sim.rows[sim.rows.length - 1];
+          $('cards').innerHTML = '';
+          $('insight').innerHTML = `<p class="font-semibold text-gray-900 mb-2">📌 這筆貸款已還完</p><p>依你填的年限，這筆房貸在 ${ym(lastRow.t)} 已繳完最後一期，不需要預演月付或準備現金。下方時間軸保留給你回顧每一段月付。</p>`;
+          $('rehearsal').innerHTML = '';
+        } else
+        // Cards
+        if (a.hasGrace) {
+          const mult = a.before > 0 ? (a.after / a.before) : 0;
+          const bR = Math.round(a.before), aR = Math.round(a.after), jump = aR - bR;
+          const gMinR = Math.round(a.graceMin);
+          const graceRange = gMinR !== bR ? `${ntd(gMinR)}–${ntd(bR)}` : ntd(bR);
+          const ltLabel = (mode === 'qa' && a.longTermSettled) ? '（補貼退完）' : '';
+          $('cards').innerHTML = `
+            <div class="rounded-2xl border border-gray-200 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">${gMinR !== bR ? '寬限期裡（只繳息，逐年變動）' : '寬限期裡（只繳息）'}</div>
+              <div class="text-2xl font-bold text-gray-900">${graceRange}</div>
+              <div class="text-xs text-gray-500 mt-1">最後一個月 ${ym(a.graceEndAbs - 1)}：${ntd(bR)}，利率 ${pct(a.beforeRate)}</div>
+            </div>
+            <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">${ym(a.graceEndAbs)} 起</div>
+              <div class="text-2xl font-bold" style="color:#C5611A">${ntd(a.after)}</div>
+              <div class="text-xs text-gray-500 mt-1">比寬限期最後一個月多 ${ntd(jump)}${mult ? `，是 ${mult.toFixed(2)} 倍` : ''}</div>
+            </div>
+            <div class="rounded-2xl border border-gray-200 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">長期月付${ltLabel}</div>
+              <div class="text-2xl font-bold text-gray-900">${ntd(a.longTerm)}</div>
+              <div class="text-xs text-gray-500 mt-1">${ym(a.longTermAt)} 起；不用寬限期是 ${ntd(a.longTermNoGrace)}</div>
+            </div>`;
+          const extra = a.longTerm - a.longTermNoGrace;
+          $('insight').innerHTML = `
+            <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+            <p class="mb-2">寬限期在 <strong>${ym(a.graceEndAbs - 1)}</strong> 結束，${ym(a.graceEndAbs)} 起月付從 ${ntd(bR)} 跳到 <strong>${ntd(aR)}</strong>，多 ${ntd(jump)}。</p>
+            ${Math.round(a.rateEffect) > 0
+              ? `<p class="mb-2">這個跳幅裡，<strong>利率上調只佔 ${ntd(Math.round(a.rateEffect))}</strong>（${pct(a.beforeRate)} → ${pct(a.afterRate)}）；其餘 <strong>${ntd(jump - Math.round(a.rateEffect))}</strong> 來自寬限期結束、開始還本金。利率漲的那幾碼是小事，寬限期到期才是大事。</p>`
+              : `<p class="mb-2">寬限期結束那個月利率沒有變，<strong>這次跳動全部來自開始還本金</strong>。</p>`}
+            <p>${extra > 0.5 ? `用了寬限期，長期每個月比不用寬限期多繳 <strong>${ntd(extra)}</strong>——前面沒還的本金，要擠進更短的年限還完。` : '長期月付跟不用寬限期的情況差不多。'}${a.monthsLeft > 0 ? ` 離寬限期結束還有 <strong>${a.monthsLeft} 個月</strong>。` : ' 你的寬限期<strong>已經結束</strong>。'}</p>`;
+        } else {
+          const first = sim.rows[0] ? sim.rows[0].pay : 0;
+          $('cards').innerHTML = `
+            <div class="rounded-2xl border border-gray-200 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">第一個月月付</div>
+              <div class="text-2xl font-bold text-gray-900">${ntd(first)}</div>
+              <div class="text-xs text-gray-500 mt-1">${ym(p.startAbs)}，利率 ${pct(sim.rows[0] ? sim.rows[0].rate : p.basePct)}</div>
+            </div>
+            <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">長期月付${(mode === 'qa' && a.longTermSettled) ? '（補貼退完）' : ''}</div>
+              <div class="text-2xl font-bold" style="color:#C5611A">${ntd(a.longTerm)}</div>
+              <div class="text-xs text-gray-500 mt-1">${ym(a.longTermAt)} 起</div>
+            </div>
+            <div class="rounded-2xl border border-gray-200 p-5">
+              <div class="text-sm font-medium text-gray-600 mb-1">利率造成的漲幅</div>
+              <div class="text-2xl font-bold text-gray-900">${ntd(Math.max(0, a.longTerm - first))}</div>
+              <div class="text-xs text-gray-500 mt-1">沒有寬限期，月付只隨利率變動</div>
+            </div>`;
+          $('insight').innerHTML = `
+            <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+            <p>沒有寬限期，一開始就本金利息一起繳，月付只會隨利率小幅變動${mode === 'qa' ? '（補貼退場每年加半碼）' : ''}。把寬限期改成 3 或 5 年，就能看到寬限期到期那天的跳動有多大。</p>`;
+        }
+
+        // Rehearsal
+        if (a.loanEnded) {
+          // 已在上方處理
+        } else if (!a.hasGrace) {
+          $('rehearsal').innerHTML = `<p class="font-semibold text-gray-900 mb-2">🧪 預演月付</p><p class="text-gray-600">沒有寬限期，不需要預演月付。</p>`;
+        } else if (a.monthsLeft <= 0) {
+          $('rehearsal').innerHTML = `
+            <p class="font-semibold text-gray-900 mb-2">🧪 你的月付已經跳上去了</p>
+            <p class="mb-2">寬限期已在 ${ym(a.graceEndAbs - 1)} 結束，現在每月約 <strong>${ntd(a.payNow)}</strong>，比寬限期最後一個月多 ${ntd(Math.round(a.payNow) - Math.round(a.before))}。</p>
+            <p class="mb-2"><strong>先看薪水撐不撐得住新月付。</strong>撐得住，就讓它跑幾個月，確定穩了，多出來的錢照長期判準處理。</p>
+            <p class="mb-2"><strong>撐不住：</strong>不要每個月不夠就從投資帳戶賣一點、看當天股價決定賣多少——碰到下跌的月份就是在低點賣。比較好的做法是一次算清楚：未來一年每月要補的差額約 ${ntd(Math.round(a.payNow) - Math.round(a.before))}，<strong>一次把一年份約 ${ntd(a.yearBuffer)} 移到現金</strong>，其餘照原配置放著，利用這一年調整支出或收入。</p>
+            <p class="text-gray-600">真的撐不了，在逾期之前就找原承貸銀行談。${mode === 'qa' ? `新青安寬限期上限是 5 年：${p.grace < 5 ? `你核的是 ${p.grace} 年，可以問銀行能否展延（合計不超過 5 年），但要看銀行審核；` : '你已經用滿 5 年，不能再延；'}` : ''}拉長年限也是一個選項——這些做法都只是把壓力再往後挪，總利息會增加。${mode === 'qa' ? '新青安限申貸一次，轉貸出去就不再是新青安，補貼也沒了。' : ''}</p>`;
+        } else if (rehearse === 0 || a.rehearseMonths <= 0) {
+          $('rehearsal').innerHTML = `
+            <p class="font-semibold text-gray-900 mb-2">🧪 預演月付</p>
+            <p class="text-gray-600">${rehearse === 0 ? '你設定不預演。' : '寬限期這個月就結束，已經來不及預演。'}把「到期前幾個月開始」改成 24，就能看到到期前兩年每月先存差額，到期時能累積多少，以及拿去提前還款或留現金各差多少。</p>`;
+        } else {
+          const diffFirst = Math.round(a.after) - Math.round(sim.rows[a.rehearseStart - p.startAbs].pay);
+          const startNote = a.rehearseStart > a.graceEndAbs - rehearse
+            ? `（到期前 ${rehearse} 個月的時間點已經過了，所以從${a.rehearseStart === p.startAbs ? '撥貸當月' : '下個月'}開始算）`
+            : '';
+          $('rehearsal').innerHTML = `
+            <p class="font-semibold text-gray-900 mb-2">🧪 預演月付：先把未來的月付，現在就繳一次</p>
+            <p class="mb-2">從 <strong>${ym(a.rehearseStart)}</strong>${startNote} 到 ${ym(a.graceEndAbs - 1)}，共 ${a.rehearseMonths} 個月，每月都當作要繳 ${ntd(a.after)}；銀行收走利息，差額（第一個月約 ${ntd(diffFirst)}）在發薪日隔天自動轉進獨立帳戶。到期時約累積 <strong>${ntd(a.pot)}</strong>（含 ${cash}% 存款利息）。</p>
+            <div class="grid sm:grid-cols-2 gap-4 my-4">
+              <div class="rounded-xl border border-gray-200 p-4">
+                <div class="text-sm font-medium text-gray-600 mb-1">A｜全數提前還本（降月付、年限不變）</div>
+                <div class="text-lg font-bold text-gray-900">每月少 ${ntd(Math.round(a.after) - Math.round(a.afterPrepaid))}</div>
+                <div class="text-xs text-gray-500 mt-1">到期後首月 ${ntd(a.after)} → ${ntd(a.afterPrepaid)}；長期 ${ntd(a.longTerm)} → ${ntd(a.longTermPrepaid)}</div>
+              </div>
+              <div class="rounded-xl border border-brand bg-brand/5 p-4">
+                <div class="text-sm font-medium text-gray-600 mb-1">B｜留現金／定存</div>
+                <div class="text-lg font-bold" style="color:#C5611A">可付約 ${a.cashMonths.toFixed(1)} 個月月付</div>
+                <div class="text-xs text-gray-500 mt-1">以到期後月付 ${ntd(a.after)} 計</div>
+              </div>
+            </div>
+            <p class="mb-2">一樣的錢，還掉是每個月少繳一點，留著是一段時間的月付不用擔心。我的排序是：<strong>寬限期結束、確定新月付撐得住之前，先留現金</strong>——提前還款是單向的，還進去就拿不回來。等新月付繳得穩了，這筆錢變成長期的錢，再決定要還還是要投。</p>
+            <p class="text-gray-600">要提前還的話：先問有沒有違約金，並主動跟銀行指定「降低月付」——A 的數字是降月付的結果，不指定可能只會縮短年限、月付不變。</p>`;
+        }
+
+        // Timeline table
+        const segs = segments(sim);
+        $('tbody').innerHTML = segs.map((s, i) => {
+          const prev = segs[i - 1];
+          let note = s.io ? '寬限期（只繳息）' : '本息平均攤還';
+          if (prev && prev.io && !s.io) note = '寬限期結束，開始還本金' + (Math.abs(prev.rate - s.rate) > 1e-9 ? '＋利率調整' : '');
+          else if (prev && Math.abs(prev.rate - s.rate) > 1e-9) note = mode === 'qa' ? (Math.abs(s.rate - p.basePct) < 1e-9 ? '補貼退完，回到原利率' : '補貼退半碼') : '利率調整';
+          const hl = prev && prev.io && !s.io;
+          return `<tr class="border-b border-gray-100${hl ? ' bg-brand/5' : ''}">
+            <td class="py-2 pr-3 whitespace-nowrap">${ymShort(s.from)}${s.to !== s.from ? '–' + ymShort(s.to) : ''}</td>
+            <td class="py-2 px-3 text-right text-gray-500">${pct(s.rate)}</td>
+            <td class="py-2 px-3 text-right font-medium ${hl ? '' : 'text-gray-900'}" ${hl ? 'style="color:#C5611A"' : ''}>${ntd(s.pay)}</td>
+            <td class="py-2 pl-3 text-gray-500">${note}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      ['amount','years','grace','start','base','rehearse','cash'].forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      $('mode').addEventListener('change', () => render(true));
+      render(false);
+    })();
+  </script>
+</BaseLayout>
