@@ -170,6 +170,12 @@ draft: false
 
 ---
 
+## 用計算機算你自己的數字
+
+**[房貸寬限期月付時間軸](/tools/xinqingan-grace-period-calculator)**：填入貸款金額、年限、寬限期和撥貸年月，排出接下來每一年的月付、寬限期結束那個月會跳多少，並比較預演月付存下的錢拿去提前還款和留現金各差多少。
+
+---
+
 ## 延伸閱讀
 
 - [有房貸還要投資嗎？我怎麼決定每個月投多少](/articles/ep16-mortgage-and-investment)（EP16）
