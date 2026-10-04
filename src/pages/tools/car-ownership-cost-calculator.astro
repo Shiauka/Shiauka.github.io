@@ -1,0 +1,654 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="買車 10 年真實成本計算機"
+  description="一台 100 萬的車，開 10 年帳面約 181 萬；加上那 100 萬本來會長出來的部分約 278 萬，連每月開銷的投資成長也算約 319 萬。填入車價、付款方式、排氣量、里程、停車與保險，算出折舊＋油錢＋保險＋稅＋停車的總成本、每月與每公里多少、機會成本，以及跟不買車的交通費比——對應 EP57。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP57</p>
+      <h1 class="text-3xl font-bold mb-3">買車 10 年真實成本計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        報價單上最大的數字是車價，但一台車真正的價格，要把<strong>折舊、油錢、保險、停車、稅</strong>全部加起來；
+        如果是付現金，還要算上<strong>那筆錢本來會長出來的部分</strong>——它不會出現在任何一張帳單上。
+        填入你要買的車和你的生活，算出持有這幾年的總成本、換算成每個月多少，再跟不買車時的交通費放在一起比。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你要買的車</h2>
+        <div class="flex flex-wrap gap-2">
+          <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到交通部平均（影片的數字）</button>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">車價（元，可打「100萬」）</span>
+          <input id="price" type="text" inputmode="decimal" value="1,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">付款方式</span>
+          <select id="payMode"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="cash" selected>現金一次付清</option>
+            <option value="loan">頭期款＋車貸</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">持有年數（1–15）</span>
+          <input id="years" type="number" min="1" max="15" step="1" value="10"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block loanOnly hidden">
+          <span class="text-sm text-gray-600">頭期款（元）</span>
+          <input id="down" type="text" inputmode="decimal" value="200,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block loanOnly hidden">
+          <span class="text-sm text-gray-600">貸款年限（年，1–7）</span>
+          <input id="loanYears" type="number" min="1" max="7" step="1" value="5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block loanOnly hidden">
+          <span class="text-sm text-gray-600">車貸年利率（%，0 也可以）</span>
+          <input id="loanRate" type="number" min="0" max="20" step="0.1" value="3"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">殘值（賣掉時還值多少）</span>
+          <select id="resMode"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="auto" selected>依概略折舊曲線自動估</option>
+            <option value="manual">自己填殘值 %</option>
+          </select>
+        </label>
+        <label class="block resManual hidden">
+          <span class="text-sm text-gray-600">賣掉時剩原價的 %（0–100）</span>
+          <input id="resPct" type="number" min="0" max="100" step="1" value="15"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">排氣量（牌照稅＋公路養管費，2026/10）</span>
+          <select id="cc"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="c1200">601–1,200cc 汽油</option>
+            <option value="c1800" selected>1,201–1,800cc 汽油</option>
+            <option value="c2400">1,801–2,400cc 汽油</option>
+            <option value="c3000">2,401–3,000cc 汽油</option>
+            <option value="c3600">3,001–3,600cc 汽油</option>
+            <option value="c4200">3,601–4,200cc 汽油</option>
+            <option value="ev">純電動車</option>
+          </select>
+        </label>
+        <label class="block evOnly hidden">
+          <span class="text-sm text-gray-600">電動車牌照稅（元／年，預設 0）</span>
+          <input id="evTax" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">一年開幾公里</span>
+          <input id="km" type="text" inputmode="decimal" value="12,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block gasOnly">
+          <span class="text-sm text-gray-600">油耗（公里／公升）</span>
+          <input id="kmpl" type="number" min="1" max="100" step="0.1" value="11.4"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block gasOnly">
+          <span class="text-sm text-gray-600">油價（元／公升；95 無鉛 2026/10）</span>
+          <input id="fuelPrice" type="number" min="0" max="200" step="0.1" value="32.7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block evOnly hidden">
+          <span class="text-sm text-gray-600">每公里電費（元，自填估計）</span>
+          <input id="evPerKm" type="number" min="0" max="20" step="0.1" value="0.8"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">每月停車費（元；台北月租平均約 2,979，2026/4 報導）</span>
+          <input id="parking" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">保險：前 3 年每年（元）</span>
+          <input id="ins1" type="text" inputmode="decimal" value="15,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">保險：第 4 年起每年（元）</span>
+          <input id="ins4" type="text" inputmode="decimal" value="15,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">保養維修每年（元；交通部平均 15,584）</span>
+          <input id="maint" type="text" inputmode="decimal" value="15,584"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">其他每年（洗車、過路費等）</span>
+          <input id="other" type="text" inputmode="decimal" value="19,312"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">投資年化報酬（%，期望值非保證）</span>
+          <input id="ret" type="number" min="0" max="15" step="0.5" value="7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">不買車時的交通費（元／月）</span>
+          <input id="alt" type="text" inputmode="decimal" value="2,400"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">計程車每公里（元；台北約 25，2026/10）</span>
+          <input id="taxi" type="number" min="1" max="200" step="1" value="25"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">稅前月收入（選填，看 20/4/10）</span>
+          <input id="income" type="text" inputmode="decimal" value="" placeholder="例如 60,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p id="presetNote" class="text-xs text-brand mt-3"></p>
+      <p class="text-xs text-gray-400 mt-3" id="ccNote"></p>
+      <p class="text-xs text-gray-400 mt-2" id="resNote"></p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Compare -->
+    <div id="compare" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- 20/4/10 -->
+    <div id="rule" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Category breakdown -->
+    <details class="mb-6" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 分項明細（持有期間合計）</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">項目</th>
+              <th class="py-2 px-3 font-medium text-right">合計</th>
+              <th class="py-2 px-3 font-medium text-right">每月</th>
+              <th class="py-2 pl-3 font-medium text-right">佔帳面</th>
+            </tr>
+          </thead>
+          <tbody id="catBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Year breakdown -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 逐年明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">第幾年</th>
+              <th class="py-2 px-3 font-medium text-right">年底車值</th>
+              <th class="py-2 px-3 font-medium text-right">折舊</th>
+              <th class="py-2 px-3 font-medium text-right">油／電</th>
+              <th class="py-2 px-3 font-medium text-right">保險</th>
+              <th class="py-2 px-3 font-medium text-right">保養</th>
+              <th class="py-2 px-3 font-medium text-right">停車</th>
+              <th class="py-2 px-3 font-medium text-right">稅費</th>
+              <th class="py-2 px-3 font-medium text-right">其他</th>
+              <th class="py-2 px-3 font-medium text-right">車貸利息</th>
+              <th class="py-2 pl-3 font-medium text-right">當年合計</th>
+            </tr>
+          </thead>
+          <tbody id="yearBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>這不是勸你不要買車。</strong>會讓買車划算的，通常是這幾種情況：每天通勤的路線沒有好的大眾運輸（像不少在工業區、科學園區上班的人）；家裡有小孩、長輩，常常要一次載好幾個人；或工作本身就要一直跑客戶。這些情況，車是工具不是奢侈品——要做的不是不買，是買的時候把整張帳單看完。</p>
+      <p><strong>折舊前面掉最兇：</strong>概略行情是第一年少一成五、五年剩四到五成、十年剩一到一成五，品牌與車款差異很大。習慣五年換一次車的人，十年會付兩次曲線最陡的那一段；把持有年數改成 5 就看得到。</p>
+      <p><strong>機會成本是期望值：</strong>那筆錢如果拿去長期投資，用年化 7% 算是預期值，不是保證，市場有好年也有壞年。如果你一兩年內就要買車，頭期款放定存就好，不要放股市；這裡算的機會成本，講的是長期不會用到的錢。</p>
+      <p><strong>車貸：</strong>零利率常是拿原本能拿到的現金折扣換的，先問現金價再比；也要問手續費、是否綁原廠保險。一般車貸利率約 2.5–8%（2026/10），利率超過約 4–5% 就跟其他高利負債一樣，先還掉比較實在——確定要付的利息，不能直接拿來跟不確定的報酬比大小。</p>
+      <p><strong>電動車：</strong>使用牌照稅法已修正、授權各縣市可對電動車免徵牌照稅到 2030/12/31，實際有沒有免看你設籍的縣市（不免的話，請把「電動車牌照稅」改成你縣市的金額）；公路養管費目前免繳。電動車的折舊、保險、充電便利性都要另外細算。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，以今天的物價估算、未計入油價與停車費上漲（所以結果偏低）。殘值曲線是中古車概略行情、非官方數據，品牌差異大。牌照稅與公路養管費依自用小客車汽油車費額表；保險、保養、停車等以你填的數字為準。機會成本：一次付出的錢（現金車價或頭期款）以年複利 (1＋r)^N 計；每月開銷、車貸月付與替代交通費視為每月月底投入，月利率取 (1＋r)^(1/12)−1，與一次投入用同一個年化報酬。報酬率是假設值、無法保證。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep57-car-ownership-true-cost" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP57 買車真實成本 →</a>
+      <a href="/articles/ep43-lifestyle-inflation" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">生活費怎麼被墊高（EP43）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    // 牌照稅（使用牌照稅法 自用小客車）＋公路養管費（原汽車燃料使用費，汽油自用小客車），元／年
+    const CAR_TAX_TABLE = {
+      c1200: { label: '601–1,200cc', license: 4320, road: 4320 },
+      c1800: { label: '1,201–1,800cc', license: 7120, road: 4800 },
+      c2400: { label: '1,801–2,400cc', license: 11230, road: 6180 },
+      c3000: { label: '2,401–3,000cc', license: 15210, road: 7200 },
+      c3600: { label: '3,001–3,600cc', license: 28220, road: 8640 },
+      c4200: { label: '3,601–4,200cc', license: 28220, road: 9810 },
+      ev: { label: '純電動車', license: 0, road: 0 },
+    };
+    const MAX_YEARS = 15;
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // 概略殘值曲線（佔原價 %）：0 年 100、1 年 85、5 年 45、10 年 15、15 年 10，中間線性內插
+    const RES_CURVE = [[0, 100], [1, 85], [5, 45], [10, 15], [15, 10]];
+    function residualPctAuto(y) {
+      y = clampN(y, 0, MAX_YEARS);
+      for (let i = 1; i < RES_CURVE.length; i++) {
+        const [x0, v0] = RES_CURVE[i - 1], [x1, v1] = RES_CURVE[i];
+        if (y <= x1) return v0 + (v1 - v0) * (y - x0) / (x1 - x0);
+      }
+      return RES_CURVE[RES_CURVE.length - 1][1];
+    }
+    // 第 y 年底殘值 %；若有自填最終殘值，沿用曲線形狀等比例縮放折舊
+    function residualPctAt(y, N, overridePct) {
+      const auto = residualPctAuto(y);
+      if (overridePct === null || overridePct === undefined || !isFinite(overridePct)) return auto;
+      const o = clampN(overridePct, 0, 100);
+      const depN = 100 - residualPctAuto(N);
+      if (depN <= 0) return o;
+      return 100 - (100 - auto) / depN * (100 - o);
+    }
+
+    // 本息平均攤還月付
+    function annuityPmt(P, ratePct, n) {
+      if (!(P > 0) || !(n > 0)) return 0;
+      const r = ratePct / 100 / 12;
+      if (r === 0) return P / n;
+      return P * r / (1 - Math.pow(1 + r, -n));
+    }
+
+    // 一筆錢 N 年後（年複利）
+    function fvLump(P, retPct, years) { return P * Math.pow(1 + retPct / 100, years); }
+
+    // 每月月底投入的現金流，到最後一個月底的終值。月利率＝(1＋年化)^(1/12)−1（與一次投入同一個年化有效報酬）
+    function fvMonthly(flows, retPct) {
+      const r = Math.pow(1 + retPct / 100, 1 / 12) - 1;
+      let fv = 0;
+      for (let i = 0; i < flows.length; i++) fv = fv * (1 + r) + flows[i];
+      return fv;
+    }
+
+    // 主計算。p 的欄位見 DOM 區 readInputs；所有金額單位：元
+    function computeCarCost(p) {
+      const N = Math.round(clampN(p.years, 1, MAX_YEARS));
+      const months = N * 12;
+      const price = clampN(p.price, 0, 1e9);
+      const isLoan = p.payMode === 'loan';
+      const down = isLoan ? clampN(p.down, 0, price) : price;
+      const loanYears = Math.round(clampN(p.loanYears, 1, 7));
+      const loanRate = clampN(p.loanRate, 0, 20);
+      const tax = CAR_TAX_TABLE[p.cc] || CAR_TAX_TABLE.c1800;
+      const isEV = p.cc === 'ev';
+      const licenseTax = isEV ? clampN(p.evTax, 0, 1e6) : tax.license;
+      const roadFee = isEV ? 0 : tax.road;
+      const km = clampN(p.km, 0, 1e6);
+      const fuelPerKm = isEV ? clampN(p.evPerKm, 0, 100) : clampN(p.fuelPrice, 0, 1000) / clampN(p.kmpl, 1, 100);
+      const fuelYear = km * fuelPerKm;
+      const parkingYear = clampN(p.parking, 0, 1e7) * 12;
+      const ins1 = clampN(p.ins1, 0, 1e8), ins4 = clampN(p.ins4, 0, 1e8);
+      const maint = clampN(p.maint, 0, 1e8), other = clampN(p.other, 0, 1e8);
+      const ret = clampN(p.ret, 0, 30);
+      const override = (p.resPct === null || p.resPct === undefined || p.resPct === '') ? null : clampN(p.resPct, 0, 100);
+
+      // 車貸
+      const principal = isLoan ? Math.max(0, price - down) : 0;
+      const loanMonths = principal > 0 ? loanYears * 12 : 0;
+      const pmt = annuityPmt(principal, loanRate, loanMonths);
+      const interestByYear = new Array(N).fill(0);
+      let bal = principal, paidMonths = Math.min(loanMonths, months), totalPmt = 0;
+      for (let m = 0; m < paidMonths; m++) {
+        const it = bal * loanRate / 100 / 12;
+        interestByYear[Math.floor(m / 12)] += it;
+        bal = Math.max(0, bal - (pmt - it));
+        totalPmt += pmt;
+      }
+      const payoff = bal;                          // 持有期滿、賣車時一次還清的貸款餘額
+      const loanInterest = interestByYear.reduce((a, b) => a + b, 0);
+
+      // 殘值與逐年
+      const resPctEnd = residualPctAt(N, N, override);
+      const residual = Math.min(price, price * resPctEnd / 100);
+      const depreciation = price - residual;
+      const rows = [];
+      const cats = { depreciation, fuel: 0, insurance: 0, maint: 0, parking: 0, tax: 0, other: 0, interest: loanInterest };
+      let prevVal = price;
+      for (let y = 1; y <= N; y++) {
+        const val = Math.min(price, price * residualPctAt(y, N, override) / 100);
+        const ins = y <= 3 ? ins1 : ins4;
+        const row = {
+          year: y, value: val, dep: prevVal - val, fuel: fuelYear, insurance: ins, maint, parking: parkingYear,
+          tax: licenseTax + roadFee, other, interest: interestByYear[y - 1],
+        };
+        row.running = row.fuel + row.insurance + row.maint + row.parking + row.tax + row.other;
+        row.total = row.dep + row.running + row.interest;
+        rows.push(row);
+        prevVal = val;
+        cats.fuel += row.fuel; cats.insurance += ins; cats.maint += maint; cats.parking += parkingYear;
+        cats.tax += row.tax; cats.other += other;
+      }
+      const running = cats.fuel + cats.insurance + cats.maint + cats.parking + cats.tax + cats.other;
+      const book = depreciation + running + loanInterest;
+
+      // 機會成本：統一用年化有效報酬 r。一次付出（現金車價或頭期款）×(1+r)^N；每月開銷＋車貸月付 月底投入、月利率 (1+r)^(1/12)−1
+      const upfront = down;
+      const lumpFV = fvLump(upfront, ret, N);
+      const lumpGrowth = lumpFV - upfront;
+      const flows = [];
+      for (let m = 0; m < months; m++) flows.push(rows[Math.floor(m / 12)].running / 12 + (m < paidMonths ? pmt : 0));
+      const flowSum = flows.reduce((a, b) => a + b, 0);
+      const flowFV = fvMonthly(flows, ret);
+      const flowGrowth = flowFV - flowSum;
+      const oppTotal = lumpGrowth + flowGrowth;
+      const allIn = book + oppTotal;
+
+      // 不買車
+      const altMonthly = clampN(p.alt, 0, 1e7);
+      const altSum = altMonthly * months;
+      const altFV = fvMonthly(new Array(months).fill(altMonthly), ret);
+      const altGrowth = altFV - altSum;
+
+      // 損益兩平（vs 計程車）：固定成本 / (計程車每公里 − 油電每公里)
+      const taxi = clampN(p.taxi, 1, 1000);
+      const fixedAnnual = (depreciation + loanInterest) / N + (cats.insurance + cats.maint + cats.parking + cats.tax + cats.other) / N;
+      const breakEvenKm = taxi > fuelPerKm ? fixedAnnual / (taxi - fuelPerKm) : null;
+
+      // 20/4/10
+      const income = clampN(p.income, 0, 1e9);
+      const firstYearRunningMonthly = rows[0].running / 12;
+      const loanPeriodMonthly = paidMonths > 0 ? pmt + firstYearRunningMonthly : 0;
+      const bookMonthly = book / months;
+      const rule = {
+        downPct: price > 0 ? down / price * 100 : 100,
+        downOk: price > 0 ? down / price >= 0.2 : true,
+        loanOk: !isLoan || principal <= 0 || loanYears <= 4,
+        income,
+        bookPctIncome: income > 0 ? bookMonthly / income * 100 : null,
+        loanPctIncome: income > 0 && loanPeriodMonthly > 0 ? loanPeriodMonthly / income * 100 : null,
+      };
+      rule.incomeOk = income > 0 ? Math.max(bookMonthly, loanPeriodMonthly) <= income * 0.1 : null;
+
+      const totalKm = km * N;
+      return {
+        N, months, price, isLoan, isEV, down, principal, loanYears, loanRate, pmt, loanMonths, paidMonths, payoff, totalPmt, loanInterest,
+        licenseTax, roadFee, fuelPerKm, fuelYear, km, totalKm,
+        resPctEnd, residual, depreciation, rows, cats, running, book, bookMonthly,
+        upfront, lumpFV, lumpGrowth, flowSum, flowFV, flowGrowth, oppTotal, allIn, allInMonthly: allIn / months,
+        perKm: totalKm > 0 ? book / totalKm : null,
+        altMonthly, altSum, altFV, altGrowth, diffBook: book - altSum, diffAllIn: allIn - altFV,
+        taxi, fixedAnnual, breakEvenKm, loanPeriodMonthly, rule,
+      };
+    }
+
+    // 金額字串解析：吃千分位、空白、NT$、元；含「萬」則 ×10000
+    function parseMoney(s) {
+      const str = String(s === undefined || s === null ? '' : s);
+      const isWan = /萬/.test(str);
+      const v = parseFloat(str.replace(/NT\$|\$|,|，|\s|萬|元/gi, ''));
+      if (!isFinite(v)) return NaN;
+      return isWan ? v * 10000 : v;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep57 = { CAR_TAX_TABLE, residualPctAuto, residualPctAt, annuityPmt, fvLump, fvMonthly, computeCarCost, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => (Math.round(n / 1000) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+      const pct1 = (n) => (Math.round(n * 10) / 10).toFixed(1) + '%';
+
+      const DEF = {
+        price: '1,000,000', payMode: 'cash', years: 10, down: '200,000', loanYears: 5, loanRate: 3,
+        resMode: 'auto', resPct: 15, cc: 'c1800', evTax: '0', km: '12,000', kmpl: 11.4, fuelPrice: 32.7, evPerKm: 0.8,
+        parking: '0', ins1: '15,000', ins4: '15,000', maint: '15,584', other: '19,312', ret: 7, alt: '2,400', taxi: 25, income: '',
+      };
+      // 交通部 113 年調查：年使用費用 84,317（不含稅費、折舊、利息）。油錢由 12,000km ÷ 11.4 × 32.7 ≈ 34,421 算出，
+      // 保養 15,584，保險填 15,000，其餘 19,312 放「其他」（停車、清潔、過路費等），合計 ≈ 84,317；加稅費 11,920 ＝ 96,237／年
+      // 預設值即為這組交通部平均（與影片一致）
+      const PRESET_NOTE = '預設值是交通部 113 年調查的全國平均（影片用的數字）：一年使用費用 84,317（油錢由 12,000 公里 ÷ 11.4 × 32.7 ≈ 34,421 算出、保養 15,584、保險 15,000，其餘 19,312 放「其他」代表停車、清潔、過路費等），加牌照稅與養管費 11,920，一年 96,237。全國平均含很多老車、小車與自有車位的人——請換成你自己的數字：100 萬新車前 3 年保險常在 2–3 萬，住都市沒車位要加停車費（填了停車費請把「其他」調低，避免重複）。';
+
+      const MONEY = ['price', 'down', 'evTax', 'km', 'parking', 'ins1', 'ins4', 'maint', 'other', 'alt', 'income'];
+      const LIM = {
+        price: [0, 100000000, '車價'], down: [0, 100000000, '頭期款'], evTax: [0, 200000, '電動車牌照稅'], km: [0, 200000, '年里程'],
+        parking: [0, 100000, '每月停車費'], ins1: [0, 1000000, '前 3 年保險'], ins4: [0, 1000000, '第 4 年起保險'],
+        maint: [0, 1000000, '保養維修'], other: [0, 10000000, '其他每年'], alt: [0, 1000000, '替代交通費'], income: [0, 100000000, '月收入'],
+        years: [1, 15, '持有年數', true], loanYears: [1, 7, '貸款年限', true], loanRate: [0, 20, '車貸利率'], resPct: [0, 100, '殘值 %'],
+        kmpl: [1, 100, '油耗'], fuelPrice: [0, 200, '油價'], evPerKm: [0, 20, '每公里電費'], ret: [0, 15, '投資報酬'], taxi: [1, 200, '計程車每公里'],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name, intOnly] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        const isMoney = MONEY.indexOf(id) >= 0;
+        if (id === 'income' && String(raw).trim() === '') return 0;
+        let v = isMoney ? parseMoney(raw) : parseFloat(raw);
+        let def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (!isFinite(def)) def = 0;
+        let changed = false;
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${num0(def)}`); v = def; changed = true; }
+        if (intOnly && v !== Math.round(v)) { v = Math.round(v); changed = true; }
+        if (v < lo) { msgs.push(`「${name}」最小 ${num0(lo)}，已改用 ${num0(lo)}`); v = lo; changed = true; }
+        if (v > hi) { msgs.push(`「${name}」最大 ${num0(hi)}，已改用 ${num0(hi)}`); v = hi; changed = true; }
+        if (commit) el.value = isMoney ? num0(v) : String(v);
+        return v;
+      }
+
+      function readInputs(commit) {
+        const msgs = [];
+        const v = {};
+        Object.keys(LIM).forEach(id => { v[id] = readField(id, msgs, commit); });
+        const payMode = $('payMode').value === 'loan' ? 'loan' : 'cash';
+        if (payMode === 'loan' && v.down > v.price) {
+          msgs.push('頭期款不能超過車價，已改用車價');
+          v.down = v.price;
+          if (commit) $('down').value = num0(v.down);
+        }
+        const cc = Object.prototype.hasOwnProperty.call(window.__ep57.CAR_TAX_TABLE, $('cc').value) ? $('cc').value : 'c1800';
+        const manual = $('resMode').value === 'manual';
+        return {
+          p: {
+            price: v.price, payMode, down: v.down, loanYears: v.loanYears, loanRate: v.loanRate, years: v.years,
+            resPct: manual ? v.resPct : null, cc, evTax: v.evTax, km: v.km, kmpl: v.kmpl, fuelPrice: v.fuelPrice, evPerKm: v.evPerKm,
+            parking: v.parking, ins1: v.ins1, ins4: v.ins4, maint: v.maint, other: v.other, ret: v.ret, alt: v.alt, taxi: v.taxi, income: v.income,
+          }, msgs,
+        };
+      }
+
+      let presetActive = true;
+      function toggle(cls, show) { document.querySelectorAll('.' + cls).forEach(el => el.classList.toggle('hidden', !show)); }
+
+      function render(commit) {
+        const isLoan = $('payMode').value === 'loan';
+        const isEV = $('cc').value === 'ev';
+        toggle('loanOnly', isLoan);
+        toggle('evOnly', isEV);
+        toggle('gasOnly', !isEV);
+        toggle('resManual', $('resMode').value === 'manual');
+
+        const { p, msgs } = readInputs(commit);
+        const nb = $('notice');
+        if (msgs.length) { nb.textContent = msgs.join('；'); nb.classList.remove('hidden'); } else { nb.classList.add('hidden'); }
+
+        const r = window.__ep57.computeCarCost(p);
+        const N = r.N;
+        const t = window.__ep57.CAR_TAX_TABLE[p.cc];
+
+        $('ccNote').innerHTML = isEV
+          ? '電動車：使用牌照稅法授權各縣市可免徵電動車牌照稅到 2030/12/31，實際看設籍縣市；公路養管費目前免繳。電費每公里是自填估計（家用充電與公共快充差很多）。'
+          : `${t.label}：使用牌照稅 ${num0(t.license)}（4 月）＋公路養管費 ${num0(t.road)}（7 月；2026/7 起由汽車燃料使用費更名為公路使用養護安全管理費，費率不變），一年 ${num0(t.license + t.road)}。`;
+        $('resNote').textContent = p.resPct === null
+          ? `殘值用概略折舊曲線：第 1 年剩 85%、5 年剩 45%、10 年剩 15%、15 年剩約 10%。這是概略行情、品牌差異大；持有 ${N} 年估剩 ${pct1(r.resPctEnd)}。`
+          : `殘值用你填的 ${pct1(r.resPctEnd)}；逐年車值沿用概略曲線的形狀等比例縮放。`;
+
+        if (r.price <= 0) {
+          $('cards').innerHTML = '';
+          $('conclusion').innerHTML = '<p>請輸入車價。</p>';
+          ['insight', 'compare', 'rule', 'catBody', 'yearBody'].forEach(id => { $(id).innerHTML = ''; });
+          return;
+        }
+
+        // Cards
+        $('cards').innerHTML = `
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">帳面成本（${N} 年）</div>
+            <div class="text-2xl font-bold text-gray-900">${wan(r.book)}</div>
+            <div class="text-xs text-gray-500 mt-1">每月 ${ntd(r.bookMonthly)}；折舊＋油錢＋保險＋保養＋停車＋稅＋其他${r.loanInterest > 0 ? '＋利息' : ''}</div>
+          </div>
+          <div class="rounded-2xl border border-brand bg-brand/5 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">含機會成本（${N} 年）</div>
+            <div class="text-2xl font-bold" style="color:#C5611A">${wan(r.allIn)}</div>
+            <div class="text-xs text-gray-500 mt-1">每月 ${ntd(r.allInMonthly)}；年化 ${p.ret}% 期望值</div>
+          </div>
+          <div class="rounded-2xl border border-gray-200 p-5">
+            <div class="text-sm font-medium text-gray-600 mb-1">每公里成本（帳面）</div>
+            <div class="text-2xl font-bold text-gray-900">${r.perKm === null ? '—' : 'NT$' + (Math.round(r.perKm * 10) / 10).toFixed(1)}</div>
+            <div class="text-xs text-gray-500 mt-1">${r.perKm === null ? '年里程為 0，無法換算' : `${N} 年共 ${num0(r.totalKm)} 公里`}</div>
+          </div>`;
+
+        const priceW = wan(r.price);
+        $('conclusion').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">結論：這台 ${priceW} 的車，${N} 年真正的代價約 <span style="color:#C5611A">${wan(r.allIn)}</span>，每個月約 ${ntd(r.allInMonthly)}</p>
+          <p>帳單上看得到的是 ${wan(r.book)}（每月 ${ntd(r.bookMonthly)}）；另外 ${wan(r.oppTotal)} 是${r.isLoan ? '頭期款' : '買車的錢'}和每月開銷如果拿去投資、${N} 年後本來會長出來的部分（年化 ${p.ret}% 的期望值，不是保證）。${p.ret === 0 ? '你把報酬設成 0，所以兩個數字一樣。' : ''}</p>`;
+
+        // Insight
+        const depShare = r.book > 0 ? r.depreciation / r.book * 100 : 0;
+        $('insight').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>
+          <p class="mb-2"><strong>折舊 ${wan(r.depreciation)}</strong>：車子 ${N} 年後估剩 ${wan(r.residual)}（原價的 ${pct1(r.resPctEnd)}）。這筆不會有人寄帳單給你，賣車或舊換新那天才一次看到；它佔帳面成本的 ${pct1(depShare)}${depShare < 50 ? '，還不到一半' : ''}。</p>
+          <p class="mb-2"><strong>${N} 年的開銷 ${wan(r.running)}</strong>：油${r.isEV ? '（電）' : ''}錢、保險、保養、停車、稅，平均一年 ${ntd(r.running / N)}、每月 ${ntd(r.running / r.months)}。每一筆單獨看都不大，加起來${r.running > r.depreciation ? '比折舊還多' : '也不小'}。以今天物價算，油錢與停車費上漲沒算進去，所以只會偏低。${r.loanInterest > 0 ? ` 車貸利息另計 ${ntd(r.loanInterest)}。` : ''}</p>
+          <p><strong>看不到的 ${wan(r.oppTotal)}</strong>：${r.isLoan ? '頭期款' : '車價'} ${wan(r.upfront)} 如果拿去投資，${N} 年後約 ${wan(r.lumpFV)}，多長出 <strong>${wan(r.lumpGrowth)}</strong>；每月的開銷${r.pmt > 0 ? '和車貸月付' : ''}（本金合計 ${wan(r.flowSum)}）如果也拿去投資，還會再多 <strong>${wan(r.flowGrowth)}</strong>。${r.payoff > 0.5 ? ` 你的貸款比持有年數長，賣車時要一次還清餘額約 ${ntd(r.payoff)}（已含在帳面計算的本金裡）。` : ''}</p>`;
+
+        // Compare vs no car
+        const be = r.breakEvenKm;
+        const kmVsBe = be === null ? '' : (r.km >= be
+          ? `你填的一年 ${num0(r.km)} 公里，<strong>超過</strong>這個門檻——如果這些里程本來都要叫計程車，有車比較便宜。`
+          : `你填的一年 ${num0(r.km)} 公里，<strong>還沒到</strong>這個門檻。`);
+        $('compare').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">🚇 跟不買車比</p>
+          <p class="mb-2">不開車一樣要移動。用你填的每月 ${ntd(r.altMonthly)}，${N} 年是 <strong>${wan(r.altSum)}</strong>；這筆不買車的交通費，${N} 年本金＋投資成長約 ${wan(r.altFV)}（拿來跟買車的含機會成本比）。</p>
+          <div class="grid sm:grid-cols-2 gap-4 my-4">
+            <div class="rounded-xl border border-gray-200 p-4">
+              <div class="text-sm font-medium text-gray-600 mb-1">帳面：買車比不買多花</div>
+              <div class="text-lg font-bold text-gray-900">${r.diffBook >= 0 ? '' : '−'}${wan(Math.abs(r.diffBook))}</div>
+              <div class="text-xs text-gray-500 mt-1">每月 ${r.diffBook >= 0 ? '' : '−'}${ntd(Math.abs(r.diffBook) / r.months)}</div>
+            </div>
+            <div class="rounded-xl border border-brand bg-brand/5 p-4">
+              <div class="text-sm font-medium text-gray-600 mb-1">含機會成本：買車比不買多花</div>
+              <div class="text-lg font-bold" style="color:#C5611A">${r.diffAllIn >= 0 ? '' : '−'}${wan(Math.abs(r.diffAllIn))}</div>
+              <div class="text-xs text-gray-500 mt-1">每月 ${r.diffAllIn >= 0 ? '' : '−'}${ntd(Math.abs(r.diffAllIn) / r.months)}</div>
+            </div>
+          </div>
+          <p class="mb-2"><strong>跟計程車的損益兩平：</strong>把車的成本拆成不管開不開都會發生的固定成本（折舊、稅、保險、保養、停車、其他${r.loanInterest > 0 ? '、利息' : ''}，平均一年 ${ntd(r.fixedAnnual)}），和開越多越貴的${r.isEV ? '電費' : '油錢'}（每公里約 ${(Math.round(r.fuelPerKm * 100) / 100).toFixed(2)} 元）。
+          ${be === null ? '你填的計程車每公里不高於油電費，算不出損益兩平。' : `對每公里 ${r.taxi} 元的計程車，一年開超過約 <strong>${num0(be)} 公里</strong>，買車比每趟都叫車便宜（影片的約 6,500 公里用的是調查的油料金額，這裡油錢由里程與油耗算，所以略有差異）。${kmVsBe}`}
+          停車用的是你填的每月 ${ntd(p.parking)}。${presetActive ? `<br><span class="text-gray-500">目前「其他」是交通部平均的 19,312， 已經含全國平均的停車、清潔、過路費，這個門檻可視為<strong>保守上限</strong>（家裡有車位的人實際更低）。若你另外填了自己的停車費，請把「其他」調低，避免重複計算。</span>` : ''}</p>
+          <p class="text-gray-600">但多數住在雙北的人不是每一趟都叫車：捷運月票加偶爾叫車，一年的交通費大多是幾萬塊。會讓買車划算的，通常是通勤路線沒有好的大眾運輸、常要載小孩長輩、或工作要跑客戶——那時車是工具，不是奢侈品。</p>`;
+
+        // 20/4/10
+        const rl = r.rule;
+        const mark = (ok) => ok === null ? '—' : (ok ? '✅ 符合' : '⚠️ 超過');
+        const incomeLine = rl.income > 0
+          ? `<li>車相關每月總支出 ≤ 稅前月收入 10%（${ntd(rl.income * 0.1)}）：真實月成本 ${ntd(r.bookMonthly)}，佔 <strong>${pct1(rl.bookPctIncome)}</strong>${rl.loanPctIncome !== null ? `；車貸期間每月實際扣款（月付＋開銷）約 ${ntd(r.loanPeriodMonthly)}，佔 ${pct1(rl.loanPctIncome)}` : ''} → ${mark(rl.incomeOk)}</li>`
+          : '<li>車相關每月總支出 ≤ 稅前月收入 10%：填入稅前月收入就能看</li>';
+        $('rule').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">🧮 20/4/10 檢查（美國理財圈的經驗法則，方向可參考、不用照抄）</p>
+          <p class="text-xs text-gray-500 mb-2">10% 這一條原意是每月實際付出去的現金；有車貸時看貸款期間每月扣款（月付＋開銷）。這裡另外用帳面月成本（含折舊、不含機會成本）一起比、取較高者，是比原法則更嚴格的延伸看法。</p>
+          <ul class="list-disc pl-5 space-y-1 mb-2">
+            <li>頭期款 ≥ 兩成：${r.isLoan ? `你付 ${pct1(rl.downPct)}` : '現金一次付清'} → ${mark(rl.downOk)}</li>
+            <li>車貸 ≤ 4 年：${r.isLoan && r.principal > 0 ? `你貸 ${r.loanYears} 年，月付 ${ntd(r.pmt)}` : '沒有車貸'} → ${mark(rl.loanOk)}</li>
+            ${incomeLine}
+          </ul>
+          <p class="text-gray-600">要算的是全部，不是月付：同一台車，月收入 6 萬跟 15 萬的人，代表的意思完全不一樣。把含機會成本的每月 ${ntd(r.allInMonthly)}，跟你每個月要存下來的錢放在一起看，看它們搶不搶得過。</p>`;
+
+        // Category table
+        const c = r.cats;
+        const catRows = [
+          ['折舊（車價 − 殘值）', c.depreciation],
+          [r.isEV ? '電費' : '油錢', c.fuel],
+          ['保險', c.insurance],
+          ['保養維修', c.maint],
+          ['停車', c.parking],
+          ['牌照稅＋公路養管費', c.tax],
+          ['其他（洗車、過路費等）', c.other],
+        ];
+        if (r.isLoan) catRows.push(['車貸利息（持有期間）', c.interest]);
+        const tr = (label, v, share, strong, color) => `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-3 ${strong ? 'font-semibold text-gray-900' : ''}">${label}</td>
+            <td class="py-2 px-3 text-right ${strong ? 'font-semibold' : ''}" ${color ? 'style="color:#C5611A"' : ''}>${ntd(v)}</td>
+            <td class="py-2 px-3 text-right text-gray-500">${ntd(v / r.months)}</td>
+            <td class="py-2 pl-3 text-right text-gray-500">${share}</td></tr>`;
+        const sh = (v) => r.book > 0 ? pct1(v / r.book * 100) : '—';
+        $('catBody').innerHTML = catRows.map(([l, v]) => tr(l, v, sh(v))).join('')
+          + tr('帳面成本合計', r.book, '100%', true)
+          + tr(`機會成本：${r.isLoan ? '頭期款' : '車價'}的未實現成長`, r.lumpGrowth, '')
+          + tr('機會成本：每月支出的未實現成長', r.flowGrowth, '')
+          + tr('含機會成本合計', r.allIn, '', true, true);
+
+        // Year table
+        $('yearBody').innerHTML = r.rows.map(y => `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-3">${y.year}</td>
+            <td class="py-2 px-3 text-right text-gray-500">${ntd(y.value)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.dep)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.fuel)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.insurance)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.maint)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.parking)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.tax)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.other)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.interest)}</td>
+            <td class="py-2 pl-3 text-right font-medium text-gray-900">${ntd(y.total)}</td></tr>`).join('');
+      }
+
+      function applyValues(vals) {
+        Object.keys(vals).forEach(id => { if ($(id)) $(id).value = vals[id]; });
+      }
+
+      $('presetBtn').addEventListener('click', () => {
+        applyValues(DEF);
+        presetActive = true;
+        render(true);
+      });
+      $('presetNote').textContent = PRESET_NOTE;
+
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => { if (['ins1', 'ins4', 'other', 'parking'].indexOf(id) >= 0) presetActive = $('other').value.replace(/,/g, '') === '19312'; render(false); });
+        $(id).addEventListener('change', () => render(true));
+      });
+      ['payMode', 'cc', 'resMode'].forEach(id => $(id).addEventListener('change', () => render(true)));
+      render(false);
+    })();
+  </script>
+</BaseLayout>
