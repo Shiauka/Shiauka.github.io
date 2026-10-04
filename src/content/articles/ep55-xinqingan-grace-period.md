@@ -176,6 +176,8 @@ draft: false
 
 ---
 
+下一篇：[券商倒了，你的 0050 會跟著消失嗎？你的股票從來不在券商那裡](/articles/ep56-broker-custody-safety)
+
 ## 延伸閱讀
 
 - [有房貸還要投資嗎？我怎麼決定每個月投多少](/articles/ep16-mortgage-and-investment)（EP16）
