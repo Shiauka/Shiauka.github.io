@@ -127,6 +127,8 @@ draft: false
 
 ---
 
+下一篇：[一台 100 萬的車，10 年其實花掉 180 萬：最貴的那一筆不在帳單上](/articles/ep57-car-ownership-true-cost)
+
 ## 延伸閱讀
 
 - [第一證券 vs IB：台灣人開海外券商，我選哪一個？](/articles/ep19-firstrade-ib-account)（EP19）
