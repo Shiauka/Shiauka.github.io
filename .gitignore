@@ -30,8 +30,6 @@ Desktop.ini
 .vscode/settings.json
 .idea/
 
-# Claude Code internal config
-CLAUDE.md
 AGENTS.md
 
 # Deployment platforms (if ever used)
