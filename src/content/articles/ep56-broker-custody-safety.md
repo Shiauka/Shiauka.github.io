@@ -132,7 +132,7 @@ draft: false
 ## 延伸閱讀
 
 - [第一證券 vs IB：台灣人開海外券商，我選哪一個？](/articles/ep19-firstrade-ib-account)（EP19）
-- [家庭財富中位數 894 萬，中間那兩成能動用的只有 221 萬](/articles/ep53-ten-million-liquid-wealth)（EP53）
+- [存到 1,000 萬，每月只能領 2.9 萬：一千萬還不是財務自由](/articles/ep53-ten-million-liquid-wealth)（EP53）
 - [「存股」這兩個字，讓 130 萬人把中鋼當成定存](/articles/ep52-cungu-word-trap)（EP52）
 
 ---

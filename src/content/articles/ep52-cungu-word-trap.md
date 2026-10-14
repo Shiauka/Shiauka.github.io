@@ -197,7 +197,7 @@ draft: false
 
 ---
 
-下一篇：[家庭財富中位數 894 萬，中間那兩成能動用的只有 221 萬](/articles/ep53-ten-million-liquid-wealth)
+下一篇：[存到 1,000 萬，每月只能領 2.9 萬：一千萬還不是財務自由](/articles/ep53-ten-million-liquid-wealth)
 
 ## 延伸閱讀
 
