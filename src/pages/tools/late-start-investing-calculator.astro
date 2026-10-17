@@ -1,0 +1,442 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="40 歲才開始投資計算機"
+  description="同樣要在 65 歲存到 1,000 萬（今天的購買力），25 歲開始每月 6,745，40 歲開始每月 17,073，是兩倍半，不是來不及。填入年紀、現在的存款、打算幾歲退休與目標，算出每月要投入多少、照目前投入退休時有多少，以及再晚 1 年、5 年開始要多付多少——對應 EP58。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP58</p>
+      <h1 class="text-3xl font-bold mb-3">40 歲才開始投資計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        「投資要趁早」是對的，但晚開始的代價可以算出來：同樣要在 65 歲存到 1,000 萬，25 歲開始每月 6,745 元，40 歲開始每月 17,073 元，大約<strong>兩倍半，不是來不及</strong>。
+        填入你的年紀、手上可以投入的錢、打算做到幾歲和目標，算出每個月要投入多少——以及<strong>再拖一年、再拖五年</strong>，要多付多少。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的情況</h2>
+        <div class="flex flex-wrap gap-2">
+          <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到影片的例子（40 歲、從零開始）</button>
+          <button id="kaiBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">套用阿凱的例子</button>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">現在幾歲（18–79）</span>
+          <input id="age" type="number" min="18" max="79" step="1" value="40"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">打算幾歲退休（比現在大、最多 80）</span>
+          <input id="retireAge" type="number" min="19" max="80" step="1" value="65"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">退休時的目標（元，可打「1000萬」「1億」）</span>
+          <input id="target" type="text" inputmode="decimal" value="10,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">現在可以投入的錢（元；先扣掉備用金與兩三年內要用的錢）</span>
+          <input id="pv" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">目前每月投入（元，選填）</span>
+          <input id="current" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">實質年化報酬（%，已扣通膨；期望值非保證）</span>
+          <input id="ret" type="number" min="0" max="12" step="0.1" value="5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">提領率（%，退休後每年領出）</span>
+          <input id="wd" type="number" min="1" max="10" step="0.1" value="3.5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">通膨率（%，算「扣款不調」用）</span>
+          <input id="infl" type="number" min="0" max="10" step="0.1" value="2"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">觀望期間錢放哪的實質報酬（%；定存 1.725% 對通膨 2% ≈ −0.27）</span>
+          <input id="wait" type="number" min="-10" max="12" step="0.01" value="-0.27"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">所有金額都是<strong>今天的購買力</strong>：用實質報酬（名目約 7% 扣掉通膨 2%，簡化為 5%）、每月月底投入、月報酬 (1＋年化)^(1/12)−1 計算。表裡的每月投入是今年的錢，之後每年要跟著物價調高。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Delay cost -->
+    <div id="delay" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Inflation reminder -->
+    <div id="inflBox" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>數字太大時，照這個順序調：</strong>先看手上的存款能放多少進去（記得先留緊急備用金、扣掉兩三年內要用的錢），再看能不能多做幾年，最後才是重新檢查目標。<strong>唯一不要動的是報酬率</strong>——把報酬率調高讓數字變好看，等於靠運氣追時間。</p>
+      <p><strong>多工作幾年只能當加分：</strong>中年被裁員、身體提早喊停都不是自己能決定的。建議用你「一定做得到」的退休年齡當計畫的底。</p>
+      <p><strong>目標往下調要有根據：</strong>是算過退休後真的花不到那麼多（例如房貸會在退休前繳完），不是因為數字看起來太難。勞保年金、勞退另外加，但估勞保寧可抓保守。</p>
+    </div>
+
+    <!-- Start age table -->
+    <details class="mb-6" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">不同起跑年齡：同一個目標，每月要投入多少</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">幾歲開始</th>
+              <th class="py-2 px-3 font-medium text-right">投入年數</th>
+              <th class="py-2 px-3 font-medium text-right">從零開始，每月</th>
+              <th class="py-2 px-3 font-medium text-right">是 25 歲的幾倍</th>
+              <th class="py-2 pl-3 font-medium text-right">帶著你現在的錢，每月</th>
+            </tr>
+          </thead>
+          <tbody id="ageBody"></tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">「帶著你現在的錢」：假設同一筆錢在那個年紀投入（實際上它在等待期間只會照觀望期間的報酬變化，見上方延後代價）。</p>
+    </details>
+
+    <!-- Year table -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">逐年明細（照「需要的每月投入」）</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">年齡（年底）</th>
+              <th class="py-2 px-3 font-medium text-right">累計投入（含現有）</th>
+              <th class="py-2 px-3 font-medium text-right">帳戶（今天購買力）</th>
+              <th class="py-2 pl-3 font-medium text-right">其中長出來的</th>
+            </tr>
+          </thead>
+          <tbody id="yearBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>為什麼晚 15 年是兩倍半：</strong>兩件事疊在一起——每一塊錢能長的時間變短（25 歲投入的一塊錢到 65 歲約變 7.04 元，40 歲投入約 3.39 元），能投入的月份也變少（480 個月變 300 個月）。</p>
+      <p><strong>為什麼越後面越貴：</strong>每晚一年，同時少掉一整年的投入，以及剩下每一筆錢少長一年。少投的錢每年差不多，少長的時間卻因為剩下的年數越來越短而越來越重。從零開始、65 歲到 1,000 萬：25 歲拖到 40 歲平均每年每月多 689 元，40 歲拖到 45 歲平均每年多 1,514 元。</p>
+      <p><strong>追報酬的代價：</strong>40 歲從零開始、每月只投 1 萬，要在 65 歲到 1,000 萬，需要實質年化約 8.6%（名目約 10.8%），比一般長期假設高將近 4 個百分點、還要連續 25 年。槓桿型 ETF 腰斬時，要漲一倍才回得來。</p>
+      <p><strong>一次投入還是分批：</strong>Vanguard 回測顯示一次投入約三分之二的時間結果較好，但平均差距不大；如果一次投入會讓你在下跌時想賣，分批也沒關係，重點是設一個期限投完。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考。報酬率是假設的期望值、不是保證，真實的路會上上下下；實質報酬以名目減通膨簡化，未扣基金內扣費用、交易成本與稅費，實際會略低。每月投入視為每月月底投入、月報酬 (1＋年化)^(1/12)−1；所有金額為今天購買力。勞保年金、勞退未計入，請另外保守估計。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep58-start-investing-at-40" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP58 40 歲才開始投資 →</a>
+      <a href="/articles/ep53-ten-million-liquid-wealth" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">一千萬夠不夠（EP53）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const MAX_YEARS = 60;
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // 年化（%）→ 月報酬：(1+r)^(1/12)−1；r 可為負（> −100%）
+    function monthlyRate(annualPct) {
+      const a = clampN(annualPct, -99, 100) / 100;
+      return Math.pow(1 + a, 1 / 12) - 1;
+    }
+
+    // 期末年金終值因子：Σ(1+rm)^k, k=0..n−1；rm=0 時為 n
+    function annuityFactor(rm, n) {
+      if (n <= 0) return 0;
+      if (Math.abs(rm) < 1e-12) return n;
+      return (Math.pow(1 + rm, n) - 1) / rm;
+    }
+
+    // 現有 pv、每月 pmt（月底投入）、n 個月後的終值
+    function fvPlan(pv, pmt, n, annualPct) {
+      const rm = monthlyRate(annualPct);
+      return pv * Math.pow(1 + rm, n) + pmt * annuityFactor(rm, n);
+    }
+
+    // 要在 n 個月後達到 target，每月要投入多少（現有 pv 一起滾）；已足夠回傳 0
+    function requiredMonthly(target, pv, n, annualPct) {
+      if (n <= 0) return null;
+      const rm = monthlyRate(annualPct);
+      const gap = target - pv * Math.pow(1 + rm, n);
+      if (gap <= 0) return 0;
+      return gap / annuityFactor(rm, n);
+    }
+
+    // 從零開始、每月 pmt，要多少實質年化報酬才能在 n 個月到 target（二分法，0–50%）
+    function requiredReturn(target, pv, pmt, n) {
+      if (n <= 0) return null;
+      if (fvPlan(pv, pmt, n, 0) >= target) return 0;
+      if (fvPlan(pv, pmt, n, 50) < target) return null;
+      let lo = 0, hi = 50;
+      for (let i = 0; i < 100; i++) {
+        const mid = (lo + hi) / 2;
+        if (fvPlan(pv, pmt, n, mid) < target) lo = mid; else hi = mid;
+      }
+      return (lo + hi) / 2;
+    }
+
+    // 主計算
+    function computeLateStart(p) {
+      const age = Math.round(clampN(p.age, 18, 79));
+      const retireAge = Math.round(clampN(p.retireAge, age + 1, Math.min(80, age + MAX_YEARS)));
+      const years = retireAge - age;
+      const n = years * 12;
+      const target = clampN(p.target, 0, 1e11);
+      const pv = clampN(p.pv, 0, 1e11);
+      const current = clampN(p.current, 0, 1e9);
+      const ret = clampN(p.ret, 0, 12);
+      const wd = clampN(p.wd, 1, 10);
+      const infl = clampN(p.infl, 0, 10);
+      const wait = clampN(p.wait, -10, 12);
+
+      // ① 需要的每月投入
+      const need = requiredMonthly(target, pv, n, ret);
+      const needZero = requiredMonthly(target, 0, n, ret);
+      const pvFV = pv * Math.pow(1 + monthlyRate(ret), n);
+
+      // ② 照目前每月投入
+      const curFV = fvPlan(pv, current, n, ret);
+      const curShare = target > 0 ? curFV / target : null;
+      const curMonthlyDraw = curFV * wd / 100 / 12;
+      const targetMonthlyDraw = target * wd / 100 / 12;
+
+      // ③ 延後代價：觀望 d 年，現有資金以 wait 報酬滾存，之後起跑
+      const delays = [1, 5].map(d => {
+        if (age + d >= retireAge) return { d, ok: false };
+        const pvD = pv * Math.pow(1 + wait / 100, d);
+        const nD = (retireAge - age - d) * 12;
+        const req = requiredMonthly(target, pvD, nD, ret);
+        return { d, ok: true, pvD, req, diff: req - need, ratio: need > 0 ? req / need - 1 : null };
+      });
+
+      // ④ 起跑年齡對照（從零開始 / 帶著現有資金在那個年紀投入）
+      const set = [25, 30, 35, 40, 45, 50, 55, 60, 65, 70];
+      if (set.indexOf(age) < 0) set.push(age);
+      const ages = set.filter(a => a >= 18 && a < retireAge && retireAge - a <= MAX_YEARS).sort((a, b) => a - b);
+      const base25 = retireAge > 25 && retireAge - 25 <= MAX_YEARS ? requiredMonthly(target, 0, (retireAge - 25) * 12, ret) : null;
+      const ageRows = ages.map(a => {
+        const nn = (retireAge - a) * 12;
+        const z = requiredMonthly(target, 0, nn, ret);
+        return { age: a, years: retireAge - a, zero: z, withPv: requiredMonthly(target, pv, nn, ret), times: base25 && base25 > 0 ? z / base25 : null, isUser: a === age };
+      });
+
+      // ⑤ 扣款固定名目不調：名目報酬 (1+實質)(1+通膨)−1，終值折回今天購買力
+      const nomAnnual = ((1 + ret / 100) * (1 + infl / 100) - 1) * 100;
+      const fixedNomFV = fvPlan(pv, need || 0, n, nomAnnual);
+      const fixedReal = fixedNomFV / Math.pow(1 + infl / 100, years);
+      const fixedShare = target > 0 ? fixedReal / target : null;
+      const targetNominal = target * Math.pow(1 + infl / 100, years);
+
+      // 逐年明細（照需要的每月投入）
+      const rows = [];
+      const pm = need || 0;
+      for (let y = 1; y <= years; y++) {
+        const fv = fvPlan(pv, pm, y * 12, ret);
+        const paid = pv + pm * 12 * y;
+        rows.push({ age: age + y, paid, fv, growth: fv - paid });
+      }
+
+      return {
+        age, retireAge, years, n, target, pv, current, ret, wd, infl, wait,
+        need, needZero, pvFV, curFV, curShare, curMonthlyDraw, targetMonthlyDraw,
+        delays, ageRows, base25, nomAnnual, fixedReal, fixedShare, targetNominal, rows,
+        reqRetCurrent: current > 0 ? requiredReturn(target, pv, current, n) : null,
+      };
+    }
+
+    // 金額字串解析：吃千分位、空白、NT$、元；支援「億」「萬」與組合（1億2000萬、3萬5000）；
+    // 有無法辨識的單位或文字一律回傳 NaN（由 DOM 端提示並改用預設值，不默默截斷）
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|\s|元/gi, '');
+      let sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      const m = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!m || (m[1] === undefined && m[2] === undefined && m[3] === undefined)) return NaN;
+      const v = (m[1] ? parseFloat(m[1]) * 1e8 : 0) + (m[2] ? parseFloat(m[2]) * 1e4 : 0) + (m[3] ? parseFloat(m[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep58 = { monthlyRate, annuityFactor, fvPlan, requiredMonthly, requiredReturn, computeLateStart, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => Math.abs(n) < 10000 ? 'NT$' + Math.round(n).toLocaleString('en-US') : (Math.round(n / 1000) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+      const pct0 = (x) => Math.round(x * 100) + '%';
+      const fmtNum = (v) => String(Math.round(v * 100) / 100);
+
+      const DEF = { age: 40, retireAge: 65, target: '10,000,000', pv: '0', current: '0', ret: 5, wd: 3.5, infl: 2, wait: -0.27 };
+      const KAI = { age: 40, retireAge: 67, target: '8,000,000', pv: '1,000,000', current: '0', ret: 5, wd: 3.5, infl: 2, wait: -0.27 };
+
+      const MONEY = ['target', 'pv', 'current'];
+      const LIM = {
+        age: [18, 79, '現在幾歲', true], retireAge: [19, 80, '退休年齡', true],
+        target: [0, 100000000000, '目標'], pv: [0, 100000000000, '現在可以投入的錢'], current: [0, 1000000000, '目前每月投入'],
+        ret: [0, 12, '實質年化報酬'], wd: [1, 10, '提領率'], infl: [0, 10, '通膨率'], wait: [-10, 12, '觀望期間報酬'],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name, intOnly] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        const isMoney = MONEY.indexOf(id) >= 0;
+        let v = isMoney ? parseMoney(raw) : parseFloat(raw);
+        let def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (!isFinite(def)) def = 0;
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${isMoney ? num0(def) : def}`); v = def; }
+        if (intOnly && v !== Math.round(v)) v = Math.round(v);
+        if (v < lo) { msgs.push(`「${name}」最小 ${num0(lo)}，已改用 ${num0(lo)}`); v = lo; }
+        if (v > hi) { msgs.push(`「${name}」最大 ${num0(hi)}，已改用 ${num0(hi)}`); v = hi; }
+        if (commit) el.value = isMoney ? num0(v) : fmtNum(v);
+        return v;
+      }
+
+      function readInputs(commit) {
+        const msgs = [];
+        const v = {};
+        Object.keys(LIM).forEach(id => { v[id] = readField(id, msgs, commit); });
+        const maxRetire = Math.min(80, v.age + 60);
+        if (v.retireAge <= v.age) {
+          const fixed = Math.min(80, v.age + 1);
+          msgs.push(`退休年齡要大於現在年齡，已改用 ${fixed}`);
+          v.retireAge = fixed;
+          if (commit) $('retireAge').value = String(fixed);
+        } else if (v.retireAge > maxRetire) {
+          msgs.push(`投入期間最多 60 年，退休年齡已改用 ${maxRetire}`);
+          v.retireAge = maxRetire;
+          if (commit) $('retireAge').value = String(maxRetire);
+        }
+        return { p: v, msgs };
+      }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div>
+          <div class="text-[11px] text-gray-400 mt-2">今天的購買力・期望值</div></div>`;
+      }
+
+      function render(commit) {
+        const { p, msgs } = readInputs(commit);
+        const r = window.__ep58.computeLateStart(p);
+        const notice = $('notice');
+        notice.textContent = msgs.join('；');
+        notice.classList.toggle('hidden', msgs.length === 0);
+
+        if (!(p.target > 0)) {
+          notice.textContent = (msgs.length ? msgs.join('；') + '；' : '') + '請填大於 0 的目標金額';
+          notice.classList.remove('hidden');
+          $('cards').innerHTML = '<div class="sm:col-span-3 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800">請在「退休時的目標」填一個大於 0 的金額，才能算出每月要投入多少。</div>';
+          ['conclusion', 'delay', 'inflBox'].forEach(id => { $(id).innerHTML = ''; });
+          $('ageBody').innerHTML = '';
+          $('yearBody').innerHTML = '';
+          return;
+        }
+
+        const needTxt = r.need === 0 ? 'NT$0' : ntd(r.need);
+        const needDesc = r.need === 0
+          ? `你現在的 ${wan(r.pv)} 放著滾到 ${r.retireAge} 歲，約 ${wan(r.pvFV)}，已經超過目標，不用再每月投入（仍是期望值）`
+          : `${r.age} 歲起每月投入、做到 ${r.retireAge} 歲（${r.years} 年），${r.pv > 0 ? `加上現在的 ${wan(r.pv)}，` : '從零開始，'}到 ${wan(r.target)}`;
+        const curDesc = r.current > 0 || r.pv > 0
+          ? `相當目標的 ${r.curShare === null ? '—' : pct0(r.curShare)}；用 ${r.wd}% 提領，每月約 ${ntd(r.curMonthlyDraw)}`
+          : '填入目前每月投入就能看';
+        const d1 = r.delays[0];
+        const delayDesc = d1.ok
+          ? (r.need > 0 ? `每月要 ${ntd(d1.req)}，多 ${ntd(d1.diff)}` : `每月要 ${ntd(d1.req)}`)
+          : (r.years === 1 ? '離退休剛好 1 年，晚 1 年開始就到退休了，沒有時間投入' : '已超過退休年齡');
+        $('cards').innerHTML =
+          card('要達成目標，每月需投入', needTxt, needDesc, true) +
+          card(`照目前每月 ${ntd(r.current)}，${r.retireAge} 歲時有`, wan(r.curFV), curDesc, false) +
+          card('如果晚 1 年才開始', d1.ok ? ntd(d1.req) : '—', delayDesc, false);
+
+        // Conclusion
+        const z25 = r.base25;
+        const timesTxt = z25 && z25 > 0 && r.needZero ? `${(Math.round(r.needZero / z25 * 10) / 10).toFixed(1)} 倍` : '—';
+        $('conclusion').innerHTML = `
+          <p class="mb-2"><strong>結論：</strong>${r.need === 0
+            ? `你手上的錢已經足夠在 ${r.retireAge} 歲長到目標（期望值）。重點變成：選一個跌五成也不會賣的配置，讓它待得住。`
+            : `${r.age} 歲開始、做到 ${r.retireAge} 歲，要到 ${wan(r.target)}，每個月要投入 <strong>${ntd(r.need)}</strong>。`}
+          ${r.need > 0 && r.pv > 0 ? `如果從零開始要 ${ntd(r.needZero)}——手上那筆錢先投進去，每月就少了 ${ntd(r.needZero - r.need)}。` : ''}</p>
+          <p class="mb-2">${r.age > 25 && z25 !== null ? `跟 25 歲就從零開始的人（每月 ${ntd(z25)}）比，你從零開始是他的 <strong>${timesTxt}</strong>。` : ''}
+          目標 ${wan(r.target)} 用 ${r.wd}% 提領，每月約 ${ntd(r.targetMonthlyDraw)}；勞保年金、勞退另外加，但估勞保寧可保守。</p>
+          ${r.current > 0 && r.need > 0 ? `<p>${r.reqRetCurrent === null ? `照目前每月 ${ntd(r.current)}，實質報酬要超過 50% 才追得到，不建議靠報酬率補。` : (r.reqRetCurrent <= 0 ? `照目前每月 ${ntd(r.current)}，報酬率 0 也追得到目標。` : `照目前每月 ${ntd(r.current)} 要追到目標，需要實質年化約 <strong>${(Math.round(r.reqRetCurrent * 10) / 10).toFixed(1)}%</strong>${r.reqRetCurrent > r.ret ? `，比你填的 ${r.ret}% 高——先調存款、退休年齡、目標，不要靠報酬率追` : '，在你填的假設之內'}。`)}</p>` : ''}`;
+
+        // Delay
+        const dl = r.delays.map(d => d.ok
+          ? `<div class="rounded-xl border ${d.d === 5 ? 'border-red-300' : 'border-gray-200'} p-4">
+              <div class="text-sm font-medium text-gray-600 mb-1">觀望 ${d.d} 年，${r.age + d.d} 歲才開始</div>
+              <div class="text-lg font-bold text-gray-900">${ntd(d.req)}<span class="text-sm font-normal text-gray-500"> ／月</span></div>
+              <div class="text-xs text-gray-500 mt-1">${r.need > 0 ? `比現在開始多 ${ntd(d.diff)}${d.ratio !== null && Math.round(d.diff) !== 0 ? `（多 ${pct0(d.ratio)}）` : ''}；平均每拖一年多 ${ntd(d.diff / d.d)}` : '現在開始不用再投入'}${r.pv > 0 ? `；觀望期間 ${wan(r.pv)} 變成 ${wan(d.pvD)}` : ''}</div></div>`
+          : `<div class="rounded-xl border border-gray-200 p-4 text-gray-500">觀望 ${d.d} 年：${r.age + d.d === r.retireAge ? '等於退休年齡，到退休就沒有時間投入了' : '已超過退休年齡，無法計算'}</div>`).join('');
+        $('delay').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">⏳ 最貴的一筆：接下來再拖的每一年</p>
+          <div class="grid sm:grid-cols-2 gap-4 my-3">${dl}</div>
+          <p class="text-gray-600">${r.age >= 30 ? '已經錯過的年數拿不回來，而且算下來沒有想像中貴；' : '接下來每晚一年，代價都比前一年更貴；'}真正貴的是「再研究一下」「等這波跌下來」「明年加薪再開始」這樣一年又一年。觀望期間的錢用你填的 ${r.wait}%（實質）計算。</p>`;
+
+        // Inflation reminder
+        $('inflBox').innerHTML = r.need > 0
+          ? `<p class="font-semibold text-gray-900 mb-1">🔁 扣款要每年跟著物價調高</p>
+             <p>上面的 ${ntd(r.need)} 是今年的錢。物價每年漲 ${r.infl}%，扣款也要每年調高約 ${r.infl}%（明年約 ${ntd(r.need * (1 + r.infl / 100))}）。如果一直固定扣 ${ntd(r.need)} 不調，${r.retireAge} 歲時大約只有今天購買力的 <strong>${wan(r.fixedReal)}</strong>，只達成目標的 <strong>${r.fixedShare === null ? '—' : pct0(r.fixedShare)}</strong>。另外，今天購買力的 ${wan(r.target)}，到 ${r.retireAge} 歲時帳面上大約是 ${wan(r.targetNominal)}。</p>`
+          : `<p class="font-semibold text-gray-900 mb-1">🔁 今天購買力 vs 帳面金額</p><p>今天購買力的 ${wan(r.target)}，到 ${r.retireAge} 歲時帳面上大約是 ${wan(r.targetNominal)}（通膨 ${r.infl}%）。</p>`;
+
+        // Age table
+        $('ageBody').innerHTML = r.ageRows.map(a => `<tr class="border-b border-gray-100 ${a.isUser ? 'bg-brand/5 font-semibold' : ''}">
+            <td class="py-2 pr-3">${a.age} 歲${a.isUser ? '（你）' : ''}</td>
+            <td class="py-2 px-3 text-right">${a.years} 年</td>
+            <td class="py-2 px-3 text-right">${ntd(a.zero)}</td>
+            <td class="py-2 px-3 text-right text-gray-500">${a.times === null ? '—' : (Math.round(a.times * 10) / 10).toFixed(1)}</td>
+            <td class="py-2 pl-3 text-right">${r.pv > 0 ? ntd(a.withPv) : '—'}</td></tr>`).join('');
+
+        // Year table
+        $('yearBody').innerHTML = r.rows.map(y => `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-3">${y.age}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.paid)}</td>
+            <td class="py-2 px-3 text-right">${ntd(y.fv)}</td>
+            <td class="py-2 pl-3 text-right text-gray-500">${ntd(y.growth)}</td></tr>`).join('');
+      }
+
+      function applyValues(vals) { Object.keys(vals).forEach(id => { if ($(id)) $(id).value = vals[id]; }); }
+      $('presetBtn').addEventListener('click', () => { applyValues(DEF); render(true); });
+      $('kaiBtn').addEventListener('click', () => { applyValues(KAI); render(true); });
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
