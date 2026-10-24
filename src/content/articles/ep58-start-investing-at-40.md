@@ -188,6 +188,8 @@ draft: false
 
 ---
 
+下一篇：[勞保 60 歲領還是 65 歲領：差的那 5 年，你要活過 85 歲才賺得回來](/articles/ep59-labor-insurance-claim-age)
+
 ## 延伸閱讀
 
 - [存到 1,000 萬，每月只能領 2.9 萬：一千萬還不是財務自由](/articles/ep53-ten-million-liquid-wealth)

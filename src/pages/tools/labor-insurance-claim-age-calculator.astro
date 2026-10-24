@@ -1,0 +1,454 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="勞保請領年齡損益兩平計算機"
+  description="勞保老年年金提前一年少 4%、延後一年多 4%，比例終身固定。填入平均月投保薪資與年資，算出 60 到 70 歲開始領的月領金額、彼此要活到幾歲才打平、活到 75 到 95 歲各領多少，並對照 114 年生命表的存活機率——對應 EP59。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP59</p>
+      <h1 class="text-3xl font-bold mb-3">勞保請領年齡損益兩平計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        勞保年金幾歲開始領，是一輩子只能選一次的決定：提早一年少 4%、晚一年多 4%，比例<strong>終身固定</strong>。
+        以投保薪資 45,800、年資 30 年為例，等到 65 歲的人要活過 <strong>85 歲</strong>才追得上 60 歲就領的人；等到 70 歲的人要活過 <strong>95 歲</strong>才追得上 65 歲就領的人。
+        填入你自己的投保薪資和年資，看看你的數字。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的勞保</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到影片的例子（45,800、30 年）</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">平均月投保薪資（元，加保期間最高 60 個月平均；2026 年上限 45,800）</span>
+          <input id="wage" type="text" inputmode="decimal" value="45,800"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">到 60 歲時的勞保年資（年，可填一位小數；已不上班的填停止時的年資）</span>
+          <input id="yrs60" type="number" min="0" max="45" step="0.1" value="30"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">60 歲以後繼續上班、保勞保到幾歲（60＝不繼續，最多 70）</span>
+          <input id="stopAge" type="number" min="60" max="70" step="1" value="60"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">早拿到的錢的實質報酬（%，0–5；0＝不算利息）</span>
+          <input id="disc" type="number" min="0" max="5" step="0.5" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">存活機率用哪一組</span>
+          <select id="sex"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="all" selected>全體</option>
+            <option value="m">男性</option>
+            <option value="f">女性</option>
+          </select>
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="block">
+            <span class="text-sm text-gray-600">自訂比較：較早</span>
+            <input id="cmpA" type="number" min="60" max="70" step="1" value="60"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">較晚（歲）</span>
+            <input id="cmpB" type="number" min="60" max="70" step="1" value="70"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">年金＝平均月投保薪資 × 年資 × 1.55%（另一式 ×0.775%＋3,000，兩式擇優，§58-1）；法定請領年齡 65 歲（民國 51 年以後出生），每提前 1 年減 4%、每延後 1 年加 4%，最多 ±20%（§58-2）。請領須離職退保，所以請領年齡不會早於你停止上班的年紀。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Survival -->
+    <div id="survival" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>損益兩平年齡：</strong>兩種領法領到的總額在這個年紀打平。活不到這個年紀，早領的人領得多；活過這個年紀，晚領的人領得多。因為增減都是同一個 4%，<strong>損益兩平點跟投保薪資、年資無關</strong>。</p>
+      <p><strong>這不是數學題：</strong>這個決定 60 歲就要做，答案卻要到 80 幾歲才知道。真正要判斷的是你的身體、家族長輩的壽命、60 歲以後有沒有別的錢可以先用（勞退專戶 60 歲可領、自己的投資）、還想不想繼續上班。</p>
+      <p><strong>晚領的價值是長壽保險：</strong>勞保年金活多久領多久。延後請領保護的是「活得很久、自己存的錢先用完」的情況；活得短用不到，活得長最有用。</p>
+      <p><strong>早拿到的錢的實質報酬：</strong>如果你手上本來就有投資，早領的勞保拿去付生活費、讓投資少賣一點，效果就像把早領的錢拿去投資，打平點會往後推。手上只有現金、錢都放活存的人，這格填 0 比較接近。</p>
+    </div>
+
+    <!-- Monthly table -->
+    <details class="mb-6" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">各年齡開始領：每月多少、跟 65 歲比要活到幾歲才打平</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">幾歲開始領</th>
+              <th class="py-2 px-3 font-medium text-right">年資</th>
+              <th class="py-2 px-3 font-medium text-right">增減</th>
+              <th class="py-2 px-3 font-medium text-right">每月</th>
+              <th class="py-2 pl-3 font-medium text-right">跟 65 歲領比，打平年齡</th>
+            </tr>
+          </thead>
+          <tbody id="ageBody"></tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">70 歲以後才領也可以，但不會再增加（最多加 20%）。</p>
+    </details>
+
+    <!-- Cumulative table -->
+    <details class="mb-8" open>
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">活到不同年紀，各領法累計領到多少</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead id="cumHead"></thead>
+          <tbody id="cumBody"></tbody>
+        </table>
+      </div>
+      <p id="cumNote" class="text-xs text-gray-400 mt-2"></p>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>沒算物價調整：</strong>勞保年金在消費者物價指數累計成長達 5% 時調整，但依<strong>請領年度分別計算</strong>，不是所有人同時調（§65-4）。比較早開始領的人比較早吃到調整，所以實際上，早領比這裡算的再划算一點。</p>
+      <p><strong>請領要先離職退保：</strong>請領老年給付須辦理離職退保（§58 III），領了之後不能再參加勞保（§58 VI）。領了以後還是可以再去上班，雇主要幫你保職災保險，但勞保年資就停在退保那天。65 歲以後還沒領、繼續工作的人，可以繼續保勞保（§9）。</p>
+      <p><strong>做到 70 歲是兩件事疊在一起：</strong>多上班的年資，加上延後的加給。以影片的例子，做到 70 歲（年資 40 年）才領每月約 34,075，剛好是 60 歲就領 17,038 的兩倍，大約一半來自年資、一半來自延後。</p>
+      <p><strong>晚領的另一筆成本：國民年金保費。</strong>60 歲就不上班、又還沒領勞保老年給付的人，65 歲前要加入國民年金（國民年金法 §7），每月要繳一千多元；已領勞保老年給付的人不必加保。本工具沒有把這筆保費算進去，所以對「不上班但延後領」的人，實際上晚領比這裡算的再吃虧一點。</p>
+      <p><strong>平均月投保薪資：</strong>月領年金用加保期間<strong>最高 60 個月</strong>平均（§19），60 歲以後換低薪兼職不會拉低。2026 年投保薪資上限 45,800，月薪再高也只算到上限。</p>
+      <p><strong>年資：</strong>年資未滿一年的部分依實際加保月數按比例計算，本工具年資可填一位小數。</p>
+      <p><strong>年資未滿 15 年：</strong>不能月領，也不能提早，65 歲起請領老年一次金，每滿 1 年給 1 個月平均月投保薪資（60 歲後年資的計算以勞保局核定為準）。勞保年資不足 15 年、併計國民年金年資才符合的人，可請領勞保老年年金（§74-2），但要 65 歲起，不適用提前減給或延後增給，本工具不涵蓋。</p>
+      <p><strong>一次請領：</strong>只有 2009 年 1 月 1 日以前就有勞保年資的人可以選（§58 II），核付後不能改。年資前 15 年每年 1 個月、之後每年 2 個月，60 歲前最高 45 個月（60 歲後繼續工作另計最多 5 年，合計 50 個月），用的是<strong>退保前 3 年</strong>的平均月投保薪資（§19）。本工具不比較一次請領。</p>
+      <p><strong>官方試算：</strong>實際年資與投保薪資請登入勞保局 e 化服務查詢，也可以用<a href="https://www.bli.gov.tw/0109187.html" target="_blank" rel="noopener" class="text-brand underline">勞保局的試算</a>。年金要自己申請，自申請當月起按月發給（§65-1）。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，依勞工保險條例現行規定（115/01/21 修正版）與 2026 年投保薪資分級表試算，未計物價調整、未計軍公教與特殊危險工作等特殊規定；規定可能修改，實際金額以勞保局核定為準。存活機率取自內政部 114 年簡易生命表（期間生命表，非世代預測）。累計金額逐月計算、每月月初入帳；實質報酬大於 0 時，金額折算回 60 歲時的價值。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep59-labor-insurance-claim-age" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP59 勞保幾歲領 →</a>
+      <a href="/tools/labor-pension-voluntary-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">勞退自提計算機（EP51）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const WAGE_MIN = 11100, WAGE_MAX = 45800;   // 部分工時最低級距 11,100；2026 年上限 45,800
+    const LEGAL_AGE = 65;                        // §58 V：民國 51 年以後出生
+    const MAX_AGE = 110;                         // 損益兩平逐月計算上限
+    // 內政部 114 年簡易生命表：生存數（60、65、85+ 起點）
+    const LIFE = {
+      all: { l60: 90819, l65: 86975, l85: 51587 },
+      m:   { l60: 87379, l65: 82058, l85: 41353 },
+      f:   { l60: 94262, l65: 91922, l85: 62040 },
+    };
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // §58-1 兩式擇優（未四捨五入）
+    function baseAnnuity(wage, years) {
+      const a = wage * years * 0.00775 + 3000;
+      const b = wage * years * 0.0155;
+      return Math.max(a, b);
+    }
+
+    // §58-2：請領年齡對應的增減比例（60–64 減、66–70 加，70 以上不再加）
+    function ageFactor(claimAge) {
+      const d = clampN(claimAge, 60, 70) - LEGAL_AGE;
+      return 1 + 0.04 * d;
+    }
+
+    // 某請領年齡的月領：精確值（未四捨五入，用於損益兩平與累計）
+    function monthlyExact(wage, years, claimAge) {
+      return baseAnnuity(wage, years) * ageFactor(claimAge);
+    }
+    // 某請領年齡的月領（元，四捨五入到整數；顯示用）
+    function monthlyAt(wage, years, claimAge) {
+      return Math.round(monthlyExact(wage, years, claimAge));
+    }
+
+    // 時點定義：自 60 歲起經過 k 個月的月底（年齡＝60＋k/12），此時已收到的月數＝k −（請領年齡−60）×12
+    // 第 t 個月（t＝0 起，60＋t/12 歲那個月）入帳、折現因子 v^t；discPct＝實質年化（%），折回 60 歲
+    // 回傳最早使較晚領法累計 ≥ 較早領法累計的月底年齡；MAX_AGE 前追不上回傳 null。b1、b2 請傳精確月額
+    function breakEven(a1, b1, a2, b2, discPct) {
+      if (!(b2 > b1) || !(a2 > a1)) return null;
+      const v = Math.pow(1 + clampN(discPct, 0, 20) / 100, -1 / 12);
+      const s1 = Math.round((a1 - 60) * 12), s2 = Math.round((a2 - 60) * 12);
+      let c1 = 0, c2 = 0, d = 1;
+      const K = (MAX_AGE - 60) * 12;
+      for (let k = 1; k <= K; k++) {
+        const t = k - 1;
+        if (t >= s1) c1 += b1 * d;
+        if (t >= s2) c2 += b2 * d;
+        d *= v;
+        if (k > s2 && c2 >= c1 * (1 - 1e-12)) return 60 + k / 12;
+      }
+      return null;
+    }
+
+    // 從請領年齡 a、月領 b，到活到 X 歲（不含 X 歲當月）為止的累計（現值）
+    function cumulative(a, b, X, discPct) {
+      const v = Math.pow(1 + clampN(discPct, 0, 20) / 100, -1 / 12);
+      let s = 0, d = 1;
+      const T = Math.round((Math.min(X, MAX_AGE) - 60) * 12);
+      for (let t = 0; t < T; t++) {
+        if (60 + t / 12 >= a - 1e-9) s += b * d;
+        d *= v;
+      }
+      return s;
+    }
+
+    function survivalTo85(sex, fromAge) {
+      const L = LIFE[sex] || LIFE.all;
+      return L.l85 / (fromAge >= 65 ? L.l65 : L.l60);
+    }
+
+    // 主計算
+    // p: { wage, yrs60, stopAge, disc, sex, cmpA, cmpB }
+    function computeClaimAge(p) {
+      const wage = clampN(p.wage, WAGE_MIN, WAGE_MAX);
+      const yrs60 = Math.round(clampN(p.yrs60, 0, 45) * 10) / 10;
+      const stopAge = Math.round(clampN(p.stopAge, 60, 70));
+      const disc = clampN(p.disc, 0, 5);
+      const sex = LIFE[p.sex] ? p.sex : 'all';
+      const years = Math.round((yrs60 + (stopAge - 60)) * 10) / 10;   // 停止上班時的總年資
+      const eligible = years >= 15;                  // 月領門檻
+      const earliest = Math.max(60, stopAge);        // 須離職退保才能領
+
+      const rows = [];
+      for (let a = 60; a <= 70; a++) {
+        if (!eligible || a < earliest) { rows.push({ age: a, ok: false }); continue; }
+        rows.push({ age: a, ok: true, years, factor: ageFactor(a), monthly: monthlyAt(wage, years, a), exact: monthlyExact(wage, years, a) });
+      }
+      const byAge = {}, ex = {};
+      rows.forEach(r => { if (r.ok) { byAge[r.age] = r.monthly; ex[r.age] = r.exact; } });
+      const m65 = ex[65];
+      rows.forEach(r => {
+        if (!r.ok || r.age === 65 || m65 === undefined) { r.be65 = null; return; }
+        r.be65 = r.age < 65 ? breakEven(r.age, r.exact, 65, m65, disc) : breakEven(65, m65, r.age, r.exact, disc);
+      });
+
+      // 主要比較：最早可領 vs 65、65 vs 70（最早已晚於 65 時：最早 vs 70）
+      const pairs = [];
+      if (eligible) {
+        if (earliest < 65) pairs.push([earliest, 65]);
+        if (earliest <= 65) pairs.push([65, 70]);
+        else if (earliest < 70) pairs.push([earliest, 70]);
+      }
+      const comps = pairs.map(([x, y]) => ({ a1: x, b1: byAge[x], a2: y, b2: byAge[y], be: breakEven(x, ex[x], y, ex[y], disc) }));
+
+      // 自訂比較
+      let ca = Math.round(clampN(p.cmpA, 60, 70)), cb = Math.round(clampN(p.cmpB, 60, 70));
+      if (ca > cb) { const t = ca; ca = cb; cb = t; }
+      let custom = null;
+      if (eligible && ca !== cb && byAge[ca] !== undefined && byAge[cb] !== undefined) {
+        custom = { a1: ca, b1: byAge[ca], a2: cb, b2: byAge[cb], be: breakEven(ca, ex[ca], cb, ex[cb], disc) };
+      }
+
+      // 累計總額
+      const claimSet = eligible ? [earliest, 65, 70].filter((a, i, s) => a >= earliest && s.indexOf(a) === i) : [];
+      const cumAges = [75, 80, 85, 90, 95];
+      const cum = cumAges.map(X => ({ X, vals: claimSet.map(a => cumulative(a, ex[a], X, disc)) }));
+
+      // 年資不足：老年一次金（65 歲起，每滿 1 年 1 個月）
+      const lumpSum = eligible ? null : { age: Math.max(LEGAL_AGE, stopAge), amount: wage * years, months: years };
+
+      return {
+        wage, yrs60, stopAge, disc, sex, years, eligible, earliest, rows, byAge, comps, custom, ca, cb,
+        claimSet, cum, lumpSum,
+        surv60: survivalTo85(sex, 60), surv65: survivalTo85(sex, 65),
+      };
+    }
+
+    // 金額字串解析：吃千分位、空白、NT$、元、「萬」；無法辨識回傳 NaN
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|\s|元/gi, '');
+      if (str === '') return NaN;
+      const m = str.match(/^(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
+      const v = (m[1] ? parseFloat(m[1]) * 1e4 : 0) + (m[2] ? parseFloat(m[2]) : 0);
+      return isFinite(v) ? v : NaN;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep59 = { baseAnnuity, ageFactor, monthlyExact, monthlyAt, breakEven, cumulative, survivalTo85, computeClaimAge, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => (Math.round(n / 1000) / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' 萬';
+      const pct1 = (x) => (Math.round(x * 1000) / 10).toFixed(1) + '%';
+      const ageTxt = (a) => a === null ? '110 歲前' : `約 ${(Math.round(a * 10) / 10).toFixed(1)} 歲`;
+      const beTxt = (a) => a === null ? '在 110 歲前都不會打平' : `在 <strong>${ageTxt(a)}</strong> 打平`;
+
+      const DEF = { wage: '45,800', yrs60: 30, stopAge: 60, disc: 0, sex: 'all', cmpA: 60, cmpB: 70 };
+      const LIM = {
+        wage: [11100, 45800, '平均月投保薪資', false, true],
+        yrs60: [0, 45, '60 歲時的年資', 'tenth'],
+        stopAge: [60, 70, '保勞保到幾歲', true],
+        disc: [0, 5, '實質報酬'],
+        cmpA: [60, 70, '自訂比較（較早）', true],
+        cmpB: [60, 70, '自訂比較（較晚）', true],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name, intOnly, isMoney] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        let v = isMoney ? parseMoney(raw) : parseFloat(raw);
+        const def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${num0(def)}`); v = def; }
+        if (intOnly === 'tenth') { const r1 = Math.round(v * 10) / 10; if (r1 !== v) { msgs.push(`「${name}」以一位小數計，已改用 ${r1}`); v = r1; } }
+        else if (intOnly && v !== Math.floor(v)) { v = Math.floor(v); msgs.push(`「${name}」以整數計，已改用 ${v}`); }
+        if (v < lo) { msgs.push(`「${name}」最小 ${num0(lo)}，已改用 ${num0(lo)}`); v = lo; }
+        if (v > hi) { msgs.push(`「${name}」最大 ${num0(hi)}${id === 'wage' ? '（2026 年投保薪資上限）' : ''}，已改用 ${num0(hi)}`); v = hi; }
+        if (commit) el.value = isMoney ? num0(v) : String(v);
+        // 欄位下方小字：實際採用的值與輸入不同時顯示
+        let hint = document.getElementById('hint_' + id);
+        if (!hint) { hint = document.createElement('span'); hint.id = 'hint_' + id; hint.className = 'block text-xs text-amber-700 mt-1'; el.insertAdjacentElement('afterend', hint); }
+        const typed = isMoney ? parseMoney(raw) : parseFloat(raw);
+        hint.textContent = (String(raw).trim() === '' || !isFinite(typed) || typed !== v) ? `已用 ${isMoney ? num0(v) : v} 計算` : '';
+        return v;
+      }
+
+      function readInputs(commit) {
+        const msgs = [];
+        const v = {};
+        Object.keys(LIM).forEach(id => { v[id] = readField(id, msgs, commit); });
+        v.sex = $('sex').value;
+        return { p: v, msgs };
+      }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      function render(commit) {
+        const { p, msgs } = readInputs(commit);
+        const r = window.__ep59.computeClaimAge(p);
+        const notice = $('notice');
+        notice.textContent = msgs.join('；');
+        notice.classList.toggle('hidden', msgs.length === 0);
+        const sexName = { all: '全體', m: '男性', f: '女性' }[r.sex];
+        const discTxt = r.disc > 0 ? `（早拿到的錢以實質 ${r.disc}% 計）` : '（不算利息、不算物價調整）';
+
+        if (!r.eligible) {
+          $('cards').innerHTML = `<div class="sm:col-span-3 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800 leading-relaxed">
+            停止上班時勞保年資 <strong>${r.years} 年</strong>，未滿 15 年，<strong>不能月領老年年金，也不能提早領</strong>。
+            ${r.lumpSum.age} 歲起可請領老年一次金：${r.lumpSum.months} 個月 × ${ntd(r.wage)} ≈ <strong>${ntd(r.lumpSum.amount)}</strong>（每滿 1 年給 1 個月平均月投保薪資，未滿一年按比例；60 歲後年資的計算以勞保局核定為準）。
+            若併計國民年金年資滿 15 年，可依 §74-2 於 65 歲起請領勞保老年年金，請洽勞保局。</div>`;
+          $('conclusion').innerHTML = '<p>年資滿 15 年才有「幾歲開始領」的選擇。每多保一年勞保，年資就多一年；也可以登入勞保局 e 化服務確認自己的年資。</p>';
+          $('ageBody').innerHTML = '';
+          $('cumHead').innerHTML = '';
+          $('cumBody').innerHTML = '';
+          $('cumNote').textContent = '';
+          renderSurvival(r, sexName);
+          return;
+        }
+
+        // Cards
+        const cardHtml = r.comps.map((c, i) => card(
+          `${c.a1} 歲 vs ${c.a2} 歲開始領`,
+          c.be === null ? '110 歲前不打平' : `${(Math.round(c.be * 10) / 10).toFixed(1)} 歲`,
+          `${c.a1} 歲起每月 ${ntd(c.b1)}；${c.a2} 歲起每月 ${ntd(c.b2)}。活過這個年紀，${c.a2} 歲才領的人領得多${discTxt}`,
+          i === 0)).join('');
+        const surv = r.earliest >= 65 ? r.surv65 : r.surv60;
+        const survCard = card(`${r.earliest >= 65 ? 65 : 60} 歲的人活到 85 歲（${sexName}）`, pct1(surv),
+          '內政部 114 年簡易生命表；期間生命表，不是預測你這一代', false);
+        $('cards').innerHTML = cardHtml + (r.comps.length < 3 ? survCard : '');
+
+        // Conclusion
+        const c0 = r.comps[0];
+        const lines = [];
+        lines.push(`停止上班時勞保年資 <strong>${r.years} 年</strong>、平均月投保薪資 ${ntd(r.wage)}。${r.stopAge > 60 ? `你保勞保到 ${r.stopAge} 歲，請領須離職退保，所以最早 ${r.earliest} 歲才能領。` : ''}`);
+        if (r.byAge[65] !== undefined) lines.push(`65 歲開始領，每月約 <strong>${ntd(r.byAge[65])}</strong>。`);
+        if (c0) lines.push(`${c0.a1} 歲就領每月 ${ntd(c0.b1)}，${c0.a2} 歲才領每月 ${ntd(c0.b2)}；兩者累計總額${beTxt(c0.be)}${discTxt}。`);
+        if (r.custom) lines.push(`自訂比較：${r.custom.a1} 歲（${ntd(r.custom.b1)}）vs ${r.custom.a2} 歲（${ntd(r.custom.b2)}），${beTxt(r.custom.be)}。`);
+        else if (r.ca === r.cb) lines.push('自訂比較：兩個年齡相同，請填不同的年齡。');
+        else lines.push(`自訂比較：${r.ca} 歲在你的設定下還不能領（最早 ${r.earliest} 歲）。`);
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結果：</strong>${lines.join('')}</p>
+          <p class="text-gray-600">哪一種領法贏，完全看你活到幾歲。這個工具只算損益兩平，不替你決定——身體狀況、家族長輩的壽命、60 歲以後有沒有別的錢可以先用，比這個數字更重要。</p>`;
+
+        // Monthly table
+        $('ageBody').innerHTML = r.rows.map(x => x.ok
+          ? `<tr class="border-b border-gray-100 ${x.age === 65 ? 'bg-brand/5 font-semibold' : ''}">
+              <td class="py-2 pr-3">${x.age} 歲${x.age === 65 ? '（法定）' : ''}</td>
+              <td class="py-2 px-3 text-right">${x.years} 年</td>
+              <td class="py-2 px-3 text-right text-gray-500">${x.factor === 1 ? '—' : (x.factor > 1 ? '+' : '−') + Math.round(Math.abs(x.factor - 1) * 100) + '%'}</td>
+              <td class="py-2 px-3 text-right">${ntd(x.monthly)}</td>
+              <td class="py-2 pl-3 text-right text-gray-500">${x.age === 65 ? '—' : (r.byAge[65] === undefined ? '—' : (x.be65 === null ? '110 歲前不打平' : ageTxt(x.be65)))}</td></tr>`
+          : `<tr class="border-b border-gray-100 text-gray-400">
+              <td class="py-2 pr-3">${x.age} 歲</td>
+              <td class="py-2 px-3 text-right" colspan="4">還在上班保勞保，不能領（須離職退保）</td></tr>`).join('');
+
+        // Cumulative table
+        $('cumHead').innerHTML = `<tr class="text-left text-gray-500 border-b border-gray-200">
+            <th class="py-2 pr-3 font-medium">活到</th>
+            ${r.claimSet.map(a => `<th class="py-2 px-3 font-medium text-right">${a} 歲開始領</th>`).join('')}
+            <th class="py-2 pl-3 font-medium text-right">領最多的</th></tr>`;
+        $('cumBody').innerHTML = r.cum.map(row => {
+          const mx = Math.max.apply(null, row.vals);
+          const winners = r.claimSet.filter((a, i) => Math.abs(row.vals[i] - mx) < 1000);
+          return `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-3">${row.X} 歲</td>
+            ${row.vals.map(v => `<td class="py-2 px-3 text-right ${Math.abs(v - mx) < 1000 ? 'font-semibold' : ''}">${v > 0 ? wan(v) : '—'}</td>`).join('')}
+            <td class="py-2 pl-3 text-right text-gray-500">${winners.map(a => a + ' 歲').join('＝')}</td></tr>`;
+        }).join('');
+        $('cumNote').textContent = r.disc > 0
+          ? `金額已用實質 ${r.disc}% 折回 60 歲時的價值；差距在 1,000 元以內視為打平。`
+          : '名目金額，未計物價調整與利息；差距在 1,000 元以內視為打平。';
+
+        renderSurvival(r, sexName);
+      }
+
+      function renderSurvival(r, sexName) {
+        const L = { all: [56.8, 59.3], m: [47.3, 50.4], f: [65.8, 67.5] };
+        $('survival').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-2">🧓 你會活到幾歲？（內政部 114 年簡易生命表）</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse whitespace-nowrap">
+              <thead><tr class="text-left text-gray-500 border-b border-gray-200">
+                <th class="py-2 pr-3 font-medium"></th><th class="py-2 px-3 font-medium text-right">全體</th><th class="py-2 px-3 font-medium text-right">男性</th><th class="py-2 pl-3 font-medium text-right">女性</th></tr></thead>
+              <tbody>
+                <tr class="border-b border-gray-100"><td class="py-2 pr-3">60 歲平均餘命</td><td class="py-2 px-3 text-right">24.89 年</td><td class="py-2 px-3 text-right">22.48 年</td><td class="py-2 pl-3 text-right">27.27 年</td></tr>
+                <tr class="border-b border-gray-100"><td class="py-2 pr-3">60 歲的人活到 85 歲</td><td class="py-2 px-3 text-right">${L.all[0]}%</td><td class="py-2 px-3 text-right">${L.m[0]}%</td><td class="py-2 pl-3 text-right">${L.f[0]}%</td></tr>
+                <tr class="border-b border-gray-100"><td class="py-2 pr-3">65 歲的人活到 85 歲</td><td class="py-2 px-3 text-right">${L.all[1]}%</td><td class="py-2 px-3 text-right">${L.m[1]}%</td><td class="py-2 pl-3 text-right">${L.f[1]}%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-gray-600 mt-3">60 歲的平均餘命將近 25 年，差不多就是 85 歲，剛好落在 60 vs 65 的損益兩平點附近。原表最後一組是「85 歲以上」，平均再活約 7 年，所以 95 歲以上的存活率這裡不列。期間生命表是用當年的死亡率算的，不是預測你這一代；過去十年 0–40 歲的平均餘命都多了 1 歲以上。</p>`;
+      }
+
+      function applyValues(vals) { Object.keys(vals).forEach(id => { if ($(id)) $(id).value = vals[id]; }); }
+      $('presetBtn').addEventListener('click', () => { applyValues(DEF); render(true); });
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      $('sex').addEventListener('change', () => render(false));
+      render(false);
+    })();
+  </script>
+</BaseLayout>
