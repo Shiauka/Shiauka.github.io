@@ -1,0 +1,358 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="再平衡檢查計算機：你的股票占幾成？"
+  description="台股一年漲六成、又從高點跌一成，股票比例可能只從 80.6% 降到 78.9%。填入股票市值、現金、目標比例與每月可存的錢，算出現在偏離目標幾個百分點、有沒有超過門檻、調回目標要賣或買多少、只用新的錢要補幾個月，以及再跌一成、兩成、三成時怎麼對照崩盤劇本——對應 EP60。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP60</p>
+      <h1 class="text-3xl font-bold mb-3">再平衡檢查計算機：你的股票占幾成？</h1>
+      <p class="text-gray-600 leading-relaxed">
+        要不要停利、要不要加碼，都得先猜接下來漲還是跌。這支計算機不猜，只算一個今天就算得出來的數字：<strong>你的股票，占你拿來投資的錢幾成</strong>。
+        填入股票市值、現金那一邊和你自己定的目標比例，看看有沒有超過門檻、要調多少、光靠每個月新的錢要補多久。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的配置</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到影片的例子（股票 112.5 萬、現金 30 萬）</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">股票市值（元；所有帳戶、個股、ETF 加總，用今天的市值）</span>
+          <input id="stock" type="text" inputmode="decimal" value="1,125,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">現金那一邊（元；活存、定存等，<strong>不含緊急備用金</strong>）</span>
+          <input id="cash" type="text" inputmode="decimal" value="300,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">你定的目標股票比例（%，0–100）</span>
+          <input id="target" type="number" min="0" max="100" step="1" value="70"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">觸發門檻（偏離超過幾個百分點才動，0.5–30）</span>
+          <input id="threshold" type="number" min="0.5" max="30" step="0.5" value="5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">每月可以存進來的新錢（元）</span>
+          <input id="monthly" type="text" inputmode="decimal" value="20,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">金額可打千分位、「112.5萬」、「NT$300,000」。緊急備用金是給失業、生病用的，不算在現金那一邊；高股息 ETF、槓桿 ETF 都算股票。偏離＝股票比例（四捨五入到 0.1%）減目標比例，<strong>超過</strong>門檻才觸發，剛好等於不算；因為先四捨五入，例如 75.04% 顯示成 75.0%，跟目標 70% 剛好差 5.0，不算觸發。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Scenarios -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed">
+      <p class="font-semibold text-gray-900 mb-2">📉 如果股票從現在再跌：對照 EP04 的崩盤劇本</p>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-3 font-medium">股票再跌</th>
+              <th class="py-2 px-3 font-medium text-right">股票市值</th>
+              <th class="py-2 px-3 font-medium text-right">股票比例</th>
+              <th class="py-2 pl-3 font-medium">劇本怎麼說</th>
+            </tr>
+          </thead>
+          <tbody id="scenBody"></tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">只有股票部位下跌、現金不動。EP04 的劇本以市場從高點的跌幅為準，這裡用「從你填的現在」再跌，方便看比例怎麼變。</p>
+    </div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>先看偏離，不看漲跌：</strong>跌了一成，比例常常只降一兩個百分點。比例還高於目標時「跌了就加碼」，是把已經超過的比例再推高。</p>
+      <p><strong>先用新的錢，不夠才賣：</strong>超標時，新的錢全部先放現金那一邊；如果要補很多個月，就把這個月的新錢先放進去，剩下的差距直接賣掉。比例偏低時反過來，新的錢先買股票。</p>
+      <p><strong>定期定額看比例：</strong>比例在範圍內就照常扣；已經超過，新的錢先放現金那一邊，等比例回來再恢復。跌一成本身不是停扣或多扣的理由。</p>
+      <p><strong>目標比例怎麼定：</strong>用金額想像一次大跌（2022 年 0050 含息約 −34%、2008 年台股約 −60%），算出你少掉的那筆錢撐不撐得住。要改目標，在年底回顧時改，不要在漲跌的當下改。</p>
+    </div>
+
+    <!-- Details -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">計算明細</summary>
+      <div id="detail" class="text-sm text-gray-600 leading-relaxed space-y-1 mt-3"></div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>為什麼只用新的錢要比想像久：</strong>新存進來的錢也會讓總數變大。影片的例子多出約 12.75 萬，但要讓股票回到七成，現金那邊要多出約 18.2 萬，每月存 2 萬要約 9.1 個月，不是 6 個多月（假設股價不動）。</p>
+      <p><strong>再平衡不是停利：</strong>停利要猜高點在哪裡；再平衡只看比例有沒有跑掉，所以跌下來的時候它會反過來叫你買。它不保證賺最多，保證的是你承擔的風險，一直是你自己定的那個大小。</p>
+      <p><strong>賣出成本：</strong>ETF 證券交易稅 0.1%（股票 0.3%），手續費上限 0.1425%；上市櫃證券交易所得目前停徵證所稅。本計算機未扣這些成本。</p>
+      <p><strong>現金那一邊放什麼：</strong>活存、定存這類隨時拿得出來、不會跟著股市跌的。長天期債券 ETF 不算，2022 年 00679B 含息約 −22%。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考。只計算股票與現金兩邊的比例，假設股價在補足期間不動、未計交易成本與稅費；不判斷市場高低點，目標比例請依你自己的承受能力決定，不代表建議比例。崩盤劇本為頻道 EP04 公開的個人規則，不適用每個人。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep60-no-take-profit-button" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP60 0050 沒有停利按鈕 →</a>
+      <a href="/articles/ep05-rebalancing" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">再平衡的藝術（EP05）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const MAX_MONTHS = 600;
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // 比例（0–1）→ 顯示用百分比，四捨五入到 0.1
+    function pct1(x) { return Math.round(x * 1000) / 10; }
+
+    // 只用每月新錢補回目標要幾個月（股價不動）
+    // 超標（S/T > t）：新錢全入現金，S/(T+x)=t → x = S/t − T
+    // 偏低（S/T < t）：新錢全入股票，(S+x)/(T+x)=t → x = (tT − S)/(1 − t)
+    // 回傳 { need: 需要的新錢, monthsExact: need÷m, months: 月數（向上取整）, ok: 是否在上限內 }；無解回傳 need=null
+    function monthsByNewMoney(S, C, t, m) {
+      const T = S + C;
+      if (T <= 0) return { need: null, months: null, ok: false };
+      const r = S / T;
+      let need;
+      if (r > t) need = t > 0 ? S / t - T : null;
+      else if (r < t) need = t < 1 ? (t * T - S) / (1 - t) : null;
+      else need = 0;
+      if (need === null) return { need: null, monthsExact: null, months: null, ok: false };
+      if (need <= 0) return { need: 0, monthsExact: 0, months: 0, ok: true };
+      if (!(m > 0)) return { need, monthsExact: null, months: null, ok: false };
+      const monthsExact = need / m;
+      const months = Math.ceil(monthsExact - 1e-9);
+      return { need, monthsExact, months, ok: months <= MAX_MONTHS };
+    }
+
+    // 主計算
+    // p = { stock, cash, target(%), threshold(百分點), monthly }
+    function computeRebalance(p) {
+      const S = clampN(p.stock, 0, 1e12);
+      const C = clampN(p.cash, 0, 1e12);
+      const targetPct = clampN(p.target, 0, 100);
+      const thr = clampN(p.threshold, 0.5, 30);
+      const m = clampN(p.monthly, 0, 1e10);
+      const t = targetPct / 100;
+      const T = S + C;
+      if (!(T > 0)) return { empty: true, S, C, targetPct, thr, m };
+
+      const ratio = S / T;
+      const ratioPct = pct1(ratio);
+      const diffPp = Math.round((ratioPct - targetPct) * 10) / 10;   // 用顯示精度判定
+      const triggered = Math.abs(diffPp) > thr;
+      const direction = diffPp > 0 ? 'over' : (diffPp < 0 ? 'under' : 'even');
+
+      const targetStock = T * t;
+      const delta = S - targetStock;            // >0 要賣；<0 要買
+      const byNew = monthsByNewMoney(S, C, t, m);
+
+      // 這個月的新錢先放偏低那一邊，剩下的差距再賣（或買）
+      let afterThisMonth = 0;
+      if (delta > 0) afterThisMonth = Math.max(0, S - t * (T + m));
+      else if (delta < 0) afterThisMonth = Math.max(0, t * (T + m) - (S + m));
+
+      // 情境：股票再跌 10/20/30%，現金不動
+      const scen = [0.1, 0.2, 0.3].map(d => {
+        const S2 = S * (1 - d);
+        const T2 = S2 + C;
+        const r2 = T2 > 0 ? S2 / T2 : 0;
+        const r2Pct = pct1(r2);
+        const diff2 = Math.round((r2Pct - targetPct) * 10) / 10;
+        const row = { drop: d, S: S2, T: T2, ratioPct: r2Pct, diffPp: diff2, triggered: Math.abs(diff2) > thr };
+        if (d === 0.2) {
+          const needCash = Math.max(0, t * T2 - S2);       // 補回目標要從現金搬多少（總額不變）
+          const cap = C / 2;
+          const use = Math.min(needCash, cap);
+          row.needCash = needCash;
+          row.cap = cap;
+          row.use = use;
+          row.capped = needCash > cap;
+          row.stillAbove = S2 / T2 >= t;
+          row.ratioAfterPct = pct1((S2 + use) / T2);
+        }
+        return row;
+      });
+
+      return {
+        empty: false, S, C, T, m, targetPct, thr, t,
+        ratio, ratioPct, diffPp, triggered, direction,
+        targetStock, delta, byNew, afterThisMonth, scen,
+      };
+    }
+
+    // 金額字串解析：吃千分位、空白、NT$、元；支援「億」「萬」與組合（1億2000萬、112.5萬）
+    // 無法辨識回傳 NaN（DOM 端提示並改用預設值，不默默截斷）
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      let sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      const mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      const v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep60 = { pct1, monthsByNewMoney, computeRebalance, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => Math.abs(n) < 10000 ? 'NT$' + Math.round(n).toLocaleString('en-US')
+        : Math.abs(n) < 1e8 ? (Math.round(n / 1000 + (n >= 0 ? 1e-9 : -1e-9)) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬'
+        : (Math.round(n / 1e6 + (n >= 0 ? 1e-9 : -1e-9)) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' 億';
+      const mon = (k) => Math.round(k).toLocaleString('en-US');
+      const pp = (x) => (x > 0 ? '+' : '') + x.toFixed(1) + ' 個百分點';
+      const fmtNum = (v) => String(Math.round(v * 100) / 100);
+
+      const DEF = { stock: '1,125,000', cash: '300,000', target: 70, threshold: 5, monthly: '20,000' };
+      const MONEY = ['stock', 'cash', 'monthly'];
+      const LIM = {
+        stock: [0, 1e12, '股票市值'], cash: [0, 1e12, '現金'], target: [0, 100, '目標股票比例'],
+        threshold: [0.5, 30, '觸發門檻'], monthly: [0, 1e10, '每月新錢'],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        const isMoney = MONEY.indexOf(id) >= 0;
+        let v = isMoney ? parseMoney(raw) : parseFloat(raw);
+        let def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${isMoney ? num0(def) : def}`); v = def; }
+        if (v < lo) { msgs.push(`「${name}」不能小於 ${isMoney ? num0(lo) : lo}，已改用 ${isMoney ? num0(lo) : lo}`); v = lo; }
+        if (v > hi) { msgs.push(`「${name}」最大 ${isMoney ? num0(hi) : hi}，已改用 ${isMoney ? num0(hi) : hi}`); v = hi; }
+        if (commit) el.value = isMoney ? num0(v) : fmtNum(v);
+        return v;
+      }
+
+      function readInputs(commit) {
+        const msgs = [];
+        const v = {};
+        Object.keys(LIM).forEach(id => { v[id] = readField(id, msgs, commit); });
+        return { p: v, msgs };
+      }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      function render(commit) {
+        const { p, msgs } = readInputs(commit);
+        const r = window.__ep60.computeRebalance(p);
+        const notice = $('notice');
+        notice.textContent = msgs.join('；');
+        notice.classList.toggle('hidden', msgs.length === 0);
+
+        if (r.empty) {
+          $('cards').innerHTML = '<div class="sm:col-span-3 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800">股票市值與現金加起來要大於 0，才能算比例。</div>';
+          ['conclusion', 'detail'].forEach(id => { $(id).innerHTML = ''; });
+          $('scenBody').innerHTML = '';
+          return;
+        }
+
+        // Cards
+        const statusTxt = r.triggered ? '已觸發' : '在範圍內';
+        const statusDesc = r.direction === 'even'
+          ? '剛好在目標上'
+          : `比目標${r.direction === 'over' ? '多' : '少'} ${Math.abs(r.diffPp).toFixed(1)} 個百分點；門檻是超過 ${r.thr} 個百分點才動${Math.abs(r.diffPp) === r.thr ? '（剛好等於，不算觸發）' : ''}`;
+        const actTitle = r.delta > 0 ? '調回目標要賣出' : (r.delta < 0 ? '調回目標要買進' : '調回目標');
+        const actVal = Math.round(Math.abs(r.delta)) === 0 ? 'NT$0' : ntd(Math.abs(r.delta));
+        const actDesc = `目標 ${r.targetPct}% 的股票是 ${wan(r.targetStock)}，你現在是 ${wan(r.S)}${r.triggered ? '' : '；沒超過門檻，照規則先不用動'}`;
+        $('cards').innerHTML =
+          card('你的股票比例', r.ratioPct.toFixed(1) + '%', `目標 ${r.targetPct}%，總共 ${wan(r.T)}`, true) +
+          card('偏離目標', statusTxt, statusDesc, false) +
+          card(actTitle, actVal, actDesc, false);
+
+        // Conclusion
+        let byNewTxt;
+        const side = r.delta > 0 ? '現金那一邊' : '股票';
+        if (r.direction === 'even' || Math.round(Math.abs(r.delta)) === 0) byNewTxt = '比例剛好在目標上，不用調。';
+        else if (r.byNew.need === null) byNewTxt = `目標設成 ${r.targetPct}% 時，光靠新的錢補不回去${r.triggered ? '（需要賣出或買進）' : ''}。`;
+        else if (r.byNew.months === null) byNewTxt = `${r.triggered ? '' : '（參考）'}光靠新的錢補，${side}要再多約 ${wan(r.byNew.need)}；你填的每月新錢是 0，補不回來。`;
+        else if (!r.byNew.ok) byNewTxt = `${r.triggered ? '' : '（參考）'}光靠新的錢補，${side}要再多約 ${wan(r.byNew.need)}，要 ${mon(r.byNew.months)} 個月，超過 600 個月（50 年），新的錢補不回來。`;
+        else if (!r.triggered) byNewTxt = `（參考）若想慢慢拉回目標，每月 ${ntd(r.m)} 的新錢全部放${r.delta > 0 ? '進現金那一邊' : '進股票'}，${side}要再多約 ${wan(r.byNew.need)}，大約 ${(Math.round(r.byNew.monthsExact * 10) / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} 個月會回到目標（假設股價不動）。`;
+        else byNewTxt = `光靠每月 ${ntd(r.m)} 的新錢全部放${r.delta > 0 ? '進現金那一邊' : '進股票'}，${side}要再多約 <strong>${wan(r.byNew.need)}</strong>，大約 <strong>${(Math.round(r.byNew.monthsExact * 10) / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} 個月</strong>（第 ${mon(r.byNew.months)} 個月補齊）才補得回來（假設股價不動；新的錢也會讓總數變大，所以比差額${wan(Math.abs(r.delta))}還多）。`;
+
+        let mainTxt;
+        if (!r.triggered) {
+          mainTxt = `你的股票占 <strong>${r.ratioPct.toFixed(1)}%</strong>，跟目標差 ${pp(r.diffPp)}，沒有超過 ${r.thr} 個百分點的門檻。照規則先不用動；定期定額照常扣，下個月回顧時再看一次。`;
+        } else if (r.delta > 0) {
+          mainTxt = `你的股票占 <strong>${r.ratioPct.toFixed(1)}%</strong>，比目標多 ${Math.abs(r.diffPp).toFixed(1)} 個百分點，超過門檻。股票比你定的多了 <strong>${wan(r.delta)}</strong>。這時候再加碼，是把已經超過的比例再推高；定期定額的新錢先放現金那一邊，等比例回來再恢復。`;
+        } else {
+          mainTxt = `你的股票占 <strong>${r.ratioPct.toFixed(1)}%</strong>，比目標少 ${Math.abs(r.diffPp).toFixed(1)} 個百分點，超過門檻。股票比你定的少了 <strong>${wan(-r.delta)}</strong>，照規則要用現金或新的錢把股票補回去。`;
+        }
+        const thisMonthTxt = r.triggered && Math.round(Math.abs(r.delta)) > 0
+          ? r.m <= 0
+            ? `這個月沒有新的錢可以先放，剩下還要${r.delta > 0 ? '賣出' : '從現金買進'}約 <strong>${ntd(r.afterThisMonth)}</strong>，也就是整個差額。`
+            : (r.afterThisMonth > 0
+            ? `如果先把這個月的 ${ntd(r.m)} 放進${r.delta > 0 ? '現金那一邊' : '股票'}，剩下還要${r.delta > 0 ? '賣出' : '從現金買進'}約 <strong>${ntd(r.afterThisMonth)}</strong>。`
+            : `這個月的 ${ntd(r.m)} 新錢放進${r.delta > 0 ? '現金那一邊' : '股票'}，就足夠調回目標，不用${r.delta > 0 ? '賣' : '另外買'}。`)
+          : '';
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結論：</strong>${mainTxt}</p>
+          <p class="mb-2">${byNewTxt}</p>${thisMonthTxt ? `<p>${thisMonthTxt}</p>` : ''}`;
+
+        // Scenarios
+        const rules = {
+          0.1: '跌一成：什麼都不做，照原計畫繼續投入（月度再平衡照常，比例超過門檻才動）',
+        };
+        $('scenBody').innerHTML = r.scen.map(s => {
+          let rule;
+          if (s.drop === 0.1) rule = rules[0.1] + (s.triggered ? `；此時偏離 ${pp(s.diffPp)}，已超過門檻` : '');
+          else if (s.drop === 0.2) {
+            if (s.stillAbove) rule = `跌兩成：啟動部分再平衡。但比例仍高於目標，照比例不用買`;
+            else if (s.needCash <= 0.5) rule = '跌兩成：啟動部分再平衡，比例剛好在目標，不用動現金';
+            else rule = `跌兩成：用現金把股票補回目標，要 ${wan(s.needCash)}；最多用現金的一半（${wan(s.cap)}）→ ${s.capped ? `<strong>被上限卡住</strong>，只動用 ${wan(s.use)}，補完約 ${s.ratioAfterPct.toFixed(1)}%，另一半留給下一波` : `動用 ${wan(s.use)} 就補回 ${s.ratioAfterPct.toFixed(1)}%`}`;
+          } else rule = '跌三成：先確認生活費不會被影響，再繼續投入，不賣任何持股';
+          return `<tr class="border-b border-gray-100 align-top">
+            <td class="py-2 pr-3">${Math.round(s.drop * 100)}%</td>
+            <td class="py-2 px-3 text-right">${wan(s.S)}</td>
+            <td class="py-2 px-3 text-right">${s.ratioPct.toFixed(1)}%</td>
+            <td class="py-2 pl-3 whitespace-normal" style="min-width:14rem">${rule}</td></tr>`;
+        }).join('');
+
+        // Detail
+        $('detail').innerHTML = `
+          <p>總額 ＝ 股票 ${ntd(r.S)} ＋ 現金 ${ntd(r.C)} ＝ ${ntd(r.T)}</p>
+          <p>股票比例 ＝ ${ntd(r.S)} ÷ ${ntd(r.T)} ＝ ${r.ratioPct.toFixed(1)}%；偏離 ＝ ${r.ratioPct.toFixed(1)}% − ${r.targetPct}% ＝ ${pp(r.diffPp)}</p>
+          <p>目標股票 ＝ ${ntd(r.T)} × ${r.targetPct}% ＝ ${ntd(r.targetStock)}；差額 ＝ ${ntd(r.S)} − ${ntd(r.targetStock)} ＝ ${(r.delta < 0 ? '−' : '') + ntd(Math.abs(r.delta))}</p>
+          ${r.byNew.need !== null && r.byNew.need > 0 ? `<p>只用新的錢：${r.delta > 0 ? `股票 ÷ (總額 ＋ x) ＝ 目標 → x ＝ ${ntd(r.S)} ÷ ${r.targetPct}% − ${ntd(r.T)}` : `(股票 ＋ x) ÷ (總額 ＋ x) ＝ 目標 → x ＝ (${r.targetPct}% × ${ntd(r.T)} − ${ntd(r.S)}) ÷ (1 − ${r.targetPct}%)`} ＝ ${ntd(r.byNew.need)}${r.byNew.months !== null ? `；÷ 每月 ${ntd(r.m)} ＝ ${(Math.round(r.byNew.monthsExact * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 個月（第 ${mon(r.byNew.months)} 個月補齊）` : ''}</p>` : ''}
+          ${r.triggered && Math.round(Math.abs(r.delta)) > 0 && r.m > 0 ? `<p>這個月新錢先入${r.delta > 0 ? '現金' : '股票'}：${r.delta > 0 ? `${ntd(r.S)} − ${r.targetPct}% × (${ntd(r.T)} ＋ ${ntd(r.m)})` : `${r.targetPct}% × (${ntd(r.T)} ＋ ${ntd(r.m)}) − (${ntd(r.S)} ＋ ${ntd(r.m)})`} ＝ ${ntd(r.afterThisMonth)}</p>` : ''}`;
+      }
+
+      $('presetBtn').addEventListener('click', () => { Object.keys(DEF).forEach(id => { $(id).value = DEF[id]; }); render(true); });
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
