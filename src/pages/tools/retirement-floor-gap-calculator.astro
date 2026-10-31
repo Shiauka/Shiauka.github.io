@@ -1,0 +1,349 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="退休缺口計算機：扣掉勞保，你自己要存多少"
+  description="月花 5 萬、用 3.5% 提領要存 1,714 萬；把勞保當地板、勞退算進存款，自己要存的可能只剩 684 萬。填入你的勞保、勞退、每月花費與退休年齡，算出缺口、要存多少、提早退休的過渡期，以及勞保打八折的壓力測試——對應 EP61。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP61</p>
+      <h1 class="text-3xl font-bold mb-3">退休缺口計算機：扣掉勞保，你自己要存多少</h1>
+      <p class="text-gray-600 leading-relaxed">
+        用提領率算退休數字，常常忘了一件事：受僱上班族有勞保，它<strong>領到過世</strong>，是退休收入的<strong>地板</strong>。存款只需要補地板上面的缺口。
+        但勞退不一樣：按月領只領到平均餘命，比較像別人幫你存好的帳戶，要算在<strong>存款</strong>那一邊。
+        填入你自己的數字，看看要存的是多少；打算提早退休的人，勞保還沒開始領的那幾年也會一起算。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的數字（全部用今天的錢）</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到影片的例子</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">退休後每個月要花的錢（元）</span>
+          <input id="spend" type="text" inputmode="decimal" value="50,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">幾歲退休（離開職場；40–70）</span>
+          <input id="retireAge" type="number" min="40" max="70" step="1" value="65"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">勞保幾歲開始領（60–70；65 為法定請領年齡，1962 年後出生）</span>
+          <input id="claimAge" type="number" min="60" max="70" step="1" value="65"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block sm:col-span-2 lg:col-span-3">
+          <span class="text-sm text-gray-600">勞保月領怎麼算</span>
+          <select id="labMode"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 bg-white focus:border-brand focus:ring-1 focus:ring-brand outline-none">
+            <option value="calc" selected>用投保薪資和年資估（勞保年金公式）</option>
+            <option value="direct">我已經知道每月大約領多少（例如勞保局試算結果）</option>
+          </select>
+        </label>
+        <label class="block" data-mode="calc">
+          <span class="text-sm text-gray-600">平均月投保薪資（元；最高 60 個月平均，2026 年上限 45,800）</span>
+          <input id="wage" type="text" inputmode="decimal" value="45,800"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block" data-mode="calc">
+          <span class="text-sm text-gray-600">退保時的勞保年資（年，可填一位小數）</span>
+          <input id="years" type="number" min="0" max="50" step="0.1" value="30"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block hidden" data-mode="direct">
+          <span class="text-sm text-gray-600">勞保每月大約領多少（元，填你開始領那個年紀的金額）</span>
+          <input id="labDirect" type="text" inputmode="decimal" value="21,297"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">勞退專戶退休時預估餘額（元，可填「300萬」）</span>
+          <input id="pension" type="text" inputmode="decimal" value="3,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">提領率（%，1–10；本頻道用 3.5）</span>
+          <input id="rate" type="number" min="1" max="10" step="0.1" value="3.5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">勞保年金＝平均月投保薪資 × 年資 × 1.55%（另一式 ×0.775%＋3,000，兩式擇優，勞工保險條例 §58-1）；65 歲前每提前 1 年減 4%、之後每延後 1 年加 4%，最多 ±20%（§58-2）。年資滿 15 年才能月領。請領須離職退保，所以勞保不會在你退休前開始領。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Compare -->
+    <div id="compare" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>地板：</strong>每月要花的錢裡，別人每月固定匯給你、而且領到過世的那一塊。勞保年金是；存款只需要補地板上面的<strong>缺口</strong>。缺口一年的金額 ÷ 提領率，就是要準備的錢。</p>
+      <p><strong>勞退為什麼不算地板：</strong>勞退月退休金是把專戶的錢，按平均餘命攤開來發（勞保局 2026 年現行參數：65 歲約 19 年、利率 1.1473%，按季發給至平均餘命止），以現在的制度大約 84 歲就領完。月領金額不跟物價連動，至少每 3 年依利率與平均餘命重算，但都只發到平均餘命為止；活過平均餘命之後的延壽年金，法律有寫但還沒開辦。所以這裡把勞退專戶當作已經存好的錢，直接從要準備的錢裡扣掉。</p>
+      <p><strong>常見的錯誤算法：</strong>把勞退月領也當地板，算出來的數字會小很多，但它假設勞退一直付下去；84 歲以後勞退停了，缺口會突然變大，那時候存款卻是照比較小的缺口準備的。</p>
+      <p><strong>提早退休：</strong>存款從退休那天起就照提領率提領缺口；但退休到開始領勞保之間，勞保那一塊還沒進來，這幾年每個月要多拿勞保那一份，所以另外準備「年數 × 12 × 勞保月領」（每月花費比勞保低時，以花費為準），不算在提領率那一筆裡面；過渡期如果長到超過 1 ÷ 提領率 年（3.5% 約 28.6 年），這一塊改成跟長期那一筆一樣照提領率提領。這裡沒有算存款在等勞保那幾年的投資成長，也沒算勞退要 60 歲才能領。提早離開職場，勞保年資也會停在那裡，記得把年資改成你實際會有的年數。</p>
+    </div>
+
+    <!-- Detail -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">計算明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>全部用今天的錢：</strong>每月花費、勞保、勞退都用今天的購買力去算。這等於假設勞保投保薪資上限會跟著物價調；但 45,800 從 2016 年起就沒調過，如果一直不調，你的地板在退休前就在悄悄變薄，所以這裡另外算了勞保打八折的情況。</p>
+      <p><strong>勞保的物價調整：</strong>開始領之後，消費者物價指數累計成長達 5% 才會調整，而且依請領年度分別計算（§65-4），會慢半拍。</p>
+      <p><strong>勞保財務：</strong>勞工保險條例 2025 年 12 月三讀、2026 年 1 月公布修正，政府撥補與「中央政府負最後支付責任」已寫進法律，勞保不會突然停發，但不代表以後的算法一定不改。</p>
+      <p><strong>年資未滿 15 年：</strong>不能月領，只能請領老年一次金（約 年資 × 平均月投保薪資），那一筆要算在存款那一邊，可以加到「勞退專戶」那格一起算；本工具這時把勞保月領當 0。併計國民年金年資的情況（§74-2）本工具不涵蓋。</p>
+      <p><strong>勞退月領：</strong>提繳年資滿 15 年才能選按月領，不滿只能一次領（勞工退休金條例 §24）。錯誤算法對照裡的勞退月領，60、65、70 歲依勞保局 2026 年現行參數（平均餘命 23／19／16 年、利率 1.1473%、按季期初發給）估算，其他年齡用內插近似，以勞保局試算為準。</p>
+      <p><strong>不適用：</strong>軍公教是另一套退撫制度；自己接案、沒有公司提繳勞退的人，勞退那格請填你實際有的金額。雙薪家庭可以把兩個人的花費、勞保、勞退加在一起算，但先走的那一位，勞保就停了，在世的那位只能在自己的年金與遺屬年金之間選一個。</p>
+      <p><strong>官方查詢：</strong>投保薪資、年資、勞退專戶餘額都可以登入勞保局 e 化服務或 App 查；勞保年金也可以用<a href="https://www.bli.gov.tw/0109187.html" target="_blank" rel="noopener" class="text-brand underline">勞保局的試算</a>。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，依勞工保險條例、勞工退休金條例現行規定與 2026 年投保薪資分級表試算，未計物價調整、稅負與健保等其他支出；提領率為假設，不保證本金不會用完；規定可能修改，實際金額以勞保局核定為準。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep61-labor-insurance-retirement-floor" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP61 完整文章 →</a>
+      <a href="/tools/labor-insurance-claim-age-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">勞保幾歲領計算機（EP59）</a>
+      <a href="/tools/retirement-number-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">退休數字計算機（EP15）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const WAGE_MIN = 11100, WAGE_MAX = 45800;     // 部分工時最低級距 11,100；2026 年上限 45,800
+    const LEGAL_AGE = 65;
+    const PEN_RATE = 0.011473;                     // 勞退月退休金現行利率
+    const PEN_LIFE = { 60: 23, 65: 19, 70: 16 };   // 勞保局現行平均餘命（年）
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // 勞保年金（§58-1 兩式擇優）×（§58-2 增減），年資 <15 回傳 0
+    function laborMonthly(wage, years, claimAge) {
+      if (!(years >= 15)) return 0;
+      const base = Math.max(wage * years * 0.00775 + 3000, wage * years * 0.0155);
+      return base * (1 + 0.04 * (clampN(claimAge, 60, 70) - LEGAL_AGE));
+    }
+
+    // 勞退平均餘命：60/65/70 用現行參數，其他年齡線性內插（近似）
+    function penLife(age) {
+      const a = clampN(age, 60, 70);
+      if (a <= 65) return PEN_LIFE[60] + (PEN_LIFE[65] - PEN_LIFE[60]) * (a - 60) / 5;
+      return PEN_LIFE[65] + (PEN_LIFE[70] - PEN_LIFE[65]) * (a - 65) / 5;
+    }
+
+    // 勞退月領估算：按季期初年金，季利率＝年利率/4，期數＝平均餘命×4；回傳每月（季額/3）
+    function pensionMonthly(balance, age) {
+      if (!(balance > 0)) return 0;
+      const i = PEN_RATE / 4, n = Math.round(penLife(age) * 4);
+      const q = balance * i / (1 - Math.pow(1 + i, -n)) / (1 + i);
+      return q / 3;
+    }
+
+    // p: { spend, mode:'calc'|'direct', wage, years, labDirect, claimAge, retireAge, pension, rate }（金額為元、rate 為 %）
+    function calc(p) {
+      const spend = clampN(p.spend, 0, 1e8);
+      const rate = clampN(p.rate, 1, 10) / 100;
+      const retireAge = Math.round(clampN(p.retireAge, 40, 70));
+      let claimAge = Math.round(clampN(p.claimAge, 60, 70));
+      const notes = [];
+      // 請領須離職退保：勞保不會在退休前開始領
+      if (claimAge < retireAge) { notes.push('claimAfterRetire'); claimAge = retireAge; }
+      const pension = clampN(p.pension, 0, 1e10);
+      let lab = 0, wage = null, years = null, eligible = true;
+      if (p.mode === 'direct') {
+        lab = clampN(p.labDirect, 0, 1e6);
+      } else {
+        wage = clampN(p.wage, WAGE_MIN, WAGE_MAX);
+        years = Math.round(clampN(p.years, 0, 50) * 10) / 10;
+        eligible = years >= 15;
+        lab = laborMonthly(wage, years, claimAge);
+      }
+      const transYears = Math.max(0, claimAge - retireAge);
+      // 過渡期：存款從退休那天起就照提領率提領缺口；勞保還沒進來的那幾年，另補「勞保那一塊」
+      // （不折現、今天的錢；未計等待期間的投資成長，也未計勞退 60 歲才能領）
+      // 每月另補＝min(地板, 花費)：花費比地板低時，只需補到花費為止
+      // 上限＝每月另補×12÷提領率：過渡年數超過 1÷提領率 時，直接併進長期那一筆比較便宜
+      const bridge = (monthly) => { const m = Math.min(monthly, spend); return Math.min(transYears * 12 * m, m * 12 / rate); };
+      const bridgeM = Math.min(lab, spend);
+      const transition = bridge(lab);
+      const bridgeCapped = transYears > 0 && bridgeM > 0 && transYears * 12 * bridgeM > bridgeM * 12 / rate;
+      const need = (monthly) => Math.max(0, spend - monthly) * 12 / rate;
+      // 勞退 60 歲前領不到：長期那一筆少了勞退那一份的提領；勞退比長期需求大時，只算到長期需求為止（僅提示，不計入金額）
+      const pensionWait = (retireAge < 60 && pension > 0) ? Math.min(pension, need(lab)) * rate * (60 - retireAge) : 0;
+      const noFloor = spend * 12 / rate;                         // 沒有地板：全部靠存款，從退休第一天起都由這筆提領，不另加過渡期
+      const labOnlyTotal = need(lab);                            // 只把勞保當地板，還沒扣勞退
+      const ownLong = Math.max(0, labOnlyTotal - pension);      // 扣勞退（不得 <0）
+      const own = ownLong + transition;                          // 主結論：你自己要存的
+      const penM = pensionMonthly(pension, claimAge);
+      const wrong = need(lab + penM) + bridge(lab + penM);       // 錯誤算法：勞退月領也當地板
+      const share = spend > 0 ? Math.min(1, lab / spend) : null;
+      const lab80 = lab * 0.8;
+      const stress = Math.max(0, need(lab80) - pension) + bridge(lab80);
+      const penEndAge = claimAge + penLife(claimAge);
+      return { spend, rate, retireAge, claimAge, pension, wage, years, eligible, lab, transYears, transition, bridgeM, bridgeCapped, pensionWait,
+               noFloor, labOnlyTotal, ownLong, own, penM, wrong, share, lab80, stress, penEndAge, notes,
+               gap: Math.max(0, spend - lab) };
+    }
+
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|\s|元/gi, '');
+      if (str === '') return NaN;
+      const m = str.match(/^(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
+      const v = (m[1] ? parseFloat(m[1]) * 1e4 : 0) + (m[2] ? parseFloat(m[2]) : 0);
+      return isFinite(v) ? v : NaN;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep61 = { laborMonthly, penLife, pensionMonthly, calc, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => Math.round(n / 1e4).toLocaleString('en-US') + ' 萬';
+      const pct = (x) => (x === null || x === undefined) ? '—' : Math.round(x * 100) + '%';
+
+      const DEF = { spend: '50,000', retireAge: 65, claimAge: 65, wage: '45,800', years: 30, labDirect: '21,297', pension: '3,000,000', rate: 3.5, labMode: 'calc' };
+      // [lo, hi, 名稱, 整數?, 金額?]
+      const LIM = {
+        spend: [0, 1e8, '每月要花的錢', false, true],
+        retireAge: [40, 70, '幾歲退休', true],
+        claimAge: [60, 70, '勞保幾歲開始領', true],
+        wage: [WAGE_MIN, WAGE_MAX, '平均月投保薪資', false, true],
+        years: [0, 50, '勞保年資', 'tenth'],
+        labDirect: [0, 1e6, '勞保每月領', false, true],
+        pension: [0, 1e10, '勞退專戶餘額', false, true],
+        rate: [1, 10, '提領率'],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name, intOnly, isMoney] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        let v = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        const def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${isMoney ? num0(def) : def}`); v = def; }
+        if (intOnly === 'tenth') { const r1 = Math.round(v * 10) / 10; if (r1 !== v) { msgs.push(`「${name}」以一位小數計，已改用 ${r1}`); v = r1; } }
+        else if (intOnly && v !== Math.floor(v)) { v = Math.floor(v); msgs.push(`「${name}」以整數計，已改用 ${v}`); }
+        if (v < lo) { msgs.push(`「${name}」最小 ${num0(lo)}，已改用 ${num0(lo)}`); v = lo; }
+        if (v > hi) { msgs.push(id === 'wage' ? '投保薪資上限 45,800，已改用 45,800；投保薪資是級距，不是月薪' : `「${name}」最大 ${num0(hi)}，已改用 ${num0(hi)}`); v = hi; }
+        if (commit) el.value = isMoney ? num0(v) : String(v);
+        let hint = document.getElementById('hint_' + id);
+        if (!hint) { hint = document.createElement('span'); hint.id = 'hint_' + id; hint.className = 'block text-xs text-amber-700 mt-1'; el.insertAdjacentElement('afterend', hint); }
+        const typed = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        hint.textContent = (String(raw).trim() === '' || !isFinite(typed) || typed !== v) ? `已用 ${isMoney ? num0(v) : v} 計算` : '';
+        return v;
+      }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      function syncMode() {
+        const mode = $('labMode').value;
+        document.querySelectorAll('[data-mode]').forEach(el => el.classList.toggle('hidden', el.getAttribute('data-mode') !== mode));
+      }
+
+      function render(commit) {
+        const msgs = [];
+        const mode = $('labMode').value;
+        const v = {};
+        Object.keys(LIM).forEach(id => {
+          if (mode === 'calc' && id === 'labDirect') return;
+          if (mode === 'direct' && (id === 'wage' || id === 'years')) return;
+          v[id] = readField(id, msgs, commit);
+        });
+        v.mode = mode;
+        const r = window.__ep61.calc(v);
+
+        if (r.notes.includes('claimAfterRetire')) msgs.push(`勞保要離職退保才能領，你 ${r.retireAge} 歲才退休，所以勞保最早 ${r.retireAge} 歲開始領，已用 ${r.claimAge} 歲計算` + (mode === 'direct' ? `；請改填 ${r.claimAge} 歲開始領的金額` : ''));
+        if (mode === 'calc' && !r.eligible) msgs.push(`勞保年資 ${r.years} 年未滿 15 年，不能月領，只能請領老年一次金（約 ${wan(r.years * r.wage)}），可以把它加到「勞退專戶」那格；這裡勞保月領以 0 計`);
+        if (r.pensionWait > 0) msgs.push(`勞退要 60 歲才能領，退休到 60 歲這幾年，那筆勞退還拿不到，實際要準備的會再多一些（約 勞退（最多到長期那一筆）× 提領率 × (60 − ${r.retireAge})，本例約 ${wan(r.pensionWait)}）`);
+        if (mode === 'calc' && r.retireAge < 65) msgs.push(`${r.retireAge} 歲就離開職場，勞保年資會停在那時候；請把「勞保年資」改成你到 ${r.retireAge} 歲實際會有的年數`);
+        const notice = $('notice');
+        notice.textContent = msgs.join('；');
+        notice.classList.toggle('hidden', msgs.length === 0);
+
+        const transTxt = r.transYears > 0 ? `，含 ${r.retireAge}–${r.claimAge} 歲另補勞保 ${wan(r.transition)}` : '';
+        $('cards').innerHTML =
+          card('你自己要存的', wan(r.own), `只把勞保當地板、扣掉勞退專戶${transTxt}`, true) +
+          card('沒有地板的算法', wan(r.noFloor), `每年 ${wan(r.spend * 12)} ÷ ${(r.rate * 100).toFixed(1)}%`, false) +
+          card('勞保撐住的生活費', pct(r.share), `勞保每月 ${ntd(r.lab)} ÷ 每月花費 ${ntd(r.spend)}`, false);
+
+        const saved = r.noFloor - r.own;
+        const lines = [];
+        lines.push(`每月花 ${ntd(r.spend)}，勞保 ${r.claimAge} 歲起每月約 <strong>${ntd(r.lab)}</strong>，缺口剩 <strong>${ntd(r.gap)}</strong>。`);
+        lines.push(`缺口一年 ${wan(r.gap * 12)} ÷ ${(r.rate * 100).toFixed(1)}% ＝ ${wan(r.labOnlyTotal)}，扣掉勞退專戶 ${wan(r.pension)}，退休後長期提領的那一筆要 <strong>${wan(r.ownLong)}</strong>（存款從退休那天起就照提領率提領）。`);
+        if (r.transYears > 0) lines.push(`${r.retireAge} 到 ${r.claimAge} 歲這 ${r.transYears} 年勞保還沒進來，存款每月要多拿勞保那一份 ${ntd(r.bridgeM)}，共 <strong>${wan(r.transition)}</strong>${r.bridgeCapped ? `（過渡超過 ${(1 / r.rate).toFixed(1)} 年，這一塊改成跟長期那一筆一樣照提領率提領，上限 ${wan(r.transition)}）。` : `，這 ${r.transYears} 年內就會用完，要另外準備，不算在提領率那一筆`}（沒算等待期間的投資成長，也沒算勞退要 60 歲才能領）。`);
+        lines.push(Math.abs(saved) < 5000
+          ? `合計你自己要存 <strong>${wan(r.own)}</strong>，跟沒有地板的算法差不多。`
+          : saved > 0
+          ? `合計你自己要存 <strong>${wan(r.own)}</strong>，比沒有地板的算法少 ${wan(saved)}。`
+          : `合計你自己要存 <strong>${wan(r.own)}</strong>，比沒有地板的算法還多 ${wan(-saved)}，因為過渡期的 ${wan(r.transition)}要另外準備。`);
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結果：</strong>${lines.join('')}</p>
+          <p class="text-gray-600">勞保每個人不一樣，一定要用你自己的投保薪資和年資；全國勞保年金平均月領約 19,312 元，一半以上的人不到 2 萬（勞保局 114 年統計）。</p>`;
+
+        $('compare').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-3">對照：同一組數字，換一種算法</p>
+          <div class="overflow-x-auto"><table class="w-full text-sm border-collapse whitespace-nowrap"><tbody>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-3">沒有地板</td><td class="py-2 pl-3 text-right">${wan(r.noFloor)}</td></tr>
+            <tr class="border-b border-gray-100 text-gray-500"><td class="py-2 pr-3">❌ 勞退也當地板（勞退月領約 ${ntd(r.penM)}，約 ${Math.round(r.penEndAge)} 歲領完）</td><td class="py-2 pl-3 text-right line-through">${wan(r.wrong)}</td></tr>
+            <tr class="border-b border-gray-100 font-semibold"><td class="py-2 pr-3">✅ 只把勞保當地板、勞退算存款</td><td class="py-2 pl-3 text-right" style="color:#C5611A">${wan(r.own)}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-3">壓力測試：勞保打八折（每月約 ${ntd(r.lab80)}）</td><td class="py-2 pl-3 text-right">${wan(r.stress)}</td></tr>
+          </tbody></table></div>
+          <p class="text-gray-600 mt-3">${r.wrong < r.own ? '勞退也當地板的算法看起來比較少，但' : '這組數字裡，勞退也當地板的算法沒有比較少（等勞保、勞退開始領的那幾年，兩塊都要另外補）；而且'}勞退按月領只領到平均餘命，${r.claimAge} 歲開始領大約 ${Math.round(r.penEndAge)} 歲就領完，之後缺口會突然變大。壓力測試：勞保打八折時的數字；投保薪資上限一直不調的話，可能比八折還多。</p>`;
+
+        const rows = [
+          ['每月要花', ntd(r.spend)],
+          [mode === 'calc' ? `勞保月領（${num0(r.wage)} × ${r.years} 年，${r.claimAge} 歲領）` : `勞保月領（自填，${r.claimAge} 歲起）`, ntd(r.lab)],
+          ['每月缺口', ntd(r.gap)],
+          ['缺口 × 12 ÷ 提領率', ntd(r.labOnlyTotal)],
+          ['− 勞退專戶', ntd(r.pension)],
+          ['退休後長期提領的那一筆', ntd(r.ownLong)],
+          [r.bridgeCapped ? `＋ 過渡期另補勞保（${num0(r.bridgeM)} × 12 ÷ 提領率，上限）` : `＋ 過渡期另補勞保（${r.transYears} 年 × 12 × ${num0(r.bridgeM)}）`, ntd(r.transition)],
+          ['你自己要存的', ntd(r.own)],
+        ];
+        $('detailBody').innerHTML = rows.map(([k, val], i) => `<tr class="border-b border-gray-100 ${i === rows.length - 1 ? 'font-semibold' : ''}"><td class="py-2 pr-3">${k}</td><td class="py-2 pl-3 text-right">${val}</td></tr>`).join('');
+      }
+
+      function applyValues(vals) { Object.keys(vals).forEach(id => { if ($(id)) $(id).value = vals[id]; }); }
+      $('presetBtn').addEventListener('click', () => { applyValues(DEF); syncMode(); render(true); });
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      $('labMode').addEventListener('change', () => { syncMode(); render(false); });
+      syncMode();
+      render(false);
+    })();
+  </script>
+</BaseLayout>

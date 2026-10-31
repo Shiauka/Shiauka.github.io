@@ -158,6 +158,8 @@ draft: false
 
 ---
 
+下一篇：[4% 法則少算了勞保：月花 5 萬，你要存的不是 1,700 萬](/articles/ep61-labor-insurance-retirement-floor)
+
 ## 延伸閱讀
 
 - [再平衡的藝術：什麼時候動，怎麼動，動多少？](/articles/ep05-rebalancing)
