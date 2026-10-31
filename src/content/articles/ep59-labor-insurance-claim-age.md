@@ -188,6 +188,8 @@ draft: false
 
 ---
 
+下一篇：[台股跌了一成，你的股票可能還是太多：0050 沒有「停利」這個按鈕](/articles/ep60-no-take-profit-button)
+
 ## 延伸閱讀
 
 - [勞退自提 6%：沒提的那八成，不一定是錯的](/articles/ep51-labor-pension-voluntary-contribution)
