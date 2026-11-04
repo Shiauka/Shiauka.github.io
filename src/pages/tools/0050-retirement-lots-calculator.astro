@@ -114,7 +114,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       本計算機僅供一般資訊參考，報酬率、提領率、股價與配息皆為假設，不保證本金不會用完；勞保依現行規定，實際金額以勞保局核定為準。不構成投資、稅務或法律建議。
     </p>
     <div class="flex flex-wrap gap-3">
-      <a href="/articles/ep62-0050-retirement-lots" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP62 完整文章 →</a>
+      <a href="/articles/ep62-0050-lots-to-retire" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP62 完整文章 →</a>
       <a href="/tools/retirement-floor-gap-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">退休缺口計算機（EP61）</a>
       <a href="/tools/late-start-investing-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">40 歲才開始投資計算機（EP58）</a>
       <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
@@ -181,17 +181,28 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
                pmtDiv, pmtSwr, pmtFloor, floor80Money, floor80Lots, pmtFloor80, swrDivYear, swrSell, swrSellLots, share };
     }
 
+    function toHalf(s) {
+      return String(s === undefined || s === null ? '' : s).replace(/[０-９．]/g, (c) => c === '．' ? '.' : String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+    }
     function parseMoney(s) {
-      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|\s|元/gi, '');
+      let str = toHalf(s).replace(/NT\$|\$|,|，|\s|元/gi, '');
       if (str === '') return NaN;
-      const m = str.match(/^(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
-      if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
-      const v = (m[1] ? parseFloat(m[1]) * 1e4 : 0) + (m[2] ? parseFloat(m[2]) : 0);
+      const m = str.match(/^(?:(\d+(?:\.\d+)?)萬)?(?:(\d+(?:\.\d+)?)千)?(\d+(?:\.\d+)?)?$/);
+      if (!m || (m[1] === undefined && m[2] === undefined && m[3] === undefined)) return NaN;
+      let rest = m[3] ? parseFloat(m[3]) : 0;
+      // 台灣口語「4萬5」＝4.5 萬：萬後面只接一位數、沒有千，當成千位
+      if (m[1] !== undefined && m[2] === undefined && m[3] !== undefined && /^\d$/.test(m[3])) rest = rest * 1000;
+      const v = (m[1] ? parseFloat(m[1]) * 1e4 : 0) + (m[2] ? parseFloat(m[2]) * 1e3 : 0) + rest;
       return isFinite(v) ? v : NaN;
+    }
+    function parseNum(s) {
+      const str = toHalf(s).replace(/,|，|\s|元|%/g, '');
+      if (str === '' || !/^\d+(?:\.\d+)?$/.test(str)) return NaN;
+      return parseFloat(str);
     }
     // ===== 純函式 END =====
 
-    if (typeof window !== 'undefined') window.__ep62 = { monthlyFor, calc, parseMoney };
+    if (typeof window !== 'undefined') window.__ep62 = { monthlyFor, calc, parseMoney, parseNum };
 
     // ===== DOM =====
     (function () {
@@ -210,8 +221,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         lab: [0, 1e6, '勞保每月領', false, true],
         pension: [0, 1e10, '勞退專戶餘額', false, true],
         rate: [1, 10, '提領率'],
-        price: [1, 1e5, '0050 股價', false, true],
-        div: [0, 1e4, '每股一年配息', false, true],
+        price: [1, 1000, '0050 股價（一股，不是一張）', false, false],
+        div: [0, 100, '每股一年配息', false, false],
         years: [1, 50, '離退休年數', true],
         real: [0, 10, '扣掉通膨後的年報酬'],
       };
@@ -220,7 +231,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         const [lo, hi, name, intOnly, isMoney] = LIM[id];
         const el = $(id);
         const raw = el.value;
-        let v = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        let v = isMoney ? parseMoney(raw) : parseNum(raw);
         const def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
         if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${isMoney ? DEF[id] : def}`); v = def; }
         if (intOnly && v !== Math.floor(v)) { v = Math.floor(v); msgs.push(`「${name}」以整數計，已改用 ${v}`); }
@@ -230,7 +241,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         if (commit) el.value = show;
         let hint = document.getElementById('hint_' + id);
         if (!hint) { hint = document.createElement('span'); hint.id = 'hint_' + id; hint.className = 'block text-xs text-amber-700 mt-1'; el.insertAdjacentElement('afterend', hint); }
-        const typed = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        const typed = isMoney ? parseMoney(raw) : parseNum(raw);
         hint.textContent = (String(raw).trim() === '' || !isFinite(typed) || typed !== v) ? `已用 ${show} 計算` : '';
         return v;
       }
