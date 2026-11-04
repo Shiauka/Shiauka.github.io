@@ -1,0 +1,305 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="存幾張 0050 才能退休：配息法、3.5% 提領、扣掉勞保勞退三種算法一起比"
+  description="網路說存 300 張 0050 靠配息月領 4 萬；換成 3.5% 提領只要約 137 張，受僱上班族扣掉勞保、勞退，可能只要 34 張左右。填入你每月要花的錢、勞保、勞退、0050 股價與配息，三種張數、要準備的金額、每月要投多少一次比——對應 EP62。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP62</p>
+      <h1 class="text-3xl font-bold mb-3">存幾張 0050 才能退休：三種算法一起比</h1>
+      <p class="text-gray-600 leading-relaxed">
+        網路上流傳「存 300 張 0050，光靠配息就能月領 4 萬」。這個張數，是用<strong>只花配息</strong>的算法算出來的；換成<strong>提領率</strong>的算法，同樣的生活費要的少一半以上。
+        如果你是受僱上班族，再把<strong>勞保</strong>（領到過世的地板）和<strong>勞退專戶</strong>（已經存好的錢）算進來，還會再少一大段。
+        填入你自己的數字，三種張數、要準備的金額、每月要投多少，一次比。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的數字（全部用今天的錢）</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到影片的例子</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">退休後每個月要花的錢（元）</span>
+          <input id="spend" type="text" inputmode="decimal" value="40,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">勞保每月大約領多少（元；沒有勞保填 0）</span>
+          <input id="lab" type="text" inputmode="decimal" value="21,297"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">勞退專戶退休時預估餘額（元，可填「300萬」；沒有填 0）</span>
+          <input id="pension" type="text" inputmode="decimal" value="3,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">提領率（%，1–10；本頻道用 3.5）</span>
+          <input id="rate" type="number" min="1" max="10" step="0.1" value="3.5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">0050 股價（元／股；一張 1,000 股）</span>
+          <input id="price" type="text" inputmode="decimal" value="100"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">每股一年配息（元；2026 年合計 1.6）</span>
+          <input id="div" type="text" inputmode="decimal" value="1.6"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">離退休還有幾年（每月投入的年數；1–50）</span>
+          <input id="years" type="number" min="1" max="50" step="1" value="30"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">扣掉通膨後的年報酬（%，0–10；影片用 5）</span>
+          <input id="real" type="number" min="0" max="10" step="0.1" value="5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">勞保年金可以用勞保局的試算查；影片的例子是投保薪資在上限 45,800、年資 30 年、65 歲開始領：45,800 × 30 × 1.55% ＝ 21,297。每月投入＝從零開始、每月月底固定投一筆，月報酬＝(1＋年報酬)^(1/12)－1。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Compare -->
+    <div id="compare" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>配息法：</strong>只花配息、一股都不賣。一年要花的錢 ÷（每股配息 × 1,000）＝ 張數。0050 的配息每年都不一樣（分割後換算：2025 年約 1.035 元、2026 年 1.6 元），換一年的配息，答案就差一大截。只花配息比較穩，是因為一年只拿 1.6% 左右，拿得少；代價是要多存一倍以上的本金。</p>
+      <p><strong>提領法：</strong>第一年拿出本金的一個比例（這裡預設 3.5%），之後每年只跟著物價調整，配息拿到的算一部分，不夠的賣股補上。一年要花的錢 ÷ 提領率 ＝ 要準備的錢，再用現在的股價換算成張數。</p>
+      <p><strong>扣掉勞保勞退：</strong>勞保年金領到過世，是退休收入的地板，存款只需要補地板上面的缺口；勞退專戶是已經存好的退休本金，直接從要準備的錢裡扣掉。缺口一年的金額 ÷ 提領率 － 勞退專戶 ＝ 你自己要準備的錢。</p>
+      <p><strong>張數不是目標，金額才是：</strong>股價一變，同樣的張數值的錢就不一樣；0050 也在 2025 年 6 月一拆四，之前文章說的「一張」等於現在的四張。先算出要準備多少錢，再用當下股價換成張數。</p>
+    </div>
+
+    <!-- Detail -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">計算明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>不建議全部押在 0050：</strong>3.5% 不是用「全部放在一檔台股 ETF」算出來的。4% 法則當初用的是美國股票加債券（股票約占一半到七成五）；0050 是一個國家的五十家公司，台積電約占六成。2022 年 0050 從高點到低點含息跌了約三成四，全部押在 0050、剛退休就碰到，提領率會從 3.5% 變成 5% 以上。這裡算出來的是「你要準備的金額」，退休時要怎麼分散、留多少現金，是另外要先想好的事。</p>
+      <p><strong>勞保這塊地板的前提：</strong>適用受僱、有加勞保的人。年資滿 15 年才能月領（未滿原則上只能一次領；勞保加國保年資併計滿 15 年可以月領，勞工保險條例 §74-2）；投保薪資要照實申報。投保薪資上限 45,800 從 2016 年起沒調過，年輕人可以把勞保改成八折看看。軍公教是另一套退撫制度；自己接案、只有國民年金的人，勞保請填 0 或你實際的金額。</p>
+      <p><strong>提早退休：</strong>這裡假設退休那天就開始領勞保。退休到開始領勞保之間的那幾年，要另外準備，請用<a href="/tools/retirement-floor-gap-calculator" class="text-brand underline">退休缺口計算機</a>算。</p>
+      <p><strong>沒算進去的：</strong>配息的補充保費（單次股利所得達 2 萬元扣 2.11%）、股利所得稅、賣股的證交稅（ETF 千分之一）與手續費；每月投入沒有算你已經有的存款。</p>
+      <p><strong>官方查詢：</strong>投保薪資、年資、勞退專戶餘額都可以登入勞保局 e 化服務或 App 查；勞保年金也可以用<a href="https://www.bli.gov.tw/0109187.html" target="_blank" rel="noopener" class="text-brand underline">勞保局的試算</a>。0050 配息以元大投信公告為準。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，報酬率、提領率、股價與配息皆為假設，不保證本金不會用完；勞保依現行規定，實際金額以勞保局核定為準。不構成投資、稅務或法律建議。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep62-0050-retirement-lots" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP62 完整文章 →</a>
+      <a href="/tools/retirement-floor-gap-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">退休缺口計算機（EP61）</a>
+      <a href="/tools/late-start-investing-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">40 歲才開始投資計算機（EP58）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const SHARES = 1000;   // 一張 1,000 股
+
+    function clampN(v, lo, hi) { v = Number(v); if (!isFinite(v)) v = lo; return Math.min(hi, Math.max(lo, v)); }
+
+    // 每月月底投入、從零開始，n 年後累積到 fv；月報酬＝(1+年報酬)^(1/12)−1；報酬 0 時＝fv ÷ 月數
+    function monthlyFor(fv, years, realRate) {
+      if (!(fv > 0)) return 0;
+      const n = Math.round(years) * 12;
+      const r = Math.pow(1 + realRate, 1 / 12) - 1;
+      if (r === 0) return fv / n;
+      return fv * r / (Math.pow(1 + r, n) - 1);
+    }
+
+    // p: { spend, lab, pension, rate(%), price, div, years, real(%) }（金額為元）
+    function calc(p) {
+      const spend = clampN(p.spend, 0, 1e8);
+      const lab = clampN(p.lab, 0, 1e6);
+      const pension = clampN(p.pension, 0, 1e10);
+      const rate = clampN(p.rate, 1, 10) / 100;
+      const price = clampN(p.price, 1, 1e5);
+      const div = clampN(p.div, 0, 1e4);
+      const years = Math.round(clampN(p.years, 1, 50));
+      const real = clampN(p.real, 0, 10) / 100;
+      const lot = price * SHARES;                 // 一張的市值
+      const year = spend * 12;
+      // ① 配息法（不扣地板）：配息 0 時無解
+      const divLots = div > 0 ? year / (div * SHARES) : null;
+      const divMoney = divLots === null ? null : divLots * lot;
+      const yieldPct = div / price;
+      // ② 提領法（不扣地板）
+      const swrMoney = year / rate;
+      const swrLots = swrMoney / lot;
+      // ③ 扣掉勞保（地板）與勞退（存款）
+      const gap = Math.max(0, spend - lab);
+      const floorTotal = gap * 12 / rate;
+      const floorMoney = Math.max(0, floorTotal - pension);
+      const floorLots = floorMoney / lot;
+      // 對照：配息法也扣勞保勞退
+      const divFloorLots = div > 0 ? Math.max(0, gap * 12 / (div * SHARES) - pension / lot) : null;
+      // 每月要投多少
+      const pmtDiv = divMoney === null ? null : monthlyFor(divMoney, years, real);
+      const pmtSwr = monthlyFor(swrMoney, years, real);
+      const pmtFloor = monthlyFor(floorMoney, years, real);
+      // 勞保八折壓力測試
+      const floor80Money = Math.max(0, Math.max(0, spend - lab * 0.8) * 12 / rate - pension);
+      const floor80Lots = floor80Money / lot;
+      const pmtFloor80 = monthlyFor(floor80Money, years, real);
+      // 提領法：一年配息、要賣多少
+      const swrDivYear = swrLots * div * SHARES;
+      const swrSell = Math.max(0, year - swrDivYear);
+      const swrSellLots = swrSell / lot;
+      const share = spend > 0 ? Math.min(1, lab / spend) : null;
+      return { spend, lab, pension, rate, price, div, years, real, lot, year, yieldPct,
+               divLots, divMoney, swrMoney, swrLots, gap, floorTotal, floorMoney, floorLots, divFloorLots,
+               pmtDiv, pmtSwr, pmtFloor, floor80Money, floor80Lots, pmtFloor80, swrDivYear, swrSell, swrSellLots, share };
+    }
+
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|\s|元/gi, '');
+      if (str === '') return NaN;
+      const m = str.match(/^(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
+      const v = (m[1] ? parseFloat(m[1]) * 1e4 : 0) + (m[2] ? parseFloat(m[2]) : 0);
+      return isFinite(v) ? v : NaN;
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep62 = { monthlyFor, calc, parseMoney };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const num0 = (n) => Math.round(n).toLocaleString('en-US');
+      const wan = (n) => Math.round(n / 1e4).toLocaleString('en-US') + ' 萬';
+      const lots = (x) => (x === null ? '—' : (x < 10 ? x.toFixed(1) : Math.round(x).toLocaleString('en-US')) + ' 張');
+      const pct = (x) => (x === null || x === undefined) ? '—' : Math.round(x * 100) + '%';
+      const pct1 = (x) => (x * 100).toFixed(1) + '%';
+
+      const DEF = { spend: '40,000', lab: '21,297', pension: '3,000,000', rate: 3.5, price: '100', div: '1.6', years: 30, real: 5 };
+      // [lo, hi, 名稱, 整數?, 金額?]
+      const LIM = {
+        spend: [0, 1e8, '每月要花的錢', false, true],
+        lab: [0, 1e6, '勞保每月領', false, true],
+        pension: [0, 1e10, '勞退專戶餘額', false, true],
+        rate: [1, 10, '提領率'],
+        price: [1, 1e5, '0050 股價', false, true],
+        div: [0, 1e4, '每股一年配息', false, true],
+        years: [1, 50, '離退休年數', true],
+        real: [0, 10, '扣掉通膨後的年報酬'],
+      };
+
+      function readField(id, msgs, commit) {
+        const [lo, hi, name, intOnly, isMoney] = LIM[id];
+        const el = $(id);
+        const raw = el.value;
+        let v = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        const def = isMoney ? parseMoney(DEF[id]) : Number(DEF[id]);
+        if (String(raw).trim() === '' || !isFinite(v)) { msgs.push(`「${name}」空白或無法辨識，暫用 ${isMoney ? DEF[id] : def}`); v = def; }
+        if (intOnly && v !== Math.floor(v)) { v = Math.floor(v); msgs.push(`「${name}」以整數計，已改用 ${v}`); }
+        if (v < lo) { msgs.push(`「${name}」最小 ${num0(lo)}，已改用 ${num0(lo)}`); v = lo; }
+        if (v > hi) { msgs.push(`「${name}」最大 ${num0(hi)}，已改用 ${num0(hi)}`); v = hi; }
+        const show = (id === 'price' || id === 'div') ? String(v) : (isMoney ? num0(v) : String(v));
+        if (commit) el.value = show;
+        let hint = document.getElementById('hint_' + id);
+        if (!hint) { hint = document.createElement('span'); hint.id = 'hint_' + id; hint.className = 'block text-xs text-amber-700 mt-1'; el.insertAdjacentElement('afterend', hint); }
+        const typed = isMoney ? parseMoney(raw) : parseFloat(String(raw).replace(/,/g, ''));
+        hint.textContent = (String(raw).trim() === '' || !isFinite(typed) || typed !== v) ? `已用 ${show} 計算` : '';
+        return v;
+      }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      function render(commit) {
+        const msgs = [];
+        const v = {};
+        Object.keys(LIM).forEach(id => { v[id] = readField(id, msgs, commit); });
+        const r = window.__ep62.calc(v);
+        if (r.div === 0) msgs.push('配息填 0：只花配息的算法無解');
+        const notice = $('notice');
+        notice.textContent = msgs.join('；');
+        notice.classList.toggle('hidden', msgs.length === 0);
+
+        const rateTxt = (r.rate * 100).toFixed(1) + '%';
+        $('cards').innerHTML =
+          card('① 只花配息', lots(r.divLots), r.divMoney === null ? '配息為 0，無法只靠配息' : `要準備 ${wan(r.divMoney)}；每月投 ${ntd(r.pmtDiv)}`, false) +
+          card(`② ${rateTxt} 提領`, lots(r.swrLots), `要準備 ${wan(r.swrMoney)}；每月投 ${ntd(r.pmtSwr)}`, false) +
+          card('③ 扣掉勞保勞退', lots(r.floorLots), `要準備 ${wan(r.floorMoney)}；每月投 ${ntd(r.pmtFloor)}`, true);
+
+        const lines = [];
+        lines.push(`每月花 ${ntd(r.spend)}，一年 ${wan(r.year)}。`);
+        if (r.divLots !== null) lines.push(`只花配息：每股配 ${r.div} 元，一張一年配 ${ntd(r.div * 1000)}，要 <strong>${lots(r.divLots)}</strong>（殖利率約 ${pct1(r.yieldPct)}）。`);
+        lines.push(`用 ${rateTxt} 提領：${wan(r.year)} ÷ ${rateTxt} ＝ ${wan(r.swrMoney)}，以一股 ${r.price} 元換算約 <strong>${lots(r.swrLots)}</strong>`
+          + (r.divLots ? `，是配息法的 ${pct(r.swrLots / r.divLots)}。` : '。'));
+        lines.push(`再把勞保當地板、勞退算存款：缺口每月 ${ntd(r.gap)}，一年 ${wan(r.gap * 12)} ÷ ${rateTxt} ＝ ${wan(r.floorTotal)}，扣掉勞退 ${wan(r.pension)}，你自己要準備 <strong>${wan(r.floorMoney)}</strong>，約 <strong>${lots(r.floorLots)}</strong>。`);
+        lines.push(`${r.years} 年、每年實質報酬 ${(r.real * 100).toFixed(1)}%，從零開始每月要投：${r.pmtDiv === null ? '' : `配息法 ${ntd(r.pmtDiv)}、`}提領法 ${ntd(r.pmtSwr)}、扣掉勞保勞退 <strong>${ntd(r.pmtFloor)}</strong>。`);
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結果：</strong>${lines.join('')}</p>
+          <p class="text-gray-600">這裡的張數是用你填的股價換算；股價一變，張數就變。真正要定的目標是金額，而且不建議全部押在 0050（見下方說明）。</p>`;
+
+        $('compare').innerHTML = `
+          <p class="font-semibold text-gray-900 mb-3">對照：同一筆生活費，換一種算法</p>
+          <div class="overflow-x-auto"><table class="w-full text-sm border-collapse whitespace-nowrap"><tbody>
+            <tr class="border-b border-gray-100 text-gray-500"><td class="py-2 pr-3">算法</td><td class="py-2 px-3 text-right">張數</td><td class="py-2 px-3 text-right">要準備</td><td class="py-2 pl-3 text-right">每月投</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-3">① 只花配息</td><td class="py-2 px-3 text-right">${lots(r.divLots)}</td><td class="py-2 px-3 text-right">${r.divMoney === null ? '—' : wan(r.divMoney)}</td><td class="py-2 pl-3 text-right">${r.pmtDiv === null ? '—' : ntd(r.pmtDiv)}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-3">② ${rateTxt} 提領</td><td class="py-2 px-3 text-right">${lots(r.swrLots)}</td><td class="py-2 px-3 text-right">${wan(r.swrMoney)}</td><td class="py-2 pl-3 text-right">${ntd(r.pmtSwr)}</td></tr>
+            <tr class="border-b border-gray-100 font-semibold"><td class="py-2 pr-3">③ 扣掉勞保勞退</td><td class="py-2 px-3 text-right" style="color:#C5611A">${lots(r.floorLots)}</td><td class="py-2 px-3 text-right">${wan(r.floorMoney)}</td><td class="py-2 pl-3 text-right">${ntd(r.pmtFloor)}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 pr-3">壓力測試：勞保打八折（每月約 ${ntd(r.lab * 0.8)}）</td><td class="py-2 px-3 text-right">${lots(r.floor80Lots)}</td><td class="py-2 px-3 text-right">${wan(r.floor80Money)}</td><td class="py-2 pl-3 text-right">${ntd(r.pmtFloor80)}</td></tr>
+          </tbody></table></div>
+          <p class="text-gray-600 mt-3">①和③差的，一部分來自換算法，一部分來自把勞保勞退算進來：配息法如果也先扣掉勞保勞退，要 ${lots(r.divFloorLots)}。</p>`;
+
+        const rows = [
+          ['每月要花', ntd(r.spend)],
+          ['一張的市值（股價 × 1,000 股）', ntd(r.lot)],
+          ['① 一年花費 ÷（每股配息 × 1,000）', r.divLots === null ? '—' : r.divLots.toFixed(2) + ' 張'],
+          [`② 一年花費 ÷ ${rateTxt}`, ntd(r.swrMoney) + '（' + r.swrLots.toFixed(2) + ' 張）'],
+          ['　其中一年配息／還要賣', ntd(r.swrDivYear) + '／' + ntd(r.swrSell) + '（' + r.swrSellLots.toFixed(2) + ' 張）'],
+          ['③ 每月缺口（花費 − 勞保）', ntd(r.gap)],
+          [`　缺口 × 12 ÷ ${rateTxt}`, ntd(r.floorTotal)],
+          ['　− 勞退專戶', ntd(r.pension)],
+          ['　你自己要準備', ntd(r.floorMoney) + '（' + r.floorLots.toFixed(2) + ' 張）'],
+        ];
+        $('detailBody').innerHTML = rows.map(([k, val]) => `<tr class="border-b border-gray-100"><td class="py-2 pr-3">${k}</td><td class="py-2 pl-3 text-right">${val}</td></tr>`).join('');
+      }
+
+      function applyValues(vals) { Object.keys(vals).forEach(id => { if ($(id)) $(id).value = vals[id]; }); }
+      $('presetBtn').addEventListener('click', () => { applyValues(DEF); render(true); });
+      Object.keys(LIM).forEach(id => {
+        $(id).addEventListener('input', () => render(false));
+        $(id).addEventListener('change', () => render(true));
+      });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
