@@ -4,6 +4,7 @@ export interface Episode {
   desc: string
   youtubeId: string   // 填入 YouTube 影片 ID（網址 ?v= 後面那段）
   pubDate: string     // 公開日 YYYY-MM-DD（上傳即填 youtubeId，但連結要到這天才開放）
+  label?: string      // 不給集號的特別集（如「時事加更」）：顯示這個取代集號；ep 用內部代號 9xx
 }
 
 export const episodes: Episode[] = [
@@ -440,5 +441,13 @@ export const episodes: Episode[] = [
     desc: '網路流傳存 300 張 0050 靠配息月領 4 萬，但 0050 本來就不是拿來領息的。改用 3.5% 提領只要 137 張，再算進勞保跟勞退，條件最好的受僱者只要 34 張，實際大約三十幾到六十張。再算雙薪家庭、每個月要投多少，以及全部押 0050 時 3.5% 為什麼不保證。',
     youtubeId: 'uFsITFb5iAk',
     pubDate: '2026-11-17',
+  },
+  {
+    ep: 901,
+    label: '時事加更',
+    title: '台股跌破四萬點，從高點跌了兩成：這個禮拜該做的三件事，跟不該做的三件事',
+    desc: '台股從 10/6 歷史高點 49,822 點，一個月後跌破四萬、剛好跌了兩成。不猜後市，只講這個當下：先看收入、數一下手上的現金、照自己寫好的劇本做；不要因為怕就停掉定期定額、不要在情緒最高的時候做計畫外的決定、不要動用不該用的錢或臨時加槓桿。',
+    youtubeId: 'gNE6YsyH2m4',
+    pubDate: '2026-11-08',
   },
 ]

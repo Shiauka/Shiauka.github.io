@@ -22,8 +22,10 @@ const withMeta = episodes.map(ep => ({
 // 已公開 = 有 youtubeId 且公開日（19:00 TW）已到。
 const isLive = (ep: typeof withMeta[number]) => !!ep.youtubeId && ep.openTs <= now
 
-const live     = withMeta.filter(isLive).sort((a, b) => b.ep - a.ep)
-const upcoming  = withMeta.filter(ep => !isLive(ep)).sort((a, b) => a.ep - b.ep)
+// 依公開日排序（特別集 ep=9xx 不能用集號排），同日再看集號
+const byTime = (a: typeof withMeta[number], b: typeof withMeta[number]) => (a.openTs - b.openTs) || (a.ep - b.ep)
+const live     = withMeta.filter(isLive).sort((a, b) => byTime(b, a))
+const upcoming  = withMeta.filter(ep => !isLive(ep)).sort(byTime)
 const nextEp    = upcoming[0]
 const sorted    = [...(nextEp ? [nextEp] : []), ...live, ...upcoming.slice(1)]
 
@@ -97,7 +99,9 @@ for (const ep of Object.values(articlesByEp)) {
             <div class="flex items-start gap-4">
               <!-- EP 編號 -->
               <div class="shrink-0 w-12 h-12 rounded-lg bg-brand/10 flex items-center justify-center">
-                <span class="text-brand font-bold text-sm">{String(ep.ep).padStart(2, '0')}</span>
+                {ep.label
+                  ? <span class="text-brand font-bold text-xs leading-tight text-center">{ep.label.slice(0, 2)}<br />{ep.label.slice(2)}</span>
+                  : <span class="text-brand font-bold text-sm">{String(ep.ep).padStart(2, '0')}</span>}
               </div>
 
               <!-- 內容 -->

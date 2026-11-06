@@ -13,7 +13,7 @@ function openTs(pubDate: string): number {
 const now = Date.now()
 const latestEpisodes = episodes
   .filter(ep => ep.youtubeId && openTs(ep.pubDate) <= now)
-  .sort((a, b) => b.ep - a.ep)
+  .sort((a, b) => (openTs(b.pubDate) - openTs(a.pubDate)) || (b.ep - a.ep))
   .slice(0, 3)
 ---
 
@@ -78,7 +78,7 @@ const latestEpisodes = episodes
             rel={ep.youtubeId ? 'noopener noreferrer' : undefined}
             class="bg-white border border-gray-200 rounded-xl p-5 hover:border-brand hover:shadow-md transition-all group"
           >
-            <span class="text-xs font-semibold text-brand mb-2 block">EP{String(ep.ep).padStart(2, '0')}</span>
+            <span class="text-xs font-semibold text-brand mb-2 block">{ep.label ?? `EP${String(ep.ep).padStart(2, '0')}`}</span>
             <h3 class="font-semibold text-gray-900 group-hover:text-brand transition-colors leading-snug mb-2">
               {ep.title}
             </h3>
