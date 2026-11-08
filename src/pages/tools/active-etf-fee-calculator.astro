@@ -1,0 +1,373 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="主動式 ETF 費用損益兩平計算機"
+  description="你那一檔主動式 ETF 的總管理費用率，比 0050 多收多少，每年扣費前就要多賺多少才打平；這個費用差放二十年，會累積成多少錢。填入本金、年數、預期毛報酬與兩邊的費用率，一次算出來——對應 EP63。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP63</p>
+      <h1 class="text-3xl font-bold mb-3">主動式 ETF 費用損益兩平計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        主動式 ETF 的總管理費用率，通常比 0050 高出不少。這個費用差<strong>每年都會從報酬裡先扣掉</strong>，所以它每年要先多賺同樣的百分點，扣完費用才會跟 0050 打平。
+        填入你那一檔的費用率，看看每年要多賺幾個百分點，以及這個差距放 N 年會累積成多少錢。
+        這不是說主動式不能買，只是讓你看到：它每年要比 0050 多賺多少，才算追平。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的數字</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到預設值</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">本金（元，可填「100萬」）</span>
+          <input id="principal" type="text" inputmode="decimal" value="1,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">放幾年（整數 1–60）</span>
+          <input id="years" type="text" inputmode="numeric" value="20"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">預期毛報酬（扣費前，%／年；−20 到 30）</span>
+          <input id="gross" type="text" inputmode="decimal" value="5"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">你那一檔的總管理費用率（%／年；0–10）</span>
+          <input id="feeYours" type="text" inputmode="decimal" value="1.00"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">0050 的總管理費用率（%／年；0–10）</span>
+          <input id="fee0050" type="text" inputmode="decimal" value="0.22"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">（選填）你那一檔每年扣費前比 0050 多賺（百分點；−20 到 30）</span>
+          <input id="extra" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+
+      <div class="mt-4">
+        <p class="text-sm text-gray-600 mb-2">快速填入「你那一檔」的費用率（只會改上面第四格）：</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-fee="0.88" class="feeBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">00985A 0.88%</button>
+          <button type="button" data-fee="1.07" class="feeBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">00980A 1.07%</button>
+          <button type="button" data-fee="1.34" class="feeBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">00982A 1.34%</button>
+          <button type="button" data-fee="1.67" class="feeBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">00981A 1.67%</button>
+          <button type="button" id="customBtn" class="text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">自訂</button>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">數字來自 MoneyDJ 過去一年總管理費用率，2026-11-06；口徑不同或規模變動會有出入，請以公開說明書為準。</p>
+      </div>
+
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">金額可打千分位、「100萬」、「NT$1,000,000」。報酬與費用率一律四捨五入到小數 2 位（0.01 個百分點）再算，顯示什麼就用什麼判定。預設值是中性的數字，不代表任何一檔的實際費用。毛報酬是假設值，不是預測。</p>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Extra scenario -->
+    <div id="extraBox" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed hidden"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>每年要多賺：</strong>你那一檔的總管理費用率，減掉 0050 的總管理費用率。這是它每年「扣費用之前」要比 0050 多賺的百分點，扣完費用才會跟 0050 打平。</p>
+      <p><strong>累積差距：</strong>結論卡用的是「兩邊選股本事一樣」的情況：毛報酬相同，只差費用。這時候兩邊的差距，全部來自費用，而且會隨年數用複利的方式越滾越大。</p>
+      <p><strong>填了「每年多賺」會怎樣：</strong>你那一檔的毛報酬改成「毛報酬＋多賺的百分點」，再跟 0050 比。多賺的剛好等於上面算出的「每年要多賺」，兩邊就打平；多一點就領先，少一點就落後。</p>
+      <p><strong>對照例子：</strong>毛報酬 5%、本金 100 萬、20 年、0050 費用率 0.22%、00981A 1.67%：0050 約 254 萬、00981A 約 193 萬，差約 62 萬（約 24%），每年要多賺 1.45 個百分點。換成 00985A（0.88%）：約 224 萬，差約 30 萬，每年要多賺 0.66 個百分點。</p>
+    </div>
+
+    <!-- Detail -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 每 5 年一列的明細</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead id="detailHead"></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+      <p id="detailNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>這是簡化模型，不是預測：</strong>費用直接從毛報酬扣除，每年實拿 ＝ 毛報酬 − 總管理費用率，N 年後金額 ＝ 本金 × (1 ＋ 實拿)<sup>N</sup>。毛報酬是你假設的固定數字，真實市場每年都在波動。</p>
+      <p><strong>績效排行榜上的報酬已經是扣費後的：</strong>淨值或價格走勢裡，費用早就扣掉了。這個工具問的是另一件事：你那一檔每年「扣費之前」要多賺多少，才追得上 0050，不要把它再扣一次。</p>
+      <p><strong>換成乘法計費會略有不同：</strong>如果改成 (1 ＋ 毛報酬) × (1 − 費用率) 來算，結果會略有差異。例如毛報酬 5%、100 萬、20 年、00981A 對 0050，差距約 64 萬，而不是 62 萬。方向一樣，數字略有出入。</p>
+      <p><strong>費用率包含什麼：</strong>總管理費用率包含經理費、保管費，以及交易成本（手續費、證交稅）等，換手越多、規模變動，數字就會跟著動；經理費也可能隨規模調降。投信投顧公會等其他來源的口徑不同，數字可能不一樣，請以公開說明書為準。</p>
+      <p><strong>費用率來源與時效：</strong>快捷按鈕的數字是 MoneyDJ 過去一年總管理費用率（0050 為 0.22%，其中經理費 0.15%、其他 0.07%），查證日 2026-11-06。想換成別檔，直接在「你那一檔」輸入。</p>
+      <p><strong>沒算進去的：</strong>稅負、配息再投入的差異、買賣價差、折溢價、通膨。真實世界的差距會受這些影響。</p>
+      <p><strong>立場：</strong>不是說主動式 ETF 不能買。台灣的主動式 ETF 才上市一年多，答案還沒出來。這個工具只是讓你看到，它每年要比 0050 多賺多少，扣完費用才算打平。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採固定報酬率與費用直接自毛報酬扣除的簡化假設，不是預測，過去績效不代表未來結果。費用率來源為 MoneyDJ（2026-11-06），可能與公開說明書不同，請以公開說明書為準。不構成投資、稅務或法律建議。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep63-active-etf-vs-0050" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP63 完整文章 →</a>
+      <a href="/tools/rebalance-check-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">再平衡檢查計算機（EP60）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const LIM = {
+      principal: { lo: 0, hi: 1e10, name: '本金' },
+      years: { lo: 1, hi: 60, name: '年數' },
+      gross: { lo: -20, hi: 30, name: '預期毛報酬' },
+      feeYours: { lo: 0, hi: 10, name: '你那一檔的費用率' },
+      fee0050: { lo: 0, hi: 10, name: '0050 的費用率' },
+      extra: { lo: -20, hi: 30, name: '每年多賺' },
+    };
+    const DEFAULTS = { principal: 1000000, years: 20, gross: 5, feeYours: 1, fee0050: 0.22, extra: 0 };
+    const MAX_YEARS = 60;
+
+    // 四捨五入到「百分點的 0.01」，回傳整數（單位：0.01 個百分點），避免浮點誤差
+    function toHundredths(pct) { return Math.round(Number(pct) * 100 + (pct >= 0 ? 1e-9 : -1e-9)); }
+
+    // 金額字串解析：吃千分位、空白、NT$、元；支援「億」「萬」與組合。無法辨識回傳 NaN
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      let sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      const mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      const v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+
+    // 百分比字串解析（可含 % 與逗號）；無法辨識回傳 NaN
+    function parsePct(s) {
+      const str = String(s === undefined || s === null ? '' : s).replace(/[%％,，\s]/g, '').replace(/^−/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      const v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+
+    // 把原始字串欄位整理成可計算的數字，超出範圍或無法辨識都寫回採用值並產生提示
+    // raw: { principal, years, gross, feeYours, fee0050, extra }（字串或數字）
+    // 回傳 { p: { principal, years, gross, feeYours, fee0050, extra }, msgs: [字串], changed: { 欄位: true } }
+    function normalizeInputs(raw) {
+      const msgs = [], changed = {}, p = {};
+      Object.keys(LIM).forEach(function (k) {
+        const L = LIM[k];
+        const isMoney = k === 'principal';
+        const blank = String(raw[k] === undefined || raw[k] === null ? '' : raw[k]).trim() === '';
+        let v = isMoney ? parseMoney(raw[k]) : parsePct(raw[k]);
+        if (k === 'extra' && blank) { v = 0; }                     // 選填，空白視為 0，不提示
+        else if (blank || !isFinite(v)) {
+          msgs.push('「' + L.name + '」' + (blank ? '空白' : '無法辨識') + '，暫用預設值 ' + DEFAULTS[k]);
+          v = DEFAULTS[k]; changed[k] = true;
+        }
+        if (k === 'years') {
+          const r = Math.round(v);
+          if (r !== v) { msgs.push('「年數」必須是整數，已四捨五入為 ' + r); v = r; changed[k] = true; }
+        } else if (!isMoney) {
+          const h = toHundredths(v) / 100;
+          if (Math.abs(h - v) > 1e-9) { msgs.push('「' + L.name + '」已四捨五入到小數 2 位：' + h); v = h; changed[k] = true; }
+        }
+        if (v < L.lo) { msgs.push('「' + L.name + '」不能小於 ' + L.lo + '，已改用 ' + L.lo); v = L.lo; changed[k] = true; }
+        if (v > L.hi) { msgs.push('「' + L.name + '」最大 ' + L.hi + '，已改用 ' + L.hi); v = L.hi; changed[k] = true; }
+        p[k] = v;
+      });
+      return { p: p, msgs: msgs, changed: changed };
+    }
+
+    // 每年扣費前要多賺幾個百分點 ＝ 你那一檔費用率 − 0050 費用率（以 0.01 為單位四捨五入）
+    // 例：requiredExtraPp(1.67, 0.22) → 1.45；負數表示比 0050 便宜
+    function requiredExtraPp(feeYours, fee0050) {
+      return (toHundredths(feeYours) - toHundredths(fee0050)) / 100;
+    }
+
+    // N 年後金額 ＝ 本金 × (1 + (毛報酬 − 費用率))^N ；百分比用「%」為單位
+    // 防呆：實拿 ≤ −100%、輸入非有限值、年數 < 0 時回傳 NaN（呼叫端要檢查 isFinite）；年數上限 60
+    function futureValue(principal, grossPct, feePct, years) {
+      const net = (toHundredths(grossPct) - toHundredths(feePct)) / 10000;
+      const n = Math.min(MAX_YEARS, Math.max(0, Math.floor(Number(years))));
+      if (!isFinite(principal) || !isFinite(net) || !isFinite(n) || net <= -1) return NaN;
+      const v = principal * Math.pow(1 + net, n);
+      return isFinite(v) ? v : NaN;
+    }
+
+    // 主計算。p 要先經過 normalizeInputs。回傳 { ok, ... }
+    function computeFeeBreakEven(p) {
+      const reqPp = requiredExtraPp(p.feeYours, p.fee0050);
+      const x100 = toHundredths(p.extra);
+      const net0050 = (toHundredths(p.gross) - toHundredths(p.fee0050)) / 100;       // 百分點
+      const netYours = (toHundredths(p.gross) - toHundredths(p.feeYours)) / 100;
+      const netExtra = (toHundredths(p.gross) + x100 - toHundredths(p.feeYours)) / 100;
+      if (net0050 <= -100 || netYours <= -100 || netExtra <= -100) {
+        return { ok: false, reason: 'netTooLow', reqPp, net0050, netYours, netExtra };
+      }
+      const years = p.years;
+      const fv0050 = futureValue(p.principal, p.gross, p.fee0050, years);
+      const fvYours = futureValue(p.principal, p.gross, p.feeYours, years);
+      const gapAmt = fv0050 - fvYours;                       // 正＝你那一檔落後
+      const gapPct = fv0050 > 0 ? gapAmt / fv0050 * 100 : null;
+      // 若填了每年多賺 x
+      const hasExtra = x100 !== 0;
+      let extra = null;
+      if (hasExtra) {
+        const fvExtra = futureValue(p.principal, p.gross + p.extra, p.feeYours, years);
+        const d100 = x100 - toHundredths(reqPp);              // 用顯示精度（0.01）判定
+        const verdict = d100 > 0 ? 'ahead' : (d100 < 0 ? 'behind' : 'tie');
+        const diffAmt = verdict === 'tie' ? 0 : fvExtra - fv0050;   // 正＝你那一檔多
+        extra = { x: p.extra, fvExtra, diffAmt, verdict, diffPct: fv0050 > 0 ? diffAmt / fv0050 * 100 : null };
+      }
+      // 每 5 年一列（最後一年若不是 5 的倍數，再補一列）
+      const rows = [];
+      for (let y = 5; y <= years && y <= MAX_YEARS; y += 5) rows.push(y);
+      if (rows[rows.length - 1] !== years) rows.push(years);
+      const table = rows.map(function (y) {
+        const a = futureValue(p.principal, p.gross, p.fee0050, y);
+        const b = futureValue(p.principal, p.gross, p.feeYours, y);
+        const c = hasExtra ? futureValue(p.principal, p.gross + p.extra, p.feeYours, y) : null;
+        return { year: y, fv0050: a, fvYours: b, fvExtra: c, gap: a - b };
+      });
+      return { ok: true, reqPp, net0050, netYours, netExtra, years, fv0050, fvYours, gapAmt, gapPct, hasExtra, extra, table };
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep63 = { toHundredths, parseMoney, parsePct, normalizeInputs, requiredExtraPp, futureValue, computeFeeBreakEven };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const FIELDS = Object.keys(LIM);
+      const ntd = (n) => 'NT$' + Math.round(n).toLocaleString('en-US');
+      const wan = (n) => {
+        if (!isFinite(n)) return '—';
+        const a = Math.abs(n);
+        if (a < 10000) return 'NT$' + Math.round(n).toLocaleString('en-US');
+        if (a < 1e8) return (Math.round(n / 1000 + (n >= 0 ? 1e-9 : -1e-9)) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+        return (Math.round(n / 1e6 + (n >= 0 ? 1e-9 : -1e-9)) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' 億';
+      };
+      const pct2 = (x) => x.toFixed(2);
+      const pctTxt = (x) => x === null || !isFinite(x) ? '—' : x.toFixed(1) + '%';
+      const fmtField = (k, v) => k === 'principal' ? Math.round(v).toLocaleString('en-US') : (k === 'years' ? String(v) : (k === 'gross' || k === 'extra' ? String(v) : v.toFixed(2)));
+
+      function readRaw() { const r = {}; FIELDS.forEach(k => { r[k] = $(k).value; }); return r; }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      // 提示要留到使用者下一次編輯：離開欄位時值已被寫回、第二次整理不會再產生訊息，但提示仍應保留
+      let lastMsgs = [];
+      function render(commit, keepNotice) {
+        const { p, msgs, changed } = window.__ep63.normalizeInputs(readRaw());
+        if (msgs.length) lastMsgs = msgs.slice(); else if (!commit || keepNotice === false) lastMsgs = [];
+        const shownMsgs = msgs.length ? msgs : lastMsgs;
+        if (commit) FIELDS.forEach(k => { $(k).value = fmtField(k, p[k]); });
+        else FIELDS.forEach(k => { if (changed[k] && document.activeElement !== $(k)) $(k).value = fmtField(k, p[k]); });
+        const notice = $('notice');
+        notice.textContent = shownMsgs.join('；');
+        notice.classList.toggle('hidden', shownMsgs.length === 0);
+
+        const r = window.__ep63.computeFeeBreakEven(p);
+        const box = $('extraBox');
+        if (!r.ok) {
+          $('cards').innerHTML = '<div class="sm:col-span-3 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800">毛報酬扣掉費用後，每年實拿已經到 −100% 以下（等於一年內全部虧光），這個模型沒有意義。請調整毛報酬或費用率。</div>';
+          $('conclusion').innerHTML = ''; box.classList.add('hidden'); box.innerHTML = '';
+          $('detailHead').innerHTML = ''; $('detailBody').innerHTML = ''; $('detailNote').textContent = '';
+          return;
+        }
+
+        const N = r.years;
+        const req = r.reqPp;
+        // 卡 1：每年要多賺
+        let c1v, c1d;
+        if (req > 0) { c1v = '+' + pct2(req) + ' 個百分點'; c1d = `你那一檔 ${pct2(p.feeYours)}% − 0050 ${pct2(p.fee0050)}%；扣費用之前每年要多賺這麼多，才跟 0050 打平`; }
+        else if (req === 0) { c1v = '0.00 個百分點'; c1d = `兩邊費用率一樣（${pct2(p.feeYours)}%），不需要多賺`; }
+        else { c1v = '不需要多賺'; c1d = `比 0050 便宜 ${pct2(-req)} 個百分點（你那一檔 ${pct2(p.feeYours)}%、0050 ${pct2(p.fee0050)}%），不需要多賺`; }
+        const same = `兩邊毛報酬都是 ${p.gross}%`;
+        const gapLabel = r.gapAmt > 0 ? '費用差累積的落差' : (r.gapAmt < 0 ? '費用差累積的優勢' : '費用差累積的落差');
+        const gapVal = r.gapAmt === 0 ? '約 0' : '約 ' + wan(Math.abs(r.gapAmt));
+        const gapDesc = p.principal === 0 ? '本金是 0，金額都是 0' :
+          (r.gapAmt > 0 ? `你那一檔比 0050 少約 ${pctTxt(r.gapPct)}（占 0050 的比例）` : (r.gapAmt < 0 ? `你那一檔比 0050 多約 ${pctTxt(-r.gapPct)}（占 0050 的比例）` : '兩邊一樣'));
+        $('cards').innerHTML =
+          card('每年扣費前要多賺', c1v, c1d, true) +
+          card(`${N} 年後（兩邊選股本事一樣）`, `0050 約 ${wan(r.fv0050)}`, `你那一檔約 ${wan(r.fvYours)}；${same}，只差費用`, false) +
+          card(gapLabel, gapVal, gapDesc, false);
+
+        // 結論
+        let main;
+        if (p.principal === 0) {
+          main = `本金是 0，所以金額都是 0；但「每年要多賺」不受影響：${req > 0 ? `你那一檔每年扣費前要比 0050 多賺 <strong>${pct2(req)} 個百分點</strong>才打平。` : req === 0 ? '兩邊費用率一樣。' : `你那一檔比 0050 便宜 <strong>${pct2(-req)} 個百分點</strong>，不需要多賺。`}`;
+        } else if (req > 0) {
+          main = `放 ${N} 年，如果兩邊選股本事一樣（毛報酬都是 ${p.gross}%），0050 約 <strong>${wan(r.fv0050)}</strong>，你那一檔約 <strong>${wan(r.fvYours)}</strong>，差約 <strong style="color:#C5611A">${wan(r.gapAmt)}</strong>（約 ${pctTxt(r.gapPct)}）。要追平，它每年扣費前得比 0050 多賺 <strong>${pct2(req)} 個百分點</strong>。`;
+        } else if (req === 0) {
+          main = `兩邊費用率一樣，在毛報酬相同的情況下金額也一樣：${N} 年後都約 <strong>${wan(r.fv0050)}</strong>。`;
+        } else {
+          main = `你那一檔比 0050 便宜 <strong>${pct2(-req)} 個百分點</strong>，不需要多賺。兩邊選股本事一樣時，${N} 年後 0050 約 <strong>${wan(r.fv0050)}</strong>、你那一檔約 <strong>${wan(r.fvYours)}</strong>，你那一檔多約 <strong>${wan(-r.gapAmt)}</strong>（約 ${pctTxt(-r.gapPct)}）。`;
+        }
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結論：</strong>${main}</p>
+          <p class="text-xs text-gray-500">簡化模型：每年實拿 ＝ 毛報酬 − 總管理費用率。0050 實拿 ${pct2(r.net0050)}%，你那一檔實拿 ${pct2(r.netYours)}%。這是假設，不是預測。</p>`;
+
+        // 若填了每年多賺
+        if (r.hasExtra) {
+          const e = r.extra;
+          let v;
+          const reqTxt = req > 0 ? `${pct2(req)} 個百分點` : (req === 0 ? '0.00 個百分點（費用率一樣）' : `${pct2(req)} 個百分點（比 0050 便宜，負數代表不用多賺）`);
+          if (e.verdict === 'ahead') v = `你那一檔多約 <strong>${wan(e.diffAmt)}</strong>（約 ${pctTxt(e.diffPct)}）。你填的 ${pct2(e.x)} 個百分點 &gt; 損益兩平需要的 ${pct2(req)}，超過打平線。`;
+          else if (e.verdict === 'behind') v = `你那一檔還少約 <strong>${wan(-e.diffAmt)}</strong>（約 ${pctTxt(-e.diffPct)}）。你填的 ${pct2(e.x)} 個百分點 &lt; 損益兩平需要的 ${pct2(req)}，還沒到打平線。`;
+          else v = `兩邊<strong>打平</strong>（你填的 ${pct2(e.x)} 個百分點 ＝ 損益兩平需要的 ${pct2(req)}）。`;
+          if (p.principal === 0) v = '本金是 0，金額都是 0；只看百分點：' + (e.verdict === 'ahead' ? '你填的比打平線高，你那一檔領先。' : e.verdict === 'behind' ? '你填的比打平線低，你那一檔落後。' : '兩邊打平。');
+          box.innerHTML = `<p class="font-semibold text-gray-900 mb-2">如果你那一檔每年扣費前比 0050 多賺 ${pct2(e.x)} 個百分點</p>
+            <p class="mb-2">毛報酬：0050 ${p.gross}%，你那一檔 ${Math.round((p.gross + e.x) * 100) / 100}%。${N} 年後 0050 約 <strong>${wan(r.fv0050)}</strong>，你那一檔約 <strong>${wan(e.fvExtra)}</strong>。</p>
+            <p class="mb-2">${v}</p>
+            <p class="text-xs text-gray-500">損益兩平需要的每年超額 ＝ ${reqTxt}。</p>`;
+          box.classList.remove('hidden');
+        } else { box.classList.add('hidden'); box.innerHTML = ''; }
+
+        // 明細
+        $('detailHead').innerHTML = `<tr class="text-left text-gray-500 border-b border-gray-200">
+          <th class="py-2 pr-4 font-medium">年</th><th class="py-2 px-4 font-medium text-right">0050</th>
+          <th class="py-2 px-4 font-medium text-right">你那一檔</th>
+          <th class="py-2 pl-4 font-medium text-right">${r.hasExtra ? '你那一檔（含每年多賺）' : '差距'}</th></tr>`;
+        $('detailBody').innerHTML = r.table.map(t => `<tr class="border-b border-gray-100">
+          <td class="py-2 pr-4">${t.year} 年</td>
+          <td class="py-2 px-4 text-right text-gray-900">${wan(t.fv0050)}</td>
+          <td class="py-2 px-4 text-right text-gray-900">${wan(t.fvYours)}</td>
+          <td class="py-2 pl-4 text-right" style="color:#C5611A">${r.hasExtra ? wan(t.fvExtra) : (t.gap === 0 ? '約 0' : (t.gap > 0 ? '−' : '+') + wan(Math.abs(t.gap)).replace(/^NT\$/, 'NT$'))}</td></tr>`).join('');
+        $('detailNote').textContent = `0050：${p.gross}% − ${pct2(p.fee0050)}% ＝ ${pct2(r.net0050)}% 每年；你那一檔：${p.gross}% − ${pct2(p.feeYours)}% ＝ ${pct2(r.netYours)}% 每年。本金 ${ntd(p.principal)}，N 年後 ＝ 本金 × (1＋實拿)^N。表中「差距」的負號代表你那一檔比 0050 少。`;
+      }
+
+      $('presetBtn').addEventListener('click', () => {
+        FIELDS.forEach(k => { $(k).value = fmtField(k, DEFAULTS[k]); }); render(true, false);
+      });
+      document.querySelectorAll('.feeBtn').forEach(b => b.addEventListener('click', () => {
+        $('feeYours').value = Number(b.getAttribute('data-fee')).toFixed(2); render(true, false);
+      }));
+      $('customBtn').addEventListener('click', () => { $('feeYours').focus(); $('feeYours').select(); });
+      FIELDS.forEach(k => {
+        $(k).addEventListener('input', () => render(false));
+        $(k).addEventListener('change', () => render(true));
+      });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
