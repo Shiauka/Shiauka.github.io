@@ -1,0 +1,451 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="報酬率假設對照計算機"
+  description="同一個存錢目標，退休試算的報酬率那一格填 4%、7%、10%，每個月要投的錢差多少？如果照樂觀的數字投、實際卻拿到比較低的報酬，N 年後會差多少、第幾年才發現又要補多少。填入目標、年數、現有本金與通膨，一次算出來——對應 EP64。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP64</p>
+      <h1 class="text-3xl font-bold mb-3">報酬率假設對照計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        退休試算表裡最顯眼的那一格是「預期年化報酬率」。同一個目標、同一份薪水，這一格填 10% 跟填 4%，<strong>每個月要投的錢可以差到三倍</strong>。
+        填入你的目標，看看 4%、7%、10%（和你自己的數字）各要每月投多少；再看看「照樂觀的數字投、實際卻拿到比較低的報酬」，N 年後會差多少。
+        這個工具不預測報酬，只讓你看到那一格有多重。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的目標</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到預設值</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">目標金額（元，可填「1000萬」）</span>
+          <input id="target" type="text" inputmode="decimal" value="10,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">要存幾年（整數 1–60）</span>
+          <input id="years" type="text" inputmode="numeric" value="30"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">現有本金（元，可填「100萬」）</span>
+          <input id="principal" type="text" inputmode="decimal" value="0"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">目標金額是哪一種錢？</span>
+          <select id="mode"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="nominal">帳面上的數字（名目，未來的錢）</option>
+            <option value="real">今天購買力的錢（實質）</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">通膨（%／年；0–10）</span>
+          <input id="infl" type="text" inputmode="decimal" value="2"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">（選填）你自己的報酬率（%／年；−20 到 30）</span>
+          <input id="custom" type="text" inputmode="decimal" value=""
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" placeholder="空白＝不加這一列" />
+        </label>
+      </div>
+
+      <h2 class="font-semibold text-gray-900 mt-6 mb-3">如果照樂觀的數字投，實際卻比較低</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">試算表填的報酬率（%／年）</span>
+          <input id="planned" type="text" inputmode="decimal" value="7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">實際拿到的報酬率（%／年）</span>
+          <input id="actual" type="text" inputmode="decimal" value="4"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">第幾年才發現（整數，1 到年數−1）</span>
+          <input id="discover" type="text" inputmode="numeric" value="10"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-p="10" data-a="4" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">影片例子：填 10%、實際 4%</button>
+        <button type="button" data-p="7" data-a="4" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">填 7%、實際 4%</button>
+        <button type="button" data-p="7" data-a="10" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">反過來：填 7%、實際 10%</button>
+      </div>
+
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">金額可打千分位、「1000萬」、「NT$10,000,000」。報酬率與通膨一律四捨五入到小數 2 位再算，顯示什麼就用什麼判定。預設值是中性的數字，不代表任何預測。每月固定投入、期末投入、沒有加薪。</p>
+    </div>
+
+    <!-- Cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Rates table -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-6">
+      <p class="font-semibold text-gray-900 mb-3">同一個目標，每一格填多少，每月要投多少</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead id="ratesHead"></thead>
+          <tbody id="ratesBody"></tbody>
+        </table>
+      </div>
+      <p id="ratesNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+    </div>
+
+    <!-- Scenario -->
+    <div id="scnBox" class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>每月要投：</strong>在你填的報酬率下，要靠每月固定投入把現有本金補到目標金額，每個月要投多少。報酬率越高，每月要投越少，但那是假設，不是保證。</p>
+      <p><strong>名目與實質：</strong>選「帳面上的數字」，目標是未來帳面的錢，每月金額固定不變，報酬率直接用你填的。選「今天購買力的錢」，目標是今天的錢，報酬率會先扣掉通膨換成實質報酬再算；這時算出的是<strong>第一個月</strong>要投的金額（以今天的錢計），之後每年要隨通膨往上調，兩種算法不能直接比。</p>
+      <p><strong>照樂觀數字投、實際比較低：</strong>用「試算表填的報酬率」算出每月要投多少，然後假設實際只拿到「實際報酬率」，看 N 年後手上有多少；再看如果第幾年才發現，剩下的年數要把缺口補回目標，每月要加碼到多少。</p>
+      <p><strong>對照例子：</strong>目標 1,000 萬（帳面）、30 年、本金 0、通膨 2%：填 10% 每月約 4,848 元，填 7% 約 8,551 元，填 4% 約 14,593 元。填 10% 的人若實際只拿到 4%，30 年後只有約 332 萬；若第 10 年才發現，戶頭約 71 萬，剩 20 年補到 1,000 萬，每月要約 23,202 元（原本的 4.79 倍）。</p>
+    </div>
+
+    <!-- Detail -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 每 5 年一列：照試算表投，帳戶的樣子</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-sm border-collapse whitespace-nowrap">
+          <thead id="detailHead"></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+      <p id="detailNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>這是簡化模型，不是預測：</strong>月報酬 ＝ (1＋年報酬)<sup>1/12</sup> − 1，每月月底投入，沒有加薪、沒有稅、沒有手續費。真實市場每年都在波動，不會剛好每年一樣。若你的試算表用「年報酬 ÷ 12」當月報酬，數字會有小差距，但差距的大小差不多。</p>
+      <p><strong>年數越短，差距越小：</strong>分批投入時，前面投的放得久、後面投的放得短，所以每月金額的差距會比「一筆錢放同樣年數」小。但就算年數短，那一格仍然有很大的影響。</p>
+      <p><strong>4% 不是最壞的情境：</strong>用固定 4% 只是代表一段偏弱的路。歷史上有更糟的十年，通過 4% 的測試也不代表一定安全。</p>
+      <p><strong>沒算進去的：</strong>基金內扣費用、股利課稅與二代健保補充保費、買賣手續費、匯率、加薪、投資順序風險（大跌若剛好落在要開始花錢的前後，傷害更大）。這些都會讓實際結果比模型更差或更不確定。</p>
+      <p><strong>適用範圍：</strong>這個工具針對還在累積的階段。如果你離退休不到十年、或已經在提領，重點會換成提領率和現金緩衝，不是每月投多少。</p>
+      <p><strong>立場：</strong>不是要你把報酬率填得越低越好。填得保守，代價是現在要多存一點；填得樂觀，代價是以後可能要補更多。這個工具讓你看到兩邊的代價各是多少。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採固定報酬率與每月固定投入的簡化假設，不是預測，過去績效不代表未來結果，不保證任何報酬。不構成投資、稅務或法律建議。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep64-return-assumption" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP64 完整文章 →</a>
+      <a href="/tools/late-start-investing-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">晚起步投資計算機（EP58）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    const LIM = {
+      target: { lo: 0, hi: 1e10, name: '目標金額' },
+      years: { lo: 1, hi: 60, name: '年數' },
+      principal: { lo: 0, hi: 1e10, name: '現有本金' },
+      infl: { lo: 0, hi: 10, name: '通膨' },
+      custom: { lo: -20, hi: 30, name: '你自己的報酬率' },
+      planned: { lo: -20, hi: 30, name: '試算表填的報酬率' },
+      actual: { lo: -20, hi: 30, name: '實際拿到的報酬率' },
+      discover: { lo: 1, hi: 59, name: '第幾年才發現' },
+    };
+    const DEFAULTS = { target: 10000000, years: 30, principal: 0, infl: 2, custom: '', planned: 7, actual: 4, discover: 10 };
+    const MAX_YEARS = 60;
+    const BASE_RATES = [4, 7, 10];
+
+    function toHundredths(pct) { return Math.round(Number(pct) * 100 + (pct >= 0 ? 1e-9 : -1e-9)); }
+
+    function parseMoney(s) {
+      let str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      let sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      const mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      const v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+
+    function parsePct(s) {
+      const str = String(s === undefined || s === null ? '' : s).replace(/[%％,，\s]/g, '').replace(/^−/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      const v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+
+    // raw: { target, years, principal, infl, custom, planned, actual, discover }
+    // 回傳 { p, msgs, changed }；custom 可空白（=不加那一列，p.custom 為 null）
+    function normalizeInputs(raw) {
+      const msgs = [], changed = {}, p = {};
+      const order = ['target', 'years', 'principal', 'infl', 'custom', 'planned', 'actual', 'discover'];
+      order.forEach(function (k) {
+        const L = LIM[k];
+        const isMoney = (k === 'target' || k === 'principal');
+        const isInt = (k === 'years' || k === 'discover');
+        const blank = String(raw[k] === undefined || raw[k] === null ? '' : raw[k]).trim() === '';
+        if (k === 'custom' && blank) { p.custom = null; return; }
+        if (k === 'discover' && p.years < 2) { p.discover = 1; return; }
+        let v = isMoney ? parseMoney(raw[k]) : parsePct(raw[k]);
+        if (blank || !isFinite(v)) {
+          msgs.push('「' + L.name + '」' + (blank ? '空白' : '無法辨識') + '，暫用預設值 ' + DEFAULTS[k]);
+          v = DEFAULTS[k]; changed[k] = true;
+        }
+        if (isInt) {
+          const r = Math.round(v);
+          if (r !== v) { msgs.push('「' + L.name + '」必須是整數，已四捨五入為 ' + r); v = r; changed[k] = true; }
+        } else if (!isMoney) {
+          const h = toHundredths(v) / 100;
+          if (Math.abs(h - v) > 1e-9) { msgs.push('「' + L.name + '」已四捨五入到小數 2 位：' + h); v = h; changed[k] = true; }
+        }
+        let hi = L.hi;
+        if (k === 'discover') hi = Math.max(1, Math.min(59, (p.years || 1) - 1));
+        if (v < L.lo) { msgs.push('「' + L.name + '」不能小於 ' + L.lo + '，已改用 ' + L.lo); v = L.lo; changed[k] = true; }
+        if (v > hi) { msgs.push('「' + L.name + '」最大 ' + hi + '，已改用 ' + hi); v = hi; changed[k] = true; }
+        p[k] = v;
+      });
+      return { p: p, msgs: msgs, changed: changed };
+    }
+
+    // 年報酬（%）→ 計算用的年報酬（小數）。mode='real'：先扣掉通膨換成實質報酬
+    function effRate(ratePct, mode, inflPct) {
+      const r = toHundredths(ratePct) / 10000;
+      if (mode === 'real') return (1 + r) / (1 + toHundredths(inflPct) / 10000) - 1;
+      return r;
+    }
+    function monthlyRate(eff) { return Math.pow(1 + eff, 1 / 12) - 1; }
+
+    // 目標 target、現有本金 principal、年報酬 eff（小數）、年數 years → 每月要投（期末投入）；本金已足夠回傳 0
+    function monthlyNeeded(target, principal, eff, years) {
+      const n = Math.min(MAX_YEARS, Math.max(0, Math.floor(Number(years)))) * 12;
+      if (!isFinite(target) || !isFinite(principal) || !isFinite(eff) || n <= 0 || eff <= -1) return NaN;
+      const i = monthlyRate(eff);
+      const grow = Math.pow(1 + i, n);
+      const need = target - principal * grow;
+      if (need <= 0) return 0;
+      if (Math.abs(i) < 1e-12) return need / n;
+      return need * i / (grow - 1);
+    }
+
+    // 每月投 pmt、現有本金 principal、年報酬 eff、年數 years → 期末金額
+    function futureValue(pmt, principal, eff, years) {
+      const n = Math.min(MAX_YEARS, Math.max(0, Math.floor(Number(years)))) * 12;
+      if (!isFinite(pmt) || !isFinite(principal) || !isFinite(eff) || eff <= -1) return NaN;
+      const i = monthlyRate(eff);
+      const grow = Math.pow(1 + i, n);
+      if (Math.abs(i) < 1e-12) return principal + pmt * n;
+      return principal * grow + pmt * (grow - 1) / i;
+    }
+
+    // 主計算。p 要先經過 normalizeInputs；mode: 'nominal' | 'real'
+    function computeAll(p, mode) {
+      const rates = BASE_RATES.slice();
+      if (p.custom !== null && p.custom !== undefined) rates.push(p.custom);
+      const rows = rates.map(function (r, idx) {
+        const eff = effRate(r, mode, p.infl);
+        const pmt = monthlyNeeded(p.target, p.principal, eff, p.years);
+        // 對照另一種口徑的等值報酬：名目輸入→實質；實質輸入→名目
+        const other = mode === 'real'
+          ? ((1 + toHundredths(r) / 10000) * (1 + toHundredths(p.infl) / 10000) - 1)
+          : ((1 + toHundredths(r) / 10000) / (1 + toHundredths(p.infl) / 10000) - 1);
+        return { rate: r, eff: eff, pmt: pmt, otherPct: other * 100, isCustom: idx >= BASE_RATES.length };
+      });
+      const r7 = rows[1], r4 = rows[0], r10 = rows[2];
+      const buffer = r4.pmt - r7.pmt;
+      // 照樂觀數字投、實際比較低
+      let scn = null;
+      if (p.years >= 2) {
+        const effP = effRate(p.planned, mode, p.infl), effA = effRate(p.actual, mode, p.infl);
+        const pmtP = monthlyNeeded(p.target, p.principal, effP, p.years);
+        const finalA = futureValue(pmtP, p.principal, effA, p.years);
+        const balD = futureValue(pmtP, p.principal, effA, p.discover);
+        const rest = p.years - p.discover;
+        const catchUp = monthlyNeeded(p.target, balD, effA, rest);
+        const needActual = monthlyNeeded(p.target, p.principal, effA, p.years);
+        const diff = finalA - p.target;
+        const exact = Math.abs(diff) < 1;
+        const enough = finalA >= p.target - 0.5;
+        scn = { pmtP: pmtP, noInvest: !(pmtP > 0), finalA: finalA, enough: enough, exact: exact, shortfall: p.target - finalA, finalPct: p.target > 0 ? finalA / p.target * 100 : null,
+          balD: balD, rest: rest, catchUp: catchUp, ratio: pmtP > 0 ? catchUp / pmtP : null, needActual: needActual,
+          plannedRate: p.planned, actualRate: p.actual, discover: p.discover };
+        // 每 5 年一列：照試算表投，實際帳戶 vs 試算表以為的帳戶
+        const tbl = [];
+        const ys = [];
+        for (let y = 5; y <= p.years && y <= MAX_YEARS; y += 5) ys.push(y);
+        if (ys[ys.length - 1] !== p.years) ys.push(p.years);
+        ys.forEach(function (y) {
+          tbl.push({ year: y, planned: futureValue(pmtP, p.principal, effP, y), actual: futureValue(pmtP, p.principal, effA, y) });
+        });
+        scn.table = tbl;
+      }
+      return { rows: rows, buffer: buffer, ratio10to4: (r10.pmt > 0 ? r4.pmt / r10.pmt : null), scn: scn, mode: mode };
+    }
+    // ===== 純函式 END =====
+
+    if (typeof window !== 'undefined') window.__ep64 = { toHundredths, parseMoney, parsePct, normalizeInputs, effRate, monthlyNeeded, futureValue, computeAll };
+
+    // ===== DOM =====
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const FIELDS = Object.keys(LIM);
+      const ntd = (n) => !isFinite(n) ? '—' : 'NT$' + Math.round(n).toLocaleString('en-US');
+      const wan = (n) => {
+        if (!isFinite(n)) return '—';
+        const a = Math.abs(n);
+        if (a < 10000) return 'NT$' + Math.round(n).toLocaleString('en-US');
+        if (a < 1e8) return (Math.round(n / 1000 + (n >= 0 ? 1e-9 : -1e-9)) / 10).toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' 萬';
+        return (Math.round(n / 1e6 + (n >= 0 ? 1e-9 : -1e-9)) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' 億';
+      };
+      const pct2 = (x) => Number(x).toFixed(2);
+      const pctTxt = (x) => x === null || !isFinite(x) ? '—' : x.toFixed(1) + '%';
+      const fmtField = (k, v) => {
+        if (k === 'custom') return (v === null || v === '' || v === undefined) ? '' : String(v);
+        if (k === 'target' || k === 'principal') return Math.round(v).toLocaleString('en-US');
+        if (k === 'years' || k === 'discover') return String(v);
+        return String(v);
+      };
+
+      function readRaw() { const r = {}; FIELDS.forEach(k => { r[k] = $(k).value; }); return r; }
+
+      function card(label, value, desc, accent) {
+        return `<div class="rounded-2xl border ${accent ? 'border-brand bg-brand/5' : 'border-gray-200'} p-5">
+          <div class="text-sm text-gray-500 mb-1">${label}</div>
+          <div class="text-2xl font-bold ${accent ? '' : 'text-gray-900'}" ${accent ? 'style="color:#C5611A"' : ''}>${value}</div>
+          <div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div></div>`;
+      }
+
+      let lastMsgs = [];
+      function render(commit, keepNotice) {
+        const { p, msgs, changed } = window.__ep64.normalizeInputs(readRaw());
+        if (msgs.length) lastMsgs = msgs.slice(); else if (!commit || keepNotice === false) lastMsgs = [];
+        const shownMsgs = msgs.length ? msgs : lastMsgs;
+        if (commit) FIELDS.forEach(k => { $(k).value = fmtField(k, p[k]); });
+        else FIELDS.forEach(k => { if (changed[k] && document.activeElement !== $(k)) $(k).value = fmtField(k, p[k]); });
+        const notice = $('notice');
+        notice.textContent = shownMsgs.join('；');
+        notice.classList.toggle('hidden', shownMsgs.length === 0);
+
+        const mode = $('mode').value === 'real' ? 'real' : 'nominal';
+        const r = window.__ep64.computeAll(p, mode);
+        const N = p.years;
+        const pay = (v) => ntd(v) + ' 元';
+        const moneyKind = mode === 'real' ? '今天購買力的' : '帳面上的';
+        const firstNote = mode === 'real' ? '第一個月金額（以今天的錢計），之後每年隨通膨往上調' : '每月固定不變';
+
+        const r4 = r.rows[0], r7 = r.rows[1], r10 = r.rows[2];
+        const enoughNow = (r7.pmt === 0 && r4.pmt === 0);
+        if (p.target === 0 || enoughNow) {
+          $('cards').innerHTML = '<div class="sm:col-span-3 rounded-2xl border border-gray-200 p-5 text-sm text-gray-700">' +
+            (p.target === 0 ? '目標金額是 0，不需要再投入。' : '你現有的本金，在 4% 和 7% 的報酬下放 ' + N + ' 年就已經超過目標，不需要每月再投入。') + '</div>';
+        } else {
+          $('cards').innerHTML =
+            card('填 7%（基本盤）每月要投', pay(r7.pmt), `${N} 年存到 ${moneyKind} ${wan(p.target)}；${firstNote}`, true) +
+            card('填 4%（壓力測試）每月要投', pay(r4.pmt), `同一個目標，報酬率改填 4%；${firstNote}`, false) +
+            card('兩者的差距（緩衝）', r.buffer > 0 ? '每月多 ' + pay(r.buffer) : (r.buffer === 0 ? '無差距' : '每月少 ' + pay(-r.buffer)), '市場比你想的差的時候，你要多補的錢', false);
+        }
+
+        // 結論
+        let concl;
+        if (p.target === 0) concl = '目標金額是 0。';
+        else if (r10.pmt > 0 && r4.pmt > 0) {
+          concl = `同一個 ${moneyKind} ${wan(p.target)} 目標、${N} 年：那一格填 <strong>10%</strong> 每月要投約 <strong>${pay(r10.pmt)}</strong>，填 <strong>7%</strong> 約 <strong>${pay(r7.pmt)}</strong>，填 <strong>4%</strong> 約 <strong style="color:#C5611A">${pay(r4.pmt)}</strong>。填 4% 要投的錢是填 10% 的 <strong>${(r4.pmt / r10.pmt).toFixed(2)} 倍</strong>。`;
+        } else {
+          concl = `同一個 ${moneyKind} ${wan(p.target)} 目標、${N} 年：填 10% 每月約 ${pay(r10.pmt)}，填 7% 約 ${pay(r7.pmt)}，填 4% 約 ${pay(r4.pmt)}。（現有本金在較高的報酬率下已經足夠，所以該列顯示 0。）`;
+        }
+        $('conclusion').innerHTML = `<p class="mb-2"><strong>結論：</strong>${concl}</p>
+          <p class="text-xs text-gray-500">簡化模型：月報酬 ＝ (1＋年報酬)^(1/12) − 1，期末投入，沒有加薪。${mode === 'real' ? '報酬率已先扣掉通膨 ' + pct2(p.infl) + '% 換成實質報酬。' : ''}這是假設，不是預測。</p>`;
+
+        // 各報酬率對照表
+        const otherHead = mode === 'real' ? '對應名目報酬' : '對應實質報酬（扣通膨 ' + pct2(p.infl) + '%）';
+        $('ratesHead').innerHTML = `<tr class="text-left text-gray-500 border-b border-gray-200">
+          <th class="py-2 pr-4 font-medium">那一格填</th><th class="py-2 px-4 font-medium text-right">每月要投</th>
+          <th class="py-2 px-4 font-medium text-right">相對 7%</th><th class="py-2 pl-4 font-medium text-right">${otherHead}</th></tr>`;
+        $('ratesBody').innerHTML = r.rows.map(t => {
+          const rel = (t.rate === 7 && !t.isCustom) ? '基本盤' : (r7.pmt > 0 ? (t.pmt / r7.pmt).toFixed(2) + ' 倍' : '—');
+          return `<tr class="border-b border-gray-100"><td class="py-2 pr-4">${pct2(t.rate)}%${t.isCustom ? '（你自己的）' : ''}</td>
+            <td class="py-2 px-4 text-right text-gray-900">${pay(t.pmt)}</td><td class="py-2 px-4 text-right">${rel}</td>
+            <td class="py-2 pl-4 text-right">${t.otherPct.toFixed(2)}%</td></tr>`;
+        }).join('');
+        $('ratesNote').textContent = mode === 'real'
+          ? '「今天購買力」模式：目標與每月金額都以今天的錢計，之後每年隨通膨往上調；兩種口徑算出的金額不能直接比。'
+          : '「帳面」模式：每月固定不變，目標是未來帳面上的數字（購買力會被通膨侵蝕）；要換成今天購買力，請在上面改選另一種。';
+
+        // 情境
+        const box = $('scnBox');
+        const s = r.scn;
+        const tail = `<p class="text-xs text-gray-500">${mode === 'real' ? '金額以今天的錢計；補投金額是補投那一年起的第一個月金額，之後隨通膨往上調。' : '金額為帳面上的未來金額。'}這是固定報酬率的簡化模型，不是預測。</p>`;
+        if (p.target === 0) {
+          box.innerHTML = '<p class="text-gray-600">目標金額是 0，沒有情境可算。</p>';
+        } else if (!s) {
+          box.innerHTML = '<p class="text-gray-600">年數至少要 2 年，才能算「第幾年才發現」的情境。</p>';
+        } else if (s.noInvest) {
+          if (s.enough) {
+            box.innerHTML = `<p class="font-semibold text-gray-900 mb-2">如果試算表填 ${pct2(s.plannedRate)}%，實際拿到 ${pct2(s.actualRate)}%</p>
+              <p class="mb-2">現有本金 ${ntd(p.principal)} 元，不再投入也能在 ${N} 年後約 <strong>${wan(s.finalA)}</strong>，達到目標 ${wan(p.target)}。</p>${tail}`;
+          } else {
+            box.innerHTML = `<p class="font-semibold text-gray-900 mb-2">如果試算表填 ${pct2(s.plannedRate)}%，實際拿到 ${pct2(s.actualRate)}%</p>
+              <p class="mb-2">照試算表填的 ${pct2(s.plannedRate)}%，你現有的本金放 ${N} 年就夠了，不需要每月再投。但如果實際只拿到 ${pct2(s.actualRate)}%，${N} 年後只有約 <strong style="color:#C5611A">${wan(s.finalA)}</strong>（目標的 ${pctTxt(s.finalPct)}），少了約 ${wan(s.shortfall)}；要達標，每月得投約 <strong style="color:#C5611A">${pay(s.needActual)}</strong>。</p>${tail}`;
+          }
+        } else {
+          let head, body;
+          if (s.exact) {
+            head = `如果試算表填 ${pct2(s.plannedRate)}%，實際也拿到 ${pct2(s.actualRate)}%`;
+            body = `<p class="mb-2">照試算表算出的每月 <strong>${pay(s.pmtP)}</strong> 投 ${N} 年，${N} 年後約 <strong>${wan(s.finalA)}</strong>，剛好達到目標 ${wan(p.target)}。</p>`;
+          } else if (!s.enough) {
+            head = `如果試算表填 ${pct2(s.plannedRate)}%，實際只拿到 ${pct2(s.actualRate)}%`;
+            body = `<p class="mb-2">照試算表算出的每月 <strong>${pay(s.pmtP)}</strong> 投 ${N} 年，實際只有 ${pct2(s.actualRate)}% 的話，${N} 年後約 <strong style="color:#C5611A">${wan(s.finalA)}</strong>，只有目標 ${wan(p.target)} 的 ${pctTxt(s.finalPct)}，少了約 ${wan(s.shortfall)}。</p>
+              <p class="mb-2">如果你到第 <strong>${s.discover}</strong> 年才發現，這時戶頭約 <strong>${wan(s.balD)}</strong>。剩 ${s.rest} 年要補到 ${wan(p.target)}，每月要加碼到 <strong style="color:#C5611A">${pay(s.catchUp)}</strong>${s.ratio ? `，是原本的 <strong>${s.ratio.toFixed(2)} 倍</strong>` : ''}。</p>`;
+          } else {
+            head = `如果試算表填 ${pct2(s.plannedRate)}%，實際拿到 ${pct2(s.actualRate)}%（比預期好）`;
+            body = `<p class="mb-2">照試算表算出的每月 <strong>${pay(s.pmtP)}</strong> 投 ${N} 年，實際 ${pct2(s.actualRate)}% 的話，${N} 年後約 <strong>${wan(s.finalA)}</strong>，超過目標 ${wan(p.target)}（${pctTxt(s.finalPct)}），多出約 ${wan(-s.shortfall)}。多出來的部分可以當成緩衝，不需要補投。</p>`;
+          }
+          box.innerHTML = `<p class="font-semibold text-gray-900 mb-2">${head}</p>${body}${tail}`;
+        }
+
+        // 明細
+        if (s && !s.noInvest && p.target > 0) {
+          $('detailHead').innerHTML = `<tr class="text-left text-gray-500 border-b border-gray-200">
+            <th class="py-2 pr-4 font-medium">年</th><th class="py-2 px-4 font-medium text-right">試算表以為的帳戶（${pct2(s.plannedRate)}%）</th>
+            <th class="py-2 pl-4 font-medium text-right">實際帳戶（${pct2(s.actualRate)}%）</th></tr>`;
+          $('detailBody').innerHTML = s.table.map(t => `<tr class="border-b border-gray-100">
+            <td class="py-2 pr-4">${t.year} 年</td><td class="py-2 px-4 text-right text-gray-900">${wan(t.planned)}</td>
+            <td class="py-2 pl-4 text-right" style="color:#C5611A">${wan(t.actual)}</td></tr>`).join('');
+          $('detailNote').textContent = `每月投 ${ntd(s.pmtP)} 元，現有本金 ${ntd(p.principal)} 元；${mode === 'real' ? '金額以今天的錢計，報酬率已扣通膨。' : '帳面金額，報酬率為名目。'}`;
+        } else {
+          $('detailHead').innerHTML = ''; $('detailBody').innerHTML = ''; $('detailNote').textContent = '';
+        }
+      }
+
+      $('presetBtn').addEventListener('click', () => {
+        FIELDS.forEach(k => { $(k).value = fmtField(k, DEFAULTS[k]); });
+        $('mode').value = 'nominal';
+        render(true, false);
+      });
+      document.querySelectorAll('.scnBtn').forEach(b => b.addEventListener('click', () => {
+        $('planned').value = b.getAttribute('data-p'); $('actual').value = b.getAttribute('data-a'); render(true, false);
+      }));
+      FIELDS.forEach(k => {
+        $(k).addEventListener('input', () => render(false));
+        $(k).addEventListener('change', () => render(true));
+      });
+      $('mode').addEventListener('change', () => render(true));
+      render(false);
+    })();
+  </script>
+</BaseLayout>
