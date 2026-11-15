@@ -1,0 +1,344 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="美元定存損益兩平匯率計算機"
+  description="美元定存年利率比台幣高，一年後換回台幣到底賺不賺？填入本金、銀行的賣出價與買入價、存款月數、美元與台幣定存利率，算出損益兩平買入價——台幣升值多少，多賺的利息就吃光——並列出不同到期匯率下比台幣定存多賺或少賺多少。對應 EP65。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP65</p>
+      <h1 class="text-3xl font-bold mb-3">美元定存損益兩平匯率計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        美元定存的年利率看起來比台幣高很多，但你要先用<strong>賣出價</strong>把台幣換成美元，到期再用<strong>買入價</strong>換回來，中間還隔著一段匯率。
+        填入你看到的專案，算出<strong>損益兩平買入價</strong>：到期的買入價低於它，你換回來的錢就比直接放台幣定存少。
+        這個工具不預測匯率，只讓你看到那段緩衝有多薄。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你看到的專案</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到預設值（影片例子）</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">本金（台幣元，可填「100萬」）</span>
+          <input id="principal" type="text" inputmode="decimal" value="1,000,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">美元賣出價（換進美元付的）</span>
+          <input id="sell" type="text" inputmode="decimal" value="32.91"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">美元買入價（換回台幣拿的）</span>
+          <input id="buy" type="text" inputmode="decimal" value="32.76"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">存款期間（月，整數 1–60）</span>
+          <input id="months" type="text" inputmode="numeric" value="12"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">美元定存年利率（%；0–30）</span>
+          <input id="usd" type="text" inputmode="decimal" value="4.3"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">台幣定存年利率（%；0–10）</span>
+          <input id="twd" type="text" inputmode="decimal" value="1.70"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-s="1000000" data-m="12" data-u="4.3" data-t="1.70" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">專案 12 個月 4.3%（影片例子）</button>
+        <button type="button" data-s="1000000" data-m="12" data-u="2.05" data-t="1.70" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">臺銀牌告對牌告 2.05% vs 1.70%</button>
+        <button type="button" data-s="1000000" data-m="12" data-u="4.3" data-t="2.33" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">對手換成台幣專案 2.33%</button>
+        <button type="button" data-s="329100" data-m="1" data-u="12" data-t="1.70" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">一個月 12%、1 萬美元</button>
+      </div>
+
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">賣出價、買入價請用你要往來的那家銀行<strong>即期</strong>牌告（預設是臺灣銀行 2026-11-15 掛牌）。利息以單利、按月數比例計算（3 個月＝年利率的四分之一），稅前，不含手續費。匯率四捨五入到小數 3 位、利率到小數 2 位再算，顯示什麼就用什麼判定。預設值是中性的範例，不代表任何預測。</p>
+    </div>
+
+    <!-- Cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Scenario table -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <p class="font-semibold text-gray-900 mb-3">到期的買入價落在哪裡，結果差多少</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 sm:pr-4 font-medium">到期買入價</th>
+              <th class="py-2 px-2 sm:px-4 font-medium text-right">漲跌</th>
+              <th class="py-2 px-2 sm:px-4 font-medium text-right">換回台幣</th>
+              <th class="py-2 pl-2 sm:pl-4 font-medium text-right">比台幣定存多／少</th>
+            </tr>
+          </thead>
+          <tbody id="scnBody"></tbody>
+        </table>
+      </div>
+      <p id="scnNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+    </div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>損益兩平買入價：</strong>＝ 台幣定存到期本利 ÷ 美元到期本利（美元數）。到期的買入價高於它，你換回來的錢比放台幣多；低於它就比放台幣少。</p>
+      <p><strong>台幣升值多少會打平：</strong>＝（現在的買入價 − 損益兩平買入價）÷ 現在的買入價。這裡用「匯率下降的比例」，台幣實際升值的幅度會略大一點點。</p>
+      <p><strong>口算：</strong>（美元利率 − 台幣利率）× 期間（以年計）− 來回價差，就是台幣升值多少會打平的大概數字。</p>
+      <p><strong>對照例子：</strong>本金 100 萬、賣出價 32.91、買入價 32.76、12 個月、美元 4.3%、台幣 1.70%：換進 30,386 美元，一年後約 31,692 美元；匯率不動時換回約 1,038,246 元，比台幣定存（1,017,000 元）多 21,246 元；損益兩平買入價約 32.09，也就是匯率降約 2.05%。</p>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>只比「換回台幣」的結果：</strong>這個工具假設你到期就把美元全部賣回台幣。如果這筆錢本來就要用美元，你不用承擔賣回去的價差與匯率風險，比的對象就是美元活存，而不是台幣定存。</p>
+      <p><strong>每家銀行的價差不同：</strong>臺灣銀行即期牌告的來回價差約 0.46%，現鈔約 2%；網路銀行或優惠匯率可能較小。請填你實際拿到的賣出價與買入價。</p>
+      <p><strong>專案的條件：</strong>專案利率常有新戶、新資金、金額上限、期間限制；到期是否自動轉期、提前解約怎麼算，各行各案不同，請以銀行的專案條款為準，這個工具沒有算進去。</p>
+      <p><strong>沒算進去的：</strong>稅（利息與匯兌損益的課稅請洽國稅局或會計師）、手續費、複利、存款保險上限以外的風險、到期後的轉期。另外，不少銀行的美元定存以實際天數 ÷ 360 計息，若如此，預設例子（12 個月）利息會多約 600 元，損益兩平的緩衝略大，結論不變；實際以銀行的計息方式為準。</p>
+      <p><strong>不預測匯率：</strong>表格列出的到期買入價只是情境，不代表任何一個比較可能發生。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採單利、稅前、固定匯率情境的簡化假設，不是預測，過去績效不代表未來結果，不保證任何報酬。不構成投資、稅務或法律建議。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep65-usd-deposit-breakeven" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP65 完整文章 →</a>
+      <a href="/articles/ep22-currency-exchange" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">換匯成本怎麼算（EP22）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    var LIM = {
+      principal: { lo: 0, hi: 1e10, name: '本金' },
+      sell: { lo: 1, hi: 1000, name: '賣出價' },
+      buy: { lo: 1, hi: 1000, name: '買入價' },
+      months: { lo: 1, hi: 60, name: '存款月數' },
+      usd: { lo: 0, hi: 30, name: '美元定存利率' },
+      twd: { lo: 0, hi: 10, name: '台幣定存利率' },
+    };
+    var DEFAULTS = { principal: 1000000, sell: 32.91, buy: 32.76, months: 12, usd: 4.3, twd: 1.7 };
+
+    function parseMoney(s) {
+      var str = String(s === undefined || s === null ? '' : s).replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      var sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      var mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      var v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+
+    function parseNum(s) {
+      var str = String(s === undefined || s === null ? '' : s).replace(/[%％,，\s]/g, '').replace(/^−/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      var v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+
+    function roundTo(v, d) { var f = Math.pow(10, d); return Math.round(v * f + (v >= 0 ? 1e-9 : -1e-9)) / f; }
+
+    // raw: { principal, sell, buy, months, usd, twd }（字串）
+    // 回傳 { p, msgs, changed }；p 內是實際採用的數字（利率 2 位、匯率 3 位、月數整數、本金整數元）
+    function normalizeInputs(raw) {
+      var msgs = [], changed = {}, p = {};
+      ['principal', 'sell', 'buy', 'months', 'usd', 'twd'].forEach(function (k) {
+        var L = LIM[k];
+        var v = (k === 'principal') ? parseMoney(raw[k]) : parseNum(raw[k]);
+        var def = DEFAULTS[k];
+        if (!isFinite(v)) {
+          if (String(raw[k] === undefined || raw[k] === null ? '' : raw[k]).trim() !== '') msgs.push(L.name + '看不懂，已改用 ' + def);
+          v = def; changed[k] = true;
+        }
+        if (v < L.lo) { msgs.push(L.name + '不能小於 ' + L.lo + '，已改成 ' + L.lo); v = L.lo; changed[k] = true; }
+        if (v > L.hi) { msgs.push(L.name + '不能大於 ' + L.hi + '，已改成 ' + L.hi); v = L.hi; changed[k] = true; }
+        var r;
+        if (k === 'principal') r = Math.round(v);
+        else if (k === 'months') r = Math.round(v);
+        else if (k === 'sell' || k === 'buy') r = roundTo(v, 3);
+        else r = roundTo(v, 2);
+        if (r !== v) {
+          if (k === 'months') msgs.push('存款月數取整數 ' + r);
+          changed[k] = true;
+        }
+        if ((k === 'sell' || k === 'buy') && r < LIM[k].lo) { r = LIM[k].lo; changed[k] = true; }
+        p[k] = r;
+      });
+      if (p.buy > p.sell) msgs.push('買入價通常低於賣出價，請確認有沒有填反');
+      return { p: p, msgs: msgs, changed: changed };
+    }
+
+    // 回傳計算結果；principal = 0 時 empty = true
+    function compute(p) {
+      var years = p.months / 12;
+      if (p.principal <= 0) return { empty: true };
+      var usdAmt = p.principal / p.sell;
+      var usdEnd = usdAmt * (1 + p.usd / 100 * years);
+      var twdEnd = p.principal * (1 + p.twd / 100 * years);
+      var be = twdEnd / usdEnd;
+      var flatEnd = usdEnd * p.buy;
+      var flatDiff = flatEnd - twdEnd;
+      var spreadPct = (p.sell - p.buy) / p.sell;
+      var dropNtd = p.buy - be;
+      var dropPct = dropNtd / p.buy;
+      var rough = (p.usd - p.twd) / 100 * years - spreadPct;
+      var diffR = Math.round(flatDiff);
+      var state = diffR >= 1 ? 'win' : (diffR <= -1 ? 'lose' : 'even');
+      return {
+        empty: false, years: years, usdAmt: usdAmt, usdEnd: usdEnd, twdEnd: twdEnd, be: be,
+        flatEnd: flatEnd, flatDiff: flatDiff, diffR: diffR, state: state,
+        spreadPct: spreadPct, dropNtd: dropNtd, dropPct: dropPct, rough: rough,
+        perYuan: usdEnd,
+      };
+    }
+
+    // 情境列：以損益兩平為中心，每格間距取「至少是緩衝一半」的整齊百分比
+    var STEPS = [0.001, 0.0025, 0.005, 0.01, 0.02, 0.05];
+    function pickStep(dropPct) {
+      var a = Math.abs(dropPct) / 2;
+      for (var i = 0; i < STEPS.length; i++) if (STEPS[i] >= a) return STEPS[i];
+      return STEPS[STEPS.length - 1];
+    }
+    function scenarios(p, c) {
+      if (c.empty) return [];
+      var step = pickStep(c.dropPct);
+      var rows = [];
+      var beRel = c.be / p.buy - 1;
+      for (var k = -3; k <= 3; k++) {
+        var price = roundTo(p.buy * (1 + k * step), 2);
+        if (price <= 0) continue;
+        if (k !== 0 && Math.abs(k * step - beRel) < step * 0.35) continue;
+        var end = c.usdEnd * price;
+        rows.push({ price: price, rel: price / p.buy - 1, end: end, diff: end - c.twdEnd, be: false });
+      }
+      rows.push({ price: c.be, rel: c.be / p.buy - 1, end: c.twdEnd, diff: 0, be: true });
+      rows.sort(function (a, b) { return a.price - b.price; });
+      return { step: step, rows: rows };
+    }
+    // ===== 純函式 END =====
+
+    window.__ep65 = { parseMoney: parseMoney, parseNum: parseNum, normalizeInputs: normalizeInputs, compute: compute, scenarios: scenarios, DEFAULTS: DEFAULTS, LIM: LIM };
+
+    (function () {
+      var FIELDS = ['principal', 'sell', 'buy', 'months', 'usd', 'twd'];
+      function $(id) { return document.getElementById(id); }
+      function ntd(v) { return Math.round(v).toLocaleString('en-US'); }
+      function fx(v) { return v.toFixed(2); }
+      function pct(v, d) { return (v * 100).toFixed(d === undefined ? 2 : d) + '%'; }
+      function signed(v) { var r = Math.round(v); return (r > 0 ? '+' : (r < 0 ? '−' : '')) + Math.abs(r).toLocaleString('en-US'); }
+      function fmtField(k, v) {
+        if (k === 'principal') return ntd(v);
+        if (k === 'sell' || k === 'buy') return String(v);
+        if (k === 'usd' || k === 'twd') return String(v);
+        return String(v);
+      }
+      function card(label, value, desc, accent) {
+        return '<div class="rounded-2xl border border-gray-200 p-5 bg-white"><div class="text-sm text-gray-500 mb-1">' + label + '</div>' +
+          '<div class="text-2xl font-bold ' + (accent ? '' : 'text-gray-900') + '"' + (accent ? ' style="color:#C5611A"' : '') + '>' + value + '</div>' +
+          '<div class="text-xs text-gray-500 mt-1 leading-relaxed">' + desc + '</div></div>';
+      }
+
+      var lastMsgs = [];
+      function readRaw() { var r = {}; FIELDS.forEach(function (k) { r[k] = $(k).value; }); return r; }
+
+      function render(commit, keepNotice) {
+        var n = normalizeInputs(readRaw());
+        var p = n.p, msgs = n.msgs, changed = n.changed;
+        if (msgs.length) lastMsgs = msgs.slice(); else if (!commit || keepNotice === false) lastMsgs = [];
+        var shown = msgs.length ? msgs : lastMsgs;
+        if (commit) FIELDS.forEach(function (k) { $(k).value = fmtField(k, p[k]); });
+        else FIELDS.forEach(function (k) { if (changed[k] && document.activeElement !== $(k)) $(k).value = fmtField(k, p[k]); });
+        var notice = $('notice');
+        notice.textContent = shown.join('；');
+        notice.classList.toggle('hidden', shown.length === 0);
+
+        var c = compute(p);
+        var cardsEl = $('cards'), concl = $('conclusion'), body = $('scnBody'), note = $('scnNote');
+        if (c.empty) {
+          cardsEl.innerHTML = '';
+          concl.innerHTML = '<p class="text-gray-600">本金是 0，沒有東西可以算。請填入你打算存的台幣金額。</p>';
+          body.innerHTML = ''; note.textContent = '';
+          return;
+        }
+
+        var beTxt = fx(c.be);
+        var dropTxt;
+        if (c.dropPct > 0) dropTxt = '比現在的買入價 ' + fx(p.buy) + ' 低 ' + fx(c.dropNtd) + ' 元（約 ' + pct(c.dropPct) + '）';
+        else if (c.dropPct < 0) dropTxt = '比現在的買入價 ' + fx(p.buy) + ' 高 ' + fx(-c.dropNtd) + ' 元（約 ' + pct(-c.dropPct) + '）';
+        else dropTxt = '剛好等於現在的買入價';
+        var flatTxt = c.state === 'win' ? '匯率不動，多賺' : (c.state === 'lose' ? '匯率不動，少賺' : '匯率不動，約打平');
+        cardsEl.innerHTML =
+          card('損益兩平買入價', beTxt, dropTxt, true) +
+          card(flatTxt, c.state === 'even' ? '約 0' : ntd(Math.abs(c.diffR)) + ' 元', '到期買入價仍是 ' + fx(p.buy) + '：換回 ' + ntd(c.flatEnd) + ' 元，台幣定存 ' + ntd(c.twdEnd) + ' 元') +
+          card('來回價差（過路費）', pct(c.spreadPct), '（賣出價 − 買入價）÷ 賣出價，換進去再馬上換回來就先少這麼多');
+
+        var html;
+        if (c.state === 'lose' && c.dropPct <= 0) {
+          html = '<p class="font-semibold text-gray-900 mb-2">匯率完全不動，這筆美元定存就已經輸給台幣定存</p>' +
+            '<p class="mb-2">利差（' + pct((p.usd - p.twd) / 100 * c.years) + '）還不夠付來回價差（' + pct(c.spreadPct) + '）：到期買入價仍是 ' + fx(p.buy) + ' 時，換回約 ' + ntd(c.flatEnd) + ' 元，比台幣定存少約 <strong style="color:#C5611A">' + ntd(-c.diffR) + ' 元</strong>。</p>' +
+            '<p>要買入價升到 <strong>' + beTxt + '</strong>（' + dropTxt + '，也就是台幣要貶值）才會打平。</p>';
+        } else if (c.state === 'even') {
+          html = '<p class="font-semibold text-gray-900 mb-2">匯率完全不動時，約略打平</p>' +
+            '<p>到期買入價只要比 ' + beTxt + ' 低，換回來的錢就比放台幣定存少。損益兩平買入價 ' + beTxt + '，' + dropTxt + '。</p>';
+        } else {
+          html = '<p class="font-semibold text-gray-900 mb-2">到期買入價降到 ' + beTxt + '，多賺的利息就吃光</p>' +
+            '<p class="mb-2">匯率完全不動（到期買入價仍是 ' + fx(p.buy) + '）時，換回約 ' + ntd(c.flatEnd) + ' 元，比台幣定存多約 <strong>' + ntd(c.diffR) + ' 元</strong>。</p>' +
+            '<p class="mb-2">但買入價只要降到 <strong style="color:#C5611A">' + beTxt + '</strong>（' + dropTxt + '，匯率下降，也就是台幣升值約這個幅度），這筆錢就剛好跟台幣定存一樣。再低，就是賠給台幣定存。</p>' +
+            '<p>買入價每差 1 元，換回台幣的金額就差約 ' + ntd(c.perYuan) + ' 元。</p>';
+        }
+        html += '<p class="text-xs text-gray-500 mt-2">口算：（美元利率 − 台幣利率）× ' + (c.years === 1 ? '1 年' : (c.years < 1 ? p.months + '/12 年' : fx(c.years) + ' 年')) + ' − 價差 ≈ ' + pct(c.rough) + '（精算 ' + pct(c.dropPct) + '）。</p>';
+        concl.innerHTML = html;
+
+        var sc = scenarios(p, c);
+        body.innerHTML = sc.rows.map(function (r) {
+          var cls = r.be ? 'border-b border-gray-100 bg-amber-50/60 font-medium' : 'border-b border-gray-100';
+          var relTxt = (r.rel > 0 ? '+' : (r.rel < 0 ? '−' : '')) + (Math.abs(r.rel) * 100).toFixed(2) + '%';
+                    var color = r.be ? '' : (Math.round(r.diff) < 0 ? ' style="color:#C5611A"' : '');
+          return '<tr class="' + cls + '"><td class="py-2 pr-2 sm:pr-4">' + fx(r.price) + (r.be ? '<br><span class="text-xs text-gray-500">損益兩平</span>' : '') + '</td>' +
+            '<td class="py-2 px-2 sm:px-4 text-right text-gray-600">' + relTxt + '</td>' +
+            '<td class="py-2 px-2 sm:px-4 text-right text-gray-900">' + ntd(r.end) + '</td>' +
+            '<td class="py-2 pl-2 sm:pl-4 text-right"' + color + '>' + (r.be ? '0' : signed(r.diff)) + '</td></tr>';
+        }).join('');
+        note.textContent = '本金 ' + ntd(p.principal) + ' 元，換進約 ' + ntd(c.usdAmt) + ' 美元，' + p.months + ' 個月後約 ' + ntd(c.usdEnd) + ' 美元；台幣定存到期 ' + ntd(c.twdEnd) + ' 元。每列的「比現在的買入價」是買入價的漲跌幅，負數代表買入價下降（台幣升值）。';
+      }
+
+      $('presetBtn').addEventListener('click', function () {
+        FIELDS.forEach(function (k) { $(k).value = fmtField(k, DEFAULTS[k]); });
+        render(true, false);
+      });
+      document.querySelectorAll('.scnBtn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          $('principal').value = ntd(Number(b.getAttribute('data-s')));
+          $('months').value = b.getAttribute('data-m');
+          $('usd').value = b.getAttribute('data-u');
+          $('twd').value = b.getAttribute('data-t');
+          $('sell').value = String(DEFAULTS.sell); $('buy').value = String(DEFAULTS.buy);
+          render(true, false);
+        });
+      });
+      FIELDS.forEach(function (k) {
+        $(k).addEventListener('input', function () { render(false); });
+        $(k).addEventListener('change', function () { render(true); });
+      });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
