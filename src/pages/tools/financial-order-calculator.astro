@@ -1,0 +1,395 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="理財順序計算機：每月多出來的錢，先放哪？"
+  description="填入備用金、卡債與利率、每月可存金額，算出你現在在七步順序的第幾步：小緩衝、還清高利債、補滿備用金各要幾個月、第幾個月開始長期投資，並把『先還債再投資』和『只繳利息、錢全拿去投資』在 1 年與 3 年、不同市場情境下並排比較。對應 EP66。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP66</p>
+      <h1 class="text-3xl font-bold mb-3">理財順序計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        順序一共七步：<strong>保障 → 小緩衝 → 高利債 → 補滿備用金 → 勞退自提 → 長期投資 → 低利債</strong>。
+        填入你的備用金、卡債與每月可存金額，看你現在在第幾步、每一步要幾個月，也看「照順序走」和「只繳利息、錢全拿去投資」在不同市場情境下差多少。
+        這個工具不預測市場，預設值只是影片裡的例子。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的數字</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到預設值（影片例子）</button>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">現有備用金（元，可填「3萬」）</span>
+          <input id="cash" type="text" inputmode="decimal" value="30,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">失業時每月最少要花（元）</span>
+          <input id="minMonth" type="text" inputmode="decimal" value="56,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">每月可存（元）</span>
+          <input id="save" type="text" inputmode="decimal" value="30,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">信用卡循環餘額（元，沒有請填 0，空白會改回預設）</span>
+          <input id="card" type="text" inputmode="decimal" value="200,000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">循環年利率（%；請看自己的帳單）</span>
+          <input id="cardRate" type="text" inputmode="decimal" value="8"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">小緩衝月數（整數 1–6，收入不穩建議 3）</span>
+          <input id="bufferMonths" type="text" inputmode="numeric" value="1"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">完整備用金目標月數（整數 1–24）</span>
+          <input id="fundMonths" type="text" inputmode="numeric" value="6"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">長期投資的期望年報酬（%，−50 到 50）</span>
+          <input id="mkt" type="text" inputmode="decimal" value="7"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">你的綜所稅稅率級距（決定勞退自提的位置）</span>
+          <select id="tax" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="0">0%（沒有要繳稅）</option>
+            <option value="5">5%</option>
+            <option value="12" selected>12%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+            <option value="40">40%</option>
+          </select>
+        </label>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-c="30000" data-d="200000" data-r="8" data-s="30000" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">影片例子（卡債 20 萬、8%）</button>
+        <button type="button" data-c="30000" data-d="200000" data-r="15" data-s="30000" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">利率拉到上限 15%</button>
+        <button type="button" data-c="30000" data-d="200000" data-r="8" data-s="20000" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">每月只能存 2 萬</button>
+        <button type="button" data-c="30000" data-d="0" data-r="8" data-s="30000" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">沒有卡債</button>
+      </div>
+
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">假設：卡債月利率 ＝ 年利率 ÷ 12，利息每月加在餘額上；每月月底存入；市場報酬以「整年固定報酬」換成等值月報酬（真實市場會上下震盪，這裡只比年底結果，也沒算到被迫賣出）；稅前、不含手續費、備用金不計利息。「小緩衝一個月」是設計值，不是公認標準。預設值是中性範例，不代表任何預測。</p>
+    </div>
+
+    <!-- Cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Timeline -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <p class="font-semibold text-gray-900 mb-3">照順序走：每一步在第幾個月完成</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 sm:pr-4 font-medium">步驟</th>
+              <th class="py-2 px-2 sm:px-4 font-medium text-right">完成月份</th>
+              <th class="py-2 pl-2 sm:pl-4 font-medium">說明</th>
+            </tr>
+          </thead>
+          <tbody id="tlBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Compare -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <p class="font-semibold text-gray-900 mb-1">兩種順序並排：一年後、三年後的淨資產</p>
+      <p class="text-xs text-gray-500 mb-3 leading-relaxed"><strong>直覺派</strong>：每月扣掉卡債利息後全部投資，備用金維持現有金額，卡債不還本金。<strong>順序派</strong>：先補小緩衝，再還卡債，還清後一半補備用金、一半投資。淨資產 ＝ 備用金 ＋ 投資 − 卡債。差距「＋」＝直覺派多，「−」＝順序派多。</p>
+      <div id="cmpWrap" class="space-y-6"></div>
+      <p id="cmpNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+    </div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>第幾步：</strong>先看備用金有沒有到小緩衝；再看有沒有利率超過約 4～5% 的卡債；再看備用金有沒有補滿；補滿後才輪到勞退自提與長期投資。第 1 步（保障）與第 7 步（低利債）不在計算裡，請自己確認。</p>
+      <p><strong>一年後的淨資產：</strong>一年內，順序派不管市場怎麼走，結果差不多（因為大部分的錢拿去還債或留現金）；直覺派要看市場。這是「少曝險」帶來的差別，不是順序本身有魔法。三年後差距會拉開，請看三年表。</p>
+      <p><strong>三年後的差距：</strong>市場照期望走、循環利率不高時，直覺派平均會多一些，那是順序派為了壞年份撐得住付出的代價；利率越高，順序派越划算。</p>
+      <p><strong>對照例子：</strong>預設值（備用金 3 萬、卡債 20 萬、年利率 8%、每月存 3 萬）：第 8 個月還清卡債、總利息約 6,481 元；約第 27 個月補滿 33.6 萬；一年後市場 −20%／0%／+7%／+20% 的差距約 −40,414／−9,519／＋787／＋19,350（負＝順序派多）；三年、期望 7% 的差距約 ＋29,576。</p>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>高利債的門檻：</strong>文章與影片說的是「大約 4～5 個百分點」，這個工具取 4%（含 4%）；低於 4% 的卡債，工具不排優先還債，只算小緩衝與補滿備用金，淨資產仍扣掉那筆餘額（不計利息）。</p>
+      <p><strong>什麼叫還清：</strong>要繳到帳單上的「本期應繳總金額」（全額）。只繳最低應繳，沒繳的部分仍算循環、繼續計息；還債期間新刷的消費請當月繳清。</p>
+      <p><strong>勞退自提的位置：</strong>自提省的稅 ＝ 自提金額 × 稅率級距，錢鎖到 60 歲；級距 12% 以上、備用金補滿後，才排在一般投資前面。這個工具不計算自提的金額，請看 EP51 的計算機。</p>
+      <p><strong>沒算進去的：</strong>稅、手續費、備用金利息、突發支出與失業、市場中途的波動、轉貸與協商。失業或大額意外發生時，請先停止多還、只繳最低應繳，把現金留著。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採月複利、稅前、固定報酬情境的簡化假設，不是預測，過去績效不代表未來結果，不保證任何報酬。不構成投資、稅務或法律建議。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep66-financial-order" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP66 完整文章 →</a>
+      <a href="/articles/ep13-emergency-fund" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">備用金怎麼算（EP13）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    var LIM = {
+      cash: { lo: 0, hi: 1e9, name: '現有備用金' },
+      minMonth: { lo: 1, hi: 1e7, name: '每月最少花費' },
+      save: { lo: 0, hi: 1e7, name: '每月可存' },
+      card: { lo: 0, hi: 1e8, name: '卡債餘額' },
+      cardRate: { lo: 0, hi: 30, name: '循環年利率' },
+      bufferMonths: { lo: 1, hi: 6, name: '小緩衝月數' },
+      fundMonths: { lo: 1, hi: 24, name: '完整備用金月數' },
+      mkt: { lo: -50, hi: 50, name: '期望年報酬' },
+    };
+    var DEFAULTS = { cash: 30000, minMonth: 56000, save: 30000, card: 200000, cardRate: 8, bufferMonths: 1, fundMonths: 6, mkt: 7, tax: 12 };
+    var HI_RATE = 4;          // 高利債門檻（%）：低於此不列入優先還債
+    var MAX_MONTHS = 600;     // 模擬月數上限
+
+    function parseMoney(s) {
+      var str = String(s === undefined || s === null ? '' : s).normalize('NFKC').replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      var sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      var mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      var v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+    function parseNum(s) {
+      var str = String(s === undefined || s === null ? '' : s).normalize('NFKC').replace(/[%％,，\s]/g, '').replace(/^−/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      var v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+    function roundTo(v, d) { var f = Math.pow(10, d); return Math.round(v * f + (v >= 0 ? 1e-9 : -1e-9)) / f; }
+
+    // raw 都是字串；回傳 { p, msgs, changed }
+    function normalizeInputs(raw) {
+      var msgs = [], changed = {}, p = {};
+      ['cash', 'minMonth', 'save', 'card', 'cardRate', 'bufferMonths', 'fundMonths', 'mkt'].forEach(function (k) {
+        var L = LIM[k];
+        var isMoney = (k === 'cash' || k === 'minMonth' || k === 'save' || k === 'card');
+        var v = isMoney ? parseMoney(raw[k]) : parseNum(raw[k]);
+        var def = DEFAULTS[k];
+        if (!isFinite(v)) {
+          msgs.push(L.name + (String(raw[k] === undefined || raw[k] === null ? '' : raw[k]).trim() === '' ? '空白，已改用預設 ' : '看不懂，已改用 ') + def);
+          v = def; changed[k] = true;
+        }
+        if (v < L.lo) { msgs.push(L.name + '不能小於 ' + L.lo + '，已改成 ' + L.lo); v = L.lo; changed[k] = true; }
+        if (v > L.hi) { msgs.push(L.name + '不能大於 ' + L.hi + '，已改成 ' + L.hi); v = L.hi; changed[k] = true; }
+        var r;
+        if (isMoney) r = Math.round(v);
+        else if (k === 'bufferMonths' || k === 'fundMonths') r = Math.round(v);
+        else r = roundTo(v, 2);
+        if (r !== v) {
+          if (k === 'bufferMonths' || k === 'fundMonths') msgs.push(L.name + '取整數 ' + r);
+          changed[k] = true;
+        }
+        p[k] = r;
+      });
+      var t = parseNum(raw.tax);
+      p.tax = [0, 5, 12, 20, 30, 40].indexOf(t) >= 0 ? t : DEFAULTS.tax;
+      if (p.bufferMonths > p.fundMonths) {
+        msgs.push('小緩衝月數不能超過完整備用金月數，完整備用金已改成 ' + p.bufferMonths);
+        p.fundMonths = p.bufferMonths; changed.fundMonths = true;
+      }
+      return { p: p, msgs: msgs, changed: changed };
+    }
+
+    // 單一路徑模擬。strategy: 'A'（直覺派）或 'B'（順序派）；annualR：市場整年固定報酬（小數）
+    // 卡債低於門檻時視為低利債，不排優先還債（card 視為 0）。
+    function simulate(p, strategy, months, annualR) {
+      var rc = p.cardRate / 100 / 12;
+      var mi = Math.pow(1 + annualR, 1 / 12) - 1;
+      var hasDebt = p.cardRate >= HI_RATE && p.card > 0;
+      var bufferT = p.minMonth * p.bufferMonths;
+      var fullT = Math.max(p.minMonth * p.fundMonths, bufferT);
+      var cash = p.cash, card = hasDebt ? p.card : 0, inv = 0;
+      var lowDebt = (!hasDebt && p.card > 0) ? p.card : 0;   // 低利債：不排優先還債，餘額照扣（不計利息）
+      var log = {}, interestTotal = 0, interestToDebtFree = null;
+      if (cash >= bufferT) log.buffer = 0;
+      if (!hasDebt) log.debtFree = 0;
+      if (cash >= fullT) log.full = 0;
+      for (var m = 1; m <= months; m++) {
+        var interest = card * rc;
+        card += interest; interestTotal += interest; inv *= (1 + mi);
+        var s = p.save;
+        if (strategy === 'A') {
+          var pay = Math.min(interest, s);
+          card -= pay; s -= pay;
+          inv += s;
+        } else {
+          if (cash < bufferT) { var a = Math.min(s, bufferT - cash); cash += a; s -= a; }
+          if (s > 0 && card > 0) { var q = Math.min(s, card); card -= q; s -= q; }
+          if (s > 0 && card <= 1e-9) {
+            if (cash < fullT) { var h = Math.min(s / 2, fullT - cash); cash += h; inv += s - h; }
+            else inv += s;
+            s = 0;
+          }
+        }
+        if (log.buffer === undefined && cash >= bufferT) log.buffer = m;
+        if (log.debtFree === undefined && card <= 1e-6) { log.debtFree = m; interestToDebtFree = interestTotal; card = 0; }
+        if (log.full === undefined && cash >= fullT) log.full = m;
+        if (log.invest === undefined && inv > 0) log.invest = m;
+      }
+      return { cash: cash, card: card, inv: inv, lowDebt: lowDebt, net: cash + inv - card - lowDebt, log: log, bufferT: bufferT, fullT: fullT,
+        hasDebt: hasDebt, interestToDebtFree: interestToDebtFree, interestTotal: interestTotal };
+    }
+
+    // 目前在第幾步（只用起點狀態判斷）
+    function currentStep(p) {
+      var bufferT = p.minMonth * p.bufferMonths;
+      var fullT = Math.max(p.minMonth * p.fundMonths, bufferT);
+      var hasDebt = p.cardRate >= HI_RATE && p.card > 0;
+      if (p.cash < bufferT) return { n: 2, name: '小緩衝', bufferT: bufferT, fullT: fullT, hasDebt: hasDebt };
+      if (hasDebt) return { n: 3, name: '還清高利債', bufferT: bufferT, fullT: fullT, hasDebt: hasDebt };
+      if (p.cash < fullT) return { n: 4, name: '補滿備用金', bufferT: bufferT, fullT: fullT, hasDebt: hasDebt };
+      return { n: (p.tax >= 12 ? 5 : 6), name: (p.tax >= 12 ? '勞退自提（再長期投資）' : '長期投資'), bufferT: bufferT, fullT: fullT, hasDebt: hasDebt };
+    }
+
+    var SCEN = [-0.20, 0, null, 0.20];  // null＝用使用者填的期望報酬
+    function compare(p, months) {
+      var rows = [];
+      SCEN.forEach(function (r) {
+        var rr = (r === null) ? p.mkt / 100 : r;
+        var a = simulate(p, 'A', months, rr), b = simulate(p, 'B', months, rr);
+        rows.push({ r: rr, isExp: r === null, a: a.net, b: b.net, diff: a.net - b.net });
+      });
+      rows.sort(function (x, y) { return x.r - y.r; });
+      return rows;
+    }
+
+    function compute(p) {
+      if (p.save <= 0) return { empty: true };
+      var step = currentStep(p);
+      var plan = simulate(p, 'B', MAX_MONTHS, p.mkt / 100);
+      var hasDebt = p.cardRate >= HI_RATE && p.card > 0;
+      var stuck = hasDebt && (p.save <= p.card * p.cardRate / 100 / 12 || plan.log.debtFree === undefined);   // 每月可存沒有大於當月利息，或模擬 600 個月仍未還清：卡債還不完
+      return { empty: false, step: step, plan: plan, stuck: stuck, y1: compare(p, 12), y3: compare(p, 36) };
+    }
+    // ===== 純函式 END =====
+
+    window.__ep66 = { parseMoney: parseMoney, parseNum: parseNum, normalizeInputs: normalizeInputs, simulate: simulate, currentStep: currentStep, compare: compare, compute: compute, DEFAULTS: DEFAULTS, LIM: LIM };
+
+    (function () {
+      var FIELDS = ['cash', 'minMonth', 'save', 'card', 'cardRate', 'bufferMonths', 'fundMonths', 'mkt'];
+      function $(id) { return document.getElementById(id); }
+      function ntd(v) { return Math.round(v).toLocaleString('en-US'); }
+      function signed(v) { var r = Math.round(v); return (r > 0 ? '+' : (r < 0 ? '−' : '')) + Math.abs(r).toLocaleString('en-US'); }
+      function mo(v) { return v === undefined ? '超過 ' + MAX_MONTHS + ' 個月' : (v === 0 ? '已完成' : '第 ' + v + ' 個月'); }
+      function card(label, value, desc, accent) {
+        return '<div class="rounded-2xl border border-gray-200 p-5 bg-white"><div class="text-sm text-gray-500 mb-1">' + label + '</div>' +
+          '<div class="text-2xl font-bold ' + (accent ? '' : 'text-gray-900') + '"' + (accent ? ' style="color:#C5611A"' : '') + '>' + value + '</div>' +
+          '<div class="text-xs text-gray-500 mt-1 leading-relaxed">' + desc + '</div></div>';
+      }
+      function cmpTable(title, rows) {
+        return '<div><p class="text-sm font-medium text-gray-900 mb-2">' + title + '</p><div class="overflow-x-auto"><table class="w-full text-xs sm:text-sm border-collapse">' +
+          '<thead><tr class="text-left text-gray-500 border-b border-gray-200"><th class="py-2 pr-2 sm:pr-4 font-medium">市場整年報酬</th><th class="py-2 px-2 sm:px-4 font-medium text-right">直覺派</th><th class="py-2 px-2 sm:px-4 font-medium text-right">順序派</th><th class="py-2 pl-2 sm:pl-4 font-medium text-right">差距（直覺派 − 順序派）</th></tr></thead><tbody>' +
+          rows.map(function (r) {
+            var cls = r.isExp ? 'border-b border-gray-100 bg-amber-50/60 font-medium' : 'border-b border-gray-100';
+            var label = (r.r > 0 ? '+' : (r.r < 0 ? '−' : '')) + (Math.abs(r.r) * 100).toFixed(r.isExp ? 2 : 0).replace(/\.?0+$/, function (z) { return z.indexOf('.') >= 0 ? '' : z; }) + '%' + (r.isExp ? '（你填的期望）' : '');
+            return '<tr class="' + cls + '"><td class="py-2 pr-2 sm:pr-4">' + label + '</td><td class="py-2 px-2 sm:px-4 text-right">' + ntd(r.a) + '</td><td class="py-2 px-2 sm:px-4 text-right">' + ntd(r.b) + '</td><td class="py-2 pl-2 sm:pl-4 text-right">' + signed(r.diff) + '</td></tr>';
+          }).join('') + '</tbody></table></div></div>';
+      }
+
+      var lastMsgs = [];
+      function readRaw() { var r = {}; FIELDS.forEach(function (k) { r[k] = $(k).value; }); r.tax = $('tax').value; return r; }
+      function fmtField(k, v) {
+        if (k === 'cash' || k === 'minMonth' || k === 'save' || k === 'card') return ntd(v);
+        return String(v);
+      }
+
+      function render(commit, keepNotice) {
+        var n = normalizeInputs(readRaw());
+        var p = n.p, msgs = n.msgs, changed = n.changed;
+        if (msgs.length) lastMsgs = msgs.slice(); else if (!commit || keepNotice === false) lastMsgs = [];
+        var shown = msgs.length ? msgs : lastMsgs;
+        if (commit) FIELDS.forEach(function (k) { $(k).value = fmtField(k, p[k]); });
+        else FIELDS.forEach(function (k) { if (changed[k] && document.activeElement !== $(k)) $(k).value = fmtField(k, p[k]); });
+        var notice = $('notice');
+        notice.textContent = shown.join('；');
+        notice.classList.toggle('hidden', shown.length === 0);
+
+        var c = compute(p);
+        var cardsEl = $('cards'), concl = $('conclusion'), tl = $('tlBody'), cmp = $('cmpWrap'), cmpNote = $('cmpNote');
+        if (c.empty) {
+          cardsEl.innerHTML = '';
+          concl.innerHTML = '<p class="text-gray-600">每月可存要大於 0，才算得出時間表。請填入你每個月能存下的金額。</p>';
+          tl.innerHTML = ''; cmp.innerHTML = ''; cmpNote.textContent = '';
+          return;
+        }
+        var L = c.plan.log, st = c.step;
+        var lowRate = p.card > 0 && p.cardRate < HI_RATE;
+        cardsEl.innerHTML =
+          card('你現在在第幾步', '第 ' + st.n + ' 步', st.name, true) +
+          card('還清卡債', st.hasDebt ? (c.stuck ? '還不完' : mo(L.debtFree)) : '不需要', st.hasDebt ? (c.stuck ? '每月可存太少，卡債只會越滾越大，或超過 ' + MAX_MONTHS + ' 個月仍還不完' : (L.debtFree === undefined ? '每月可存太少，超過 ' + MAX_MONTHS + ' 個月仍未還清' : '還債期間總利息約 ' + ntd(c.plan.interestToDebtFree) + ' 元')) : (lowRate ? '利率低於約 ' + HI_RATE + '%，不排優先還債（第 7 步低利債）' : '沒有卡債')) +
+          card('補滿備用金', mo(L.full), '目標 ' + ntd(st.fullT) + ' 元（' + p.fundMonths + ' 個月）');
+
+        var html = c.stuck ? '<p class="font-semibold mb-2" style="color:#C5611A">每月可存要明顯大於卡債的當月利息（約 ' + ntd(p.card * p.cardRate / 100 / 12) + ' 元），否則卡債可能還不完，請先想辦法增加每月可存或找銀行談降息、協商。</p>' : '';
+        html += '<p class="font-semibold text-gray-900 mb-2">照順序走，' + (L.invest === undefined ? '目前這組數字沒有走到長期投資' : '第 ' + L.invest + ' 個月開始有錢進長期投資') + '</p>';
+        html += '<p class="mb-2">小緩衝目標 ' + ntd(st.bufferT) + ' 元（' + p.bufferMonths + ' 個月最少花費）：' + mo(L.buffer) + '；完整備用金 ' + ntd(st.fullT) + ' 元：' + mo(L.full) + '。</p>';
+        if (st.n === 2) html += '<p class="mb-2">你現在連小緩衝都還沒到，先補到 ' + ntd(st.bufferT) + ' 元，' + (st.hasDebt ? '再去處理卡債' : '再補到完整備用金') + '。小緩衝擋不住失業，萬一失業先停止多還、只繳最低應繳。</p>';
+        if (st.hasDebt && p.cardRate >= HI_RATE) html += '<p class="mb-2">卡債利率 ' + p.cardRate + '% 達到 ' + HI_RATE + '% 以上，小緩衝之後每一塊錢先去還它；請繳「本期應繳總金額」才算還清，還債期間新消費當月繳清。</p>';
+        if (st.n >= 5 || (L.full !== undefined)) html += '<p class="mb-2">備用金補滿後：稅率級距 ' + p.tax + '%，' + (p.tax >= 12 ? '≥12%，勞退自提可以排在一般投資前面（算法看 EP51）' : '低於 12%，自提省的稅有限且錢鎖到 60 歲，不一定要急，可以先進長期投資') + '。</p>';
+        html += '<p class="text-xs text-gray-500">時間表假設每個月都存下同樣的金額、不含突發支出。</p>';
+        concl.innerHTML = html;
+
+        function row(name, m, note) {
+          return '<tr class="border-b border-gray-100"><td class="py-2 pr-2 sm:pr-4">' + name + '</td><td class="py-2 px-2 sm:px-4 text-right">' + mo(m) + '</td><td class="py-2 pl-2 sm:pl-4 text-gray-600">' + note + '</td></tr>';
+        }
+        tl.innerHTML =
+          row('2. 小緩衝', L.buffer, '補到 ' + ntd(st.bufferT) + ' 元') +
+          row('3. 還清高利債', st.hasDebt ? L.debtFree : 0, st.hasDebt ? '卡債 ' + ntd(p.card) + ' 元、年利率 ' + p.cardRate + '%' : '沒有需要優先還的債') +
+          row('4. 補滿備用金', L.full, (st.hasDebt ? '還債後' : '小緩衝後') + '一半補、一半投資，目標 ' + ntd(st.fullT) + ' 元') +
+          row('開始長期投資', L.invest, '補滿前一半進投資，補滿後全額');
+
+        cmp.innerHTML = cmpTable('一年後（12 個月）', c.y1) + cmpTable('三年後（36 個月）', c.y3);
+        cmpNote.textContent = (st.hasDebt ? '直覺派等於一邊欠著 ' + ntd(p.card) + ' 元卡債、一邊把錢全放進市場，備用金維持 ' + ntd(p.cash) + ' 元。' : '你沒有高利卡債，兩種做法的差別只剩「備用金補滿前，投資要不要先踩煞車」。') +
+          '順序派在一年內大部分是現金，所以對市場不敏感；這是少曝險的結果，也是它的代價：市場好的年份，直覺派會多。';
+      }
+
+      $('presetBtn').addEventListener('click', function () {
+        FIELDS.forEach(function (k) { $(k).value = fmtField(k, DEFAULTS[k]); });
+        $('tax').value = String(DEFAULTS.tax);
+        render(true, false);
+      });
+      document.querySelectorAll('.scnBtn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          $('cash').value = ntd(Number(b.getAttribute('data-c')));
+          $('card').value = ntd(Number(b.getAttribute('data-d')));
+          $('cardRate').value = b.getAttribute('data-r');
+          $('save').value = ntd(Number(b.getAttribute('data-s')));
+          $('minMonth').value = ntd(DEFAULTS.minMonth); $('bufferMonths').value = '1'; $('fundMonths').value = '6'; $('mkt').value = '7';
+          render(true, false);
+        });
+      });
+      FIELDS.forEach(function (k) {
+        $(k).addEventListener('input', function () { render(false); });
+        $(k).addEventListener('change', function () { render(true); });
+      });
+      $('tax').addEventListener('change', function () { render(true); });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
