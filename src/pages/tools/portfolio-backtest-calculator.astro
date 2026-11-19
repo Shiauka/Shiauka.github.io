@@ -23,7 +23,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     <div class="rounded-2xl border border-amber-300 bg-amber-50 p-5 mb-8 text-sm text-amber-950 leading-relaxed">
       <p class="font-semibold mb-2">先讀這六點，再看數字</p>
       <ol class="space-y-1.5 list-none pl-0">
-        <li><strong>① 這是過去資料，而且有後見之明。</strong>你是在已經知道這十年結果之後才來試比例；十一年前，沒有人事先知道哪個比例會是什麼結果。預設的比例只是範例（依一組約略的配置換算成 80%，不是任何人的實際持有比例）。</li>
+        <li><strong>① 這是過去資料，而且有後見之明。</strong>你是在已經知道這十年結果之後才來試比例；十一年前，沒有人事先知道哪個比例會是什麼結果。預設按鈕裡的比例是範例（取整數的大略配置，占總資產 80%，另外 20% 是現金），不是任何人的實際持有比例。</li>
         <li><strong>② 2016–2026 剛好是台積電、AI、比特幣、台股都很強的十年。</strong>這個結果不代表未來。</li>
         <li><strong>③ 比特幣這段期間年化約 59%、最大跌幅約 −83%；00631L 是槓桿型（兩倍），最大跌幅約 −55%。</strong>單一標的的歷史最大跌幅列在下面的表格，別只看組合。</li>
         <li><strong>④ 不含稅、手續費、交易成本、匯差價差。</strong>現金固定年息，兩邊相同。</li>
@@ -43,7 +43,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <div class="flex flex-wrap gap-2 mb-5">
         <button type="button" data-preset="full" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">完整四桶</button>
         <button type="button" data-preset="vt" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">80% 全 VT</button>
-        <button type="button" data-preset="plain" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">不加料（核心＋全球分散）</button>
+        <button type="button" data-preset="plain" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">兩桶版（核心＋全球分散）</button>
         <button type="button" data-preset="small" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">VT＋小衛星</button>
       </div>
 
@@ -162,7 +162,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <p class="text-xs text-gray-400 mt-3 leading-relaxed">
         基準永遠是「同樣的現金比例與利率、其餘全部 VT」，所以你把現金改成幾 %，基準也跟著改成同樣的現金。
         工具不會悄悄改你填的值：合計不是 100 就先提示，不計算；現金年息超出 0–20 或欄位看不懂也一樣。
-        預設按鈕裡的比例都是範例（依一組約略的配置換算成占總資產 80%，不是任何人的實際持有比例）；為了讓合計剛好 100%，「完整四桶」與「不加料」的比例有小數點後三、四位（四捨五入成一位，「完整四桶」會變成合計 99.9%）。再平衡選「偏離 5 個百分點才調回」時只檢查四個桶與現金，VT 不單獨檢查（見下方說明）。
+        預設按鈕裡的比例是範例（取整數的大略配置，占總資產 80%，另外 20% 是現金），不是任何人的實際持有比例。再平衡選「偏離 5 個百分點才調回」時只檢查四個桶與現金，VT 不單獨檢查（見下方說明）。
       </p>
     </div>
 
@@ -255,13 +255,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <p><strong>年化報酬：</strong>整段期間的年複合報酬（幾何平均），含配息再投入、含現金利息。<strong>月報酬年化波動：</strong>把每個日曆月最後一個交易日的組合價值串起來，相鄰月底的月報酬標準差乘上 √12，數字越大，月與月之間的起伏越大。</p>
       <p><strong>最大跌幅與回本天數：</strong>最大跌幅是任何高點到之後最低點的最大跌幅，並列出高點日與最低日；回本天數是從那個高點日起算，到組合價值第一次回到高點值的日曆天數。</p>
       <p><strong>終值：</strong>起點 100 萬，到 2026-11-17 變成多少萬。這是「假如十一年前就用這個比例、照你選的再平衡規則」的結果，沒有扣稅費。</p>
-      <p><strong>怎麼看差在哪：</strong>先看逐年報酬，找出差距集中在哪幾年；再看單一標的表，找出是哪幾個標的把差距拉開；最後看事件窗口，比較同一次下跌兩邊各跌多少。用預設按鈕可以一步步拆：80% 全 VT → 不加料（只換成核心＋全球分散）→ 完整四桶（再加攻擊與另類）。</p>
+      <p><strong>怎麼看差在哪：</strong>先看逐年報酬，找出差距集中在哪幾年；再看單一標的表，找出是哪幾個標的把差距拉開；最後看事件窗口，比較同一次下跌兩邊各跌多少。用預設按鈕可以一步步拆：80% 全 VT → 兩桶版（只留核心桶〔標普 500＋0050〕和全球分散桶〔VEA＋VWO〕，把 80% 放滿）→ 完整四桶（再補上攻擊與另類）。</p>
       <p><strong>對照例子（預設設定：現金 20%、年息 1.5%、每年再平衡、2016 起算）：</strong>
-        完整四桶 年化 19.4%、月報酬年化波動 13.1%、最大跌幅 −23.3%、回本 145 天、終值 686 萬；
+        完整四桶 年化 19.4%、月報酬年化波動 13.0%、最大跌幅 −23.2%、回本 145 天、終值 685 萬；
         80% 全 VT 10.0%、10.5%、−27.1%、196 天、281 萬；
-        不加料 13.1%、11.1%、−24.2%、189 天、381 萬；
+        兩桶版 13.1%、11.0%、−24.2%、189 天、382 萬；
         VT＋小衛星 11.4%、9.6%、−23.3%、167 天、324 萬。
-        同樣四組，把再平衡改成「偏離 5 個百分點才調回」：完整四桶 年化 17.8%、最大跌幅 −24.2%（調回 8 次）；80% 全 VT 10.3%、−27.4%（調回 5 次）；不加料 13.1%、−24.7%；VT＋小衛星 11.8%、−23.6%。
+        同樣四組，把再平衡改成「偏離 5 個百分點才調回」：完整四桶 年化 17.7%、最大跌幅 −23.0%（調回 9 次）；80% 全 VT 10.3%、−27.4%（調回 5 次）；兩桶版 13.1%、−24.7%；VT＋小衛星 11.8%、−23.6%。
         這是同一段「很強的十年」裡的結果，換一段期間（試試從 2020 或 2024 起算）會很不一樣。</p>
     </div>
 
@@ -311,12 +311,12 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     var BUCKET_OF = { VOO: 0, '0050': 0, QQQ: 1, '00631L': 1, VEA: 2, VWO: 2, IAU: 3, BTC: 3 };   // 核心、攻擊、全球分散、另類；VT 不屬於任何桶，不單獨檢查
     var RATE_LIM = [0, 20];               // 現金年息範圍（%）
     var SUM_TOL = 0.005;                  // 合計與 100 的容許差（%，四捨五入誤差）
-    // 預設比例（範例）：完整四桶＝一組約略的八檔配置換算成占總資產 80%；不加料＝同一組只留核心與全球分散，換算成 80%。
-    // 取到小數第三、四位，使合計剛好 80；取一位小數會讓逐年報酬差 0.1 個百分點，完整四桶甚至合計變成 99.9。
+    // 預設比例（範例）：取整數的大略配置，占總資產 80%，另外 20% 是現金（合計剛好 100）；不是任何人的實際持有比例。
+    // 完整四桶＝八檔；兩桶版＝只留核心（VOO、0050）與全球分散（VEA、VWO），把 80% 放滿。
     var PRESETS = {
-      full:  { name: '完整四桶', cash: 20, w: { VOO: 19.277, '0050': 17.349, QQQ: 14.458, '00631L': 6.747, VEA: 7.229, VWO: 7.229, IAU: 4.819, BTC: 2.892 } },
+      full:  { name: '完整四桶', cash: 20, w: { VOO: 20, '0050': 17, QQQ: 15, '00631L': 6, VEA: 7, VWO: 7, IAU: 5, BTC: 3 } },
       vt:    { name: '80% 全 VT', cash: 20, w: { VT: 80 } },
-      plain: { name: '不加料（核心＋全球分散）', cash: 20, w: { VOO: 30.189, '0050': 27.17, VEA: 11.3205, VWO: 11.3205 } },
+      plain: { name: '兩桶版（核心＋全球分散）', cash: 20, w: { VOO: 31, '0050': 27, VEA: 11, VWO: 11 } },
       small: { name: 'VT＋小衛星', cash: 20, w: { VT: 60, '0050': 12, IAU: 8 } },
     };
     var DEFAULTS = { preset: 'full', rate: 1.5, rebal: 'yearly', startYear: 2016 };
