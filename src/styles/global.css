@@ -108,16 +108,30 @@ body {
   background-color: #fafafa;
 }
 
-/* 手機：表格太寬時可左右捲動，不要把最右欄切掉 */
+/* 手機：表格太寬時可左右捲動，並用兩側漸層陰影提示「還有內容」 */
 @media (max-width: 640px) {
   .article-body table {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    background:
+      linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(to left, #fff 30%, rgba(255, 255, 255, 0)) 100% 0,
+      radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0)),
+      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0)) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 36px 100%, 36px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .article-body th {
+    white-space: normal;
+    padding: 0.6rem 0.7rem;
   }
 
   .article-body td {
-    min-width: 5.5rem;
+    padding: 0.6rem 0.7rem;
+    min-width: 4.5rem;
   }
 }
 
