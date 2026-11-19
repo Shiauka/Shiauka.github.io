@@ -1,0 +1,777 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="用你的比例，回測這十一年"
+  description="兩邊都留 20% 現金，剩下 80% 全買 VT，還是分配到核心、攻擊、全球分散、另類四個桶？填入九個標的與現金的比例，用 2016 年起的台幣計價、含息還原價格回測，並排比較年化報酬、波動、最大跌幅、回本天數、逐年報酬與三次事件窗口。過去資料、有後見之明，僅供看差在哪，不是預測。對應 EP67。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-6">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP67</p>
+      <h1 class="text-3xl font-bold mb-3">用你的比例，回測這十一年</h1>
+      <p class="text-gray-600 leading-relaxed">
+        兩邊都留 20% 現金，剩下 80%：<strong>全買 VT</strong>，還是分配到<strong>核心、攻擊、全球分散、另類</strong>四個桶？
+        這支計算機讓你自己填九個標的和現金的比例，用 2016 年起的台幣計價、含配息還原價格，把「你的組合」和「全 VT 基準」並排回測，看差在哪。
+        兩邊都不是標準答案，工具不替你選。
+      </p>
+    </div>
+
+    <!-- Key notices -->
+    <div class="rounded-2xl border border-amber-300 bg-amber-50 p-5 mb-8 text-sm text-amber-950 leading-relaxed">
+      <p class="font-semibold mb-2">先讀這六點，再看數字</p>
+      <ol class="space-y-1.5 list-none pl-0">
+        <li><strong>① 這是過去資料，而且有後見之明。</strong>你是在已經知道這十年結果之後才來試比例；十一年前，沒有人事先知道哪個比例會是什麼結果。預設的比例只是範例（依一組約略的配置換算成 80%，不是任何人的實際持有比例）。</li>
+        <li><strong>② 2016–2026 剛好是台積電、AI、比特幣、台股都很強的十年。</strong>這個結果不代表未來。</li>
+        <li><strong>③ 比特幣這段期間年化約 59%、最大跌幅約 −83%；00631L 是槓桿型（兩倍），最大跌幅約 −55%。</strong>單一標的的歷史最大跌幅列在下面的表格，別只看組合。</li>
+        <li><strong>④ 不含稅、手續費、交易成本、匯差價差。</strong>現金固定年息，兩邊相同。</li>
+        <li><strong>⑤ 「配出歷史最佳組合」沒有意義。</strong>這是在用後照鏡開車：過去最好的比例，不會是未來最好的比例。這個工具不是拿來找最佳比例，是拿來看「差在哪」。</li>
+        <li><strong>⑥ 僅供一般資訊參考，不構成投資、稅務或法律建議。</strong></li>
+      </ol>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">你的比例（占總資產 %，合計要剛好 100）</h2>
+        <button id="resetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">全部回到預設值</button>
+      </div>
+
+      <p class="text-xs text-gray-500 mb-2">快速預設（點一下填入比例，現金都是 20%）</p>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <button type="button" data-preset="full" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">完整四桶</button>
+        <button type="button" data-preset="vt" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">80% 全 VT</button>
+        <button type="button" data-preset="plain" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">不加料（核心＋全球分散）</button>
+        <button type="button" data-preset="small" class="presetBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">VT＋小衛星</button>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-x-5 gap-y-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">全球一籃子</p>
+          <label class="block">
+            <span class="text-sm text-gray-600">VT（全球股票）</span>
+            <input id="w-VT" data-k="VT" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+              class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">現金</p>
+          <label class="block">
+            <span class="text-sm text-gray-600">現金（％）</span>
+            <input id="w-cash" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">核心桶</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">標普 500（VOO）</span>
+              <input id="w-VOO" data-k="VOO" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">0050</span>
+              <input id="w-0050" data-k="0050" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">攻擊桶</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">QQQ</span>
+              <input id="w-QQQ" data-k="QQQ" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">00631L（正 2）</span>
+              <input id="w-00631L" data-k="00631L" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">全球分散桶</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">VEA（已開發）</span>
+              <input id="w-VEA" data-k="VEA" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">VWO（新興）</span>
+              <input id="w-VWO" data-k="VWO" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-1">另類桶</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">黃金（IAU）</span>
+              <input id="w-IAU" data-k="IAU" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">比特幣</span>
+              <input id="w-BTC" data-k="BTC" type="text" inputmode="decimal" autocomplete="off" placeholder="0"
+                class="wIn mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 合計 -->
+      <div id="sumBox" class="mt-4 rounded-lg border px-3 py-2 text-sm" aria-live="polite"></div>
+
+      <div class="grid sm:grid-cols-3 gap-4 mt-5">
+        <label class="block">
+          <span class="text-sm text-gray-600">現金年息（%，0–20）</span>
+          <input id="rate" type="text" inputmode="decimal" autocomplete="off"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">再平衡</span>
+          <select id="rebal" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="yearly">每年第一個交易日</option>
+            <option value="none">不再平衡（只在起點配置一次）</option>
+            <option value="band">偏離 5 個百分點才調回</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">從哪一年起算（到 2026-11-17）</span>
+          <select id="startYear" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="2016">2016（全期，2016-01-04 起）</option>
+            <option value="2017">2017</option>
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+          </select>
+        </label>
+      </div>
+      <p class="text-xs text-gray-400 mt-3 leading-relaxed">
+        基準永遠是「同樣的現金比例與利率、其餘全部 VT」，所以你把現金改成幾 %，基準也跟著改成同樣的現金。
+        工具不會悄悄改你填的值：合計不是 100 就先提示，不計算；現金年息超出 0–20 或欄位看不懂也一樣。
+        預設按鈕裡的比例都是範例（依一組約略的配置換算成占總資產 80%，不是任何人的實際持有比例）；為了讓合計剛好 100%，「完整四桶」與「不加料」的比例有小數點後三、四位（四捨五入成一位，「完整四桶」會變成合計 99.9%）。再平衡選「偏離 5 個百分點才調回」時只檢查四個桶與現金，VT 不單獨檢查（見下方說明）。
+      </p>
+    </div>
+
+    <!-- Status / placeholder -->
+    <div id="statusBox" class="rounded-2xl border border-dashed border-gray-300 p-6 mb-8 text-sm text-gray-600 leading-relaxed" aria-live="polite">價格資料載入中…</div>
+
+    <!-- Results -->
+    <div id="resultsWrap" class="hidden">
+
+      <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+        <div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+          <p class="font-semibold text-gray-900">並排比較</p>
+          <p id="periodText" class="text-xs text-gray-500"></p>
+        </div>
+        <p id="legendText" class="text-xs text-gray-500 mb-3 leading-relaxed"></p>
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 font-medium">指標</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#C5611A">你的組合</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#475569">全 VT 基準</th>
+              <th class="py-2 pl-2 font-medium text-right">差</th>
+            </tr>
+          </thead>
+          <tbody id="metricsBody"></tbody>
+        </table>
+        <p id="metricsNote" class="text-xs text-gray-500 mt-3 leading-relaxed"></p>
+      </div>
+
+      <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+        <p class="font-semibold text-gray-900 mb-1">起點 100 的資產走勢</p>
+        <p class="text-xs text-gray-500 mb-3">兩條線的起點都是 100（萬）。含現金、含再平衡設定，不含稅費。</p>
+        <div id="chartBox" class="w-full"></div>
+      </div>
+
+      <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+        <p class="font-semibold text-gray-900 mb-1">逐年報酬（日曆年）</p>
+        <p id="yearlyNote" class="text-xs text-gray-500 mb-3 leading-relaxed"></p>
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 font-medium">年度</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#C5611A">你的組合</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#475569">全 VT 基準</th>
+              <th class="py-2 pl-2 font-medium text-right">差</th>
+            </tr>
+          </thead>
+          <tbody id="yearlyBody"></tbody>
+        </table>
+      </div>
+
+      <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+        <p class="font-semibold text-gray-900 mb-1">三次事件窗口：區間起點到區間最低點的跌幅</p>
+        <p class="text-xs text-gray-500 mb-3 leading-relaxed">只看窗口起點那天的價值，到窗口內最低那天跌了多少，不是整段期間的最大跌幅。窗口起點早於你選的起算年，就不計算。</p>
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 font-medium">窗口</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#C5611A">你的組合</th>
+              <th class="py-2 px-2 font-medium text-right" style="color:#475569">全 VT 基準</th>
+              <th class="py-2 pl-2 font-medium text-right">差</th>
+            </tr>
+          </thead>
+          <tbody id="eventsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+        <p class="font-semibold text-gray-900 mb-1">單一標的各自的歷史（別只看組合）</p>
+        <p class="text-xs text-gray-500 mb-3 leading-relaxed">同一段期間、台幣計價、含息還原、買了不動（沒有再平衡）的單一標的。比特幣與 00631L 的最大跌幅最深。</p>
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 font-medium">標的</th>
+              <th class="py-2 px-2 font-medium text-right">你的占比</th>
+              <th class="py-2 px-2 font-medium text-right">年化報酬</th>
+              <th class="py-2 pl-2 font-medium text-right">最大跌幅</th>
+            </tr>
+          </thead>
+          <tbody id="assetsBody"></tbody>
+        </table>
+        <p id="assetNote" class="text-xs text-gray-500 mt-2 leading-relaxed"></p>
+      </div>
+
+    </div>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>年化報酬：</strong>整段期間的年複合報酬（幾何平均），含配息再投入、含現金利息。<strong>年化波動：</strong>日報酬標準差乘上 √252，數字越大，日常起伏越大。</p>
+      <p><strong>最大跌幅與回本天數：</strong>最大跌幅是任何高點到之後最低點的最大跌幅，並列出高點日與最低日；回本天數是從那個高點日起算，到組合價值第一次回到高點值的日曆天數。</p>
+      <p><strong>終值：</strong>起點 100 萬，到 2026-11-17 變成多少萬。這是「假如十一年前就用這個比例、照你選的再平衡規則」的結果，沒有扣稅費。</p>
+      <p><strong>怎麼看差在哪：</strong>先看逐年報酬，找出差距集中在哪幾年；再看單一標的表，找出是哪幾個標的把差距拉開；最後看事件窗口，比較同一次下跌兩邊各跌多少。用預設按鈕可以一步步拆：80% 全 VT → 不加料（只換成核心＋全球分散）→ 完整四桶（再加攻擊與另類）。</p>
+      <p><strong>對照例子（預設設定：現金 20%、年息 1.5%、每年再平衡、2016 起算）：</strong>
+        完整四桶 年化 19.4%、波動 12.7%、最大跌幅 −23.3%、回本 145 天、終值 686 萬；
+        80% 全 VT 10.0%、13.5%、−27.1%、196 天、281 萬；
+        不加料 13.1%、11.2%、−24.2%、189 天、381 萬；
+        VT＋小衛星 11.4%、11.0%、−23.3%、167 天、324 萬。
+        同樣四組，把再平衡改成「偏離 5 個百分點才調回」：完整四桶 年化 17.8%、最大跌幅 −24.2%（調回 8 次）；80% 全 VT 10.3%、−27.4%（調回 5 次）；不加料 13.1%、−24.7%；VT＋小衛星 11.8%、−23.6%。
+        這是同一段「很強的十年」裡的結果，換一段期間（試試從 2020 或 2024 起算）會很不一樣。</p>
+    </div>
+
+    <!-- Notes -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950"><strong>這是在用後照鏡開車：過去最好的比例，不會是未來最好的比例。</strong>這個工具是拿來看「差在哪」，不是拿來找最佳比例。</p>
+      <p><strong>資料怎麼建：</strong>Yahoo Finance 含配息還原的每日收盤價（2026-11-19 抓取，到 2026-11-17）：VT、VOO、QQQ、VEA、VWO、IAU、BTC-USD、0050.TW、00631L.TW。美元計價的標的用 Yahoo 的 TWD=X 匯率換成台幣；TWD=X 有單日跳動的雜訊，所以先取置中 5 日中位數再換算。交易日取 VT 與 0050 的交易日聯集，其中一邊休市的那天，沿用前一個交易日的價格。</p>
+      <p><strong>比特幣用 BTC-USD 代表：</strong>用的是比特幣本身的價格，沒有扣費用，也沒有反映交易所與保管風險；比特幣 ETF 2024 年才上市，沒有十年以上的資料。<strong>00631L 從 2016-01-04 起算</strong>：2015 年前期的資料有分割調整的斷點與異常日，和 0050 的兩倍日報酬交叉驗證，2015 年 9 月起才吻合。</p>
+      <p><strong>匯率濾波的影響：</strong>TWD=X 的單日雜訊在 2016 年特別多，置中 5 日中位數會把雜訊壓掉，也會壓掉一點真實的單日匯率波動，所以美元資產的年化波動會略低於不濾波的算法（以全 VT 基準為例，約低 1 個百分點）；年化報酬與終值幾乎不受影響。</p>
+      <p><strong>回測怎麼算：</strong>起點總資產 100，各標的與現金照你填的比例配置；現金按日曆天數以固定年息複利計息，兩邊相同；不計交易成本、稅、匯差與價差，ETF 內扣的費用已反映在還原價裡。</p>
+      <p><strong>三種再平衡規則：</strong>回測預設的規則是「每年第一個交易日硬調回目標」，不管偏離多少，每年第一個交易日把所有標的與現金調回目標比例。「不再平衡」只在起點配置一次，之後各部位自己漲跌。「偏離 5 個百分點才調回」每個交易日收盤檢查：核心（VOO＋0050）、攻擊（QQQ＋00631L）、全球分散（VEA＋VWO）、另類（IAU＋BTC）四個桶與現金，只要任一個占總資產的比例偏離目標 5 個百分點以上，當天收盤就把整個組合調回目標。VT 不屬於這四個桶，不單獨檢查：只有 VT 與現金時，兩者互為補數，現金偏離 5 個百分點就等於 VT 偏離 5 個百分點；但 VT 加上其他標的（例如「VT＋小衛星」）時，VT 的占比可能偏離目標超過 5 個百分點而不觸發調回。表格裡的「調回目標次數」不含起點那一次配置。</p>
+      <p><strong>起算年：</strong>選 2020 就從 2020 年第一個交易日開始、起點價值 100；如果事件窗口的起點早於起算日（例如從 2021 年起算，看不到 2020 年的窗口；從 2022 年起算，連 2022 年的窗口也看不到，因為它從 2021-11-08 開始），那一列顯示「—」。逐年報酬的第一年從起算日當天收盤算起，2026 年是到 11-17 的年初至今。</p>
+      <p><strong>限制：</strong>價格資料來自 Yahoo Finance，可能與券商實際成交價有出入，也偶有連續數日價格不變的停滯資料（例如 0050 在 2025 年 6 月），只影響中間的路徑，不影響起訖端點；過去的報酬、波動與回撤不代表未來；這個工具只看這九個標的與現金，沒有考慮你的稅務身分、買賣單位、匯兌時點與其他資產。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，使用過去的歷史價格回測，有後見之明，不是預測，過去績效不代表未來結果，不保證任何報酬。不構成投資、稅務或法律建議。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep67-vt-vs-four-buckets" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP67 完整文章 →</a>
+      <a href="/tools/rebalance-check-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">再平衡檢查（EP60）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    var KEYS = ['VT', 'VOO', '0050', 'QQQ', '00631L', 'VEA', 'VWO', 'IAU', 'BTC'];
+    var SHORT = { VT: 'VT', VOO: '標普 500（VOO）', '0050': '0050', QQQ: 'QQQ', '00631L': '00631L（正 2）', VEA: 'VEA', VWO: 'VWO', IAU: '黃金（IAU）', BTC: '比特幣（BTC-USD）' };
+    var BUCKETS = [
+      { name: '核心', keys: ['VOO', '0050'] },
+      { name: '攻擊', keys: ['QQQ', '00631L'] },
+      { name: '全球分散', keys: ['VEA', 'VWO'] },
+      { name: '另類', keys: ['IAU', 'BTC'] },
+    ];
+    var EVENTS = [
+      { key: '2020', label: '2020 疫情崩跌', a: '2020-02-14', b: '2020-04-30' },
+      { key: '2022', label: '2022 升息下跌', a: '2021-11-08', b: '2022-10-31' },
+      { key: '2025', label: '2025 春季下跌', a: '2025-02-18', b: '2025-04-30' },
+    ];
+    var START_YEARS = [2016, 2024];       // 可選起算年範圍
+    var REBALS = ['yearly', 'none', 'band'];  // 每年第一個交易日／不再平衡／偏離門檻才調回
+    var BAND_PP = 5;                      // 偏離門檻（百分點）：任一桶（含現金）占總資產比例偏離目標 ≥ 5 個百分點，當天收盤整個組合調回
+    var BUCKET_OF = { VOO: 0, '0050': 0, QQQ: 1, '00631L': 1, VEA: 2, VWO: 2, IAU: 3, BTC: 3 };   // 核心、攻擊、全球分散、另類；VT 不屬於任何桶，不單獨檢查
+    var RATE_LIM = [0, 20];               // 現金年息範圍（%）
+    var SUM_TOL = 0.005;                  // 合計與 100 的容許差（%，四捨五入誤差）
+    // 預設比例（範例）：完整四桶＝一組約略的八檔配置換算成占總資產 80%；不加料＝同一組只留核心與全球分散，換算成 80%。
+    // 取到小數第三、四位，使合計剛好 80；取一位小數會讓逐年報酬差 0.1 個百分點，完整四桶甚至合計變成 99.9。
+    var PRESETS = {
+      full:  { name: '完整四桶', cash: 20, w: { VOO: 19.277, '0050': 17.349, QQQ: 14.458, '00631L': 6.747, VEA: 7.229, VWO: 7.229, IAU: 4.819, BTC: 2.892 } },
+      vt:    { name: '80% 全 VT', cash: 20, w: { VT: 80 } },
+      plain: { name: '不加料（核心＋全球分散）', cash: 20, w: { VOO: 30.189, '0050': 27.17, VEA: 11.3205, VWO: 11.3205 } },
+      small: { name: 'VT＋小衛星', cash: 20, w: { VT: 60, '0050': 12, IAU: 8 } },
+    };
+    var DEFAULTS = { preset: 'full', rate: 1.5, rebal: 'yearly', startYear: 2016 };
+
+    function isBlank(s) { return String(s === undefined || s === null ? '' : s).trim() === ''; }
+    // 百分比欄位：吃全形數字、%、前後空白、U+2212 負號；不吃逗號（19,3 會被當成看不懂）；其他一律 NaN
+    function parsePct(s) {
+      var str = String(s === undefined || s === null ? '' : s).normalize('NFKC').replace(/[\s%]/g, '').replace(/^[−–—]/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      var v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+    function trimNum(v, d) { var s = (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toString(); return s; }
+
+    // raw：{ w:{VT:'..',...}, cash:'', rate:'', rebal:'yearly'|'none'|'band', startYear:'2016' }（全是字串）
+    // 回傳 { ok, errors, sum, sumOff, weights, cash, rate(小數), rebal(字串 yearly|none|band), startYear, scale }
+    // 不會悄悄改任何值：有錯誤或合計不是 100 就 ok=false（不計算）；合計與 100 差在 SUM_TOL 內視為四捨五入誤差，計算時等比例換算成 100。
+    function normalizeInputs(raw) {
+      var errors = [], badIds = [], weights = {}, sum = 0;
+      function bad(id, msg) { errors.push(msg); badIds.push(id); return NaN; }
+      function one(id, label, r, lo, hi, blankOk, eg) {
+        if (isBlank(r)) {
+          if (blankOk) return 0;
+          return bad(id, label + '：空白，請填數字');
+        }
+        var v = parsePct(r);
+        if (!isFinite(v)) return bad(id, label + '：看不懂「' + String(r).trim() + '」，請填數字（例：' + (eg || '19.3') + '）');
+        if (v < lo) return bad(id, label + '：不能小於 ' + lo + '（你填 ' + String(r).trim() + '）');
+        if (v > hi) return bad(id, label + '：不能大於 ' + hi + '（你填 ' + String(r).trim() + '）');
+        return v;
+      }
+      KEYS.forEach(function (k) {
+        var v = one('w-' + k, SHORT[k], raw.w[k], 0, 100, true);
+        weights[k] = isFinite(v) ? v : 0; if (isFinite(v)) sum += v;
+      });
+      var cash = one('w-cash', '現金', raw.cash, 0, 100, true);
+      if (isFinite(cash)) sum += cash; else cash = 0;
+      var ratePct = one('rate', '現金年息', raw.rate, RATE_LIM[0], RATE_LIM[1], false, '1.5');
+      var rebal = raw.rebal;
+      if (REBALS.indexOf(rebal) < 0) { bad('rebal', '再平衡：請選每年第一個交易日、不再平衡或偏離 5 個百分點才調回'); rebal = 'yearly'; }
+      var sy = String(raw.startYear === undefined || raw.startYear === null ? '' : raw.startYear).trim();
+      var startYear = /^\d{4}$/.test(sy) ? parseInt(sy, 10) : NaN;
+      if (!(startYear >= START_YEARS[0] && startYear <= START_YEARS[1])) { bad('startYear', '起算年：請選 ' + START_YEARS[0] + ' 到 ' + START_YEARS[1]); startYear = NaN; }
+      var sumOff = errors.length === 0 && Math.abs(sum - 100) > SUM_TOL + 1e-9;
+      var ok = errors.length === 0 && !sumOff;
+      var scale = 1;
+      var w2 = weights, c2 = cash;
+      if (ok && Math.abs(sum - 100) > 1e-9) {
+        scale = 100 / sum; w2 = {}; KEYS.forEach(function (k) { w2[k] = weights[k] * scale; }); c2 = cash * scale;
+      }
+      return { ok: ok, errors: errors, badIds: badIds, sum: sum, sumOff: sumOff, weights: w2, cash: c2, rawWeights: weights, rawCash: cash,
+        rate: isFinite(ratePct) ? ratePct / 100 : NaN, ratePct: ratePct, rebal: rebal, startYear: startYear, scale: scale };
+    }
+
+    function validateData(data) {
+      if (!data || !Array.isArray(data.dates) || data.dates.length < 300 || !data.px) return '資料格式不對';
+      var n = data.dates.length;
+      for (var i = 0; i < n; i++) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(data.dates[i])) return '日期格式不對';
+        if (i > 0 && !(data.dates[i] > data.dates[i - 1])) return '日期沒有由舊到新排列';
+      }
+      for (var j = 0; j < KEYS.length; j++) {
+        var a = data.px[KEYS[j]];
+        if (!Array.isArray(a) || a.length !== n) return KEYS[j] + ' 價格筆數不對';
+        for (var m = 0; m < n; m++) if (!(a[m] > 0) || !isFinite(a[m])) return KEYS[j] + ' 價格有缺值';
+      }
+      return '';
+    }
+    function buildCtx(data) {
+      var n = data.dates.length, day = new Float64Array(n), year = new Int16Array(n);
+      for (var i = 0; i < n; i++) {
+        var p = data.dates[i].split('-');
+        day[i] = Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; year[i] = +p[0];
+      }
+      return { dates: data.dates, day: day, year: year, px: data.px, n: n };
+    }
+    function startIndex(ctx, startYear) { for (var i = 0; i < ctx.n; i++) if (ctx.year[i] >= startYear) return i; return -1; }
+
+    // 與 ep67_backtest.simulate 同算法：起點總值 100；現金按日曆天數 (1+r)^(天/365) 複利。
+    // rebal='yearly'：每年第一個交易日把各標的與現金調回目標；'none'：只在起點配置一次；
+    // 'band'：每個交易日收盤檢查四個桶（核心＝VOO＋0050、攻擊＝QQQ＋00631L、全球分散＝VEA＋VWO、另類＝IAU＋BTC）與現金，
+    //   任一個占總資產的比例偏離目標 ≥ BAND_PP 個百分點，當天收盤整個組合調回目標（VT 不屬於桶，不單獨檢查；全 VT 時 VT 與現金互為補數，看現金就等於看 VT）。
+    // weights／cashPct 以占總資產 % 表示（合計 100）；回傳 { i0, v, nReb }，v[k] 對應 ctx.dates[i0+k]，nReb＝起點之後調回目標的次數
+    function simulate(ctx, weights, cashPct, rate, rebal, startYear) {
+      var i0 = startIndex(ctx, startYear), n = ctx.n - i0;
+      var v = new Float64Array(n);
+      var keys = KEYS.filter(function (k) { return weights[k] > 0; });
+      var arrs = keys.map(function (k) { return ctx.px[k]; });
+      var units = keys.map(function () { return 0; });
+      var tgt = [0, 0, 0, 0];
+      KEYS.forEach(function (k) { if (BUCKET_OF[k] !== undefined) tgt[BUCKET_OF[k]] += weights[k]; });
+      var cash = cashPct, total = 100, started = false, prevYear = null, prevDay = null, nReb = 0;
+      for (var k = 0; k < n; k++) {
+        var i = i0 + k, j, value, doReb = false;
+        if (prevDay !== null) cash *= Math.pow(1 + rate, (ctx.day[i] - prevDay) / 365);
+        if (!started) { value = total; doReb = true; }
+        else {
+          value = cash; for (j = 0; j < keys.length; j++) value += units[j] * arrs[j][i];
+          if (rebal === 'yearly') doReb = ctx.year[i] !== prevYear;
+          else if (rebal === 'band') {
+            var bv = [0, 0, 0, 0];
+            for (j = 0; j < keys.length; j++) if (BUCKET_OF[keys[j]] !== undefined) bv[BUCKET_OF[keys[j]]] += units[j] * arrs[j][i];
+            if (Math.abs(cash / value * 100 - cashPct) >= BAND_PP) doReb = true;
+            for (j = 0; j < 4 && !doReb; j++) if (Math.abs(bv[j] / value * 100 - tgt[j]) >= BAND_PP) doReb = true;
+          }
+        }
+        if (doReb) {
+          if (started) nReb++;
+          total = started ? value : 100;
+          cash = total * cashPct / 100;
+          for (j = 0; j < keys.length; j++) units[j] = total * weights[keys[j]] / 100 / arrs[j][i];
+          value = total; started = true;
+        }
+        prevYear = ctx.year[i]; prevDay = ctx.day[i]; v[k] = value;
+      }
+      return { i0: i0, v: v, nReb: nReb };
+    }
+
+    // 與 ep67_backtest.metrics 同算法。v 為與 ctx.dates[i0..] 對齊的價值序列
+    function metrics(ctx, i0, v) {
+      var n = v.length, d0 = ctx.day[i0], d1 = ctx.day[i0 + n - 1];
+      var yrs = (d1 - d0) / 365.25;
+      var cagr = Math.pow(v[n - 1] / v[0], 1 / yrs) - 1;
+      var m = n - 1, mean = 0, k;
+      var rets = new Float64Array(m);
+      for (k = 1; k < n; k++) { rets[k - 1] = v[k] / v[k - 1] - 1; mean += rets[k - 1]; }
+      mean /= m;
+      var ss = 0; for (k = 0; k < m; k++) ss += (rets[k] - mean) * (rets[k] - mean);
+      var vol = Math.sqrt(ss / m) * Math.sqrt(252);
+      var peak = v[0], pk = 0, mdd = 0, mddPk = 0, mddLo = 0;
+      for (k = 0; k < n; k++) {
+        if (v[k] > peak) { peak = v[k]; pk = k; }
+        var dd = v[k] / peak - 1;
+        if (dd < mdd) { mdd = dd; mddPk = pk; mddLo = k; }
+      }
+      var pkV = v[mddPk], rec = -1;
+      for (k = mddLo + 1; k < n; k++) if (v[k] >= pkV) { rec = k; break; }
+      return { final: v[n - 1], cagr: cagr, vol: vol, mdd: mdd, years: yrs,
+        pkDate: ctx.dates[i0 + mddPk], loDate: ctx.dates[i0 + mddLo],
+        recDate: rec >= 0 ? ctx.dates[i0 + rec] : null,
+        recDays: rec >= 0 ? ctx.day[i0 + rec] - ctx.day[i0 + mddPk] : null,
+        sincePeakDays: ctx.day[i0 + n - 1] - ctx.day[i0 + mddPk], noDrop: mdd === 0 };
+    }
+
+    // 與 ep67_backtest.window_dd 同算法：窗口 [a,b] 內，窗口第一個交易日到窗口最低的跌幅與最低日
+    // inside＝窗口起點不早於這次回測的第一天（早於就只是半個窗口，頁面不顯示）
+    function windowDD(ctx, i0, v, a, b) {
+      var n = v.length, k0 = -1, k1 = -1, k;
+      for (k = 0; k < n; k++) {
+        var d = ctx.dates[i0 + k];
+        if (d > b) break;
+        if (d >= a && k0 < 0) k0 = k;
+        k1 = k;
+      }
+      if (k0 < 0 || k1 < k0) return null;
+      var lo = k0; for (k = k0; k <= k1; k++) if (v[k] < v[lo]) lo = k;
+      return { dd: v[lo] / v[k0] - 1, lowDate: ctx.dates[i0 + lo], startDate: ctx.dates[i0 + k0], inside: a >= ctx.dates[i0] };
+    }
+
+    // 與 ep67_backtest.calendar_returns 同算法：每年報酬 ＝ 年底值 ÷ 前一年底值；第一年從起算日當天算起
+    function calendarReturns(ctx, i0, v) {
+      var n = v.length, out = [], prev = v[0], cur = ctx.year[i0], last = v[0];
+      for (var k = 0; k < n; k++) {
+        var y = ctx.year[i0 + k];
+        if (y !== cur) { out.push({ year: cur, ret: last / prev - 1 }); prev = last; cur = y; }
+        last = v[k];
+      }
+      out.push({ year: cur, ret: last / prev - 1, lastDate: ctx.dates[i0 + n - 1] });
+      return out;
+    }
+
+    function runPortfolio(ctx, weights, cashPct, p) {
+      var s = simulate(ctx, weights, cashPct, p.rate, p.rebal, p.startYear);
+      var m = metrics(ctx, s.i0, s.v);
+      return { i0: s.i0, v: s.v, nReb: s.nReb, m: m, cal: calendarReturns(ctx, s.i0, s.v),
+        ev: EVENTS.map(function (e) { return windowDD(ctx, s.i0, s.v, e.a, e.b); }) };
+    }
+    // p＝normalizeInputs(...) 的結果（ok 為 true）
+    function compute(ctx, p) {
+      var user = runPortfolio(ctx, p.weights, p.cash, p);
+      var vt = {}; vt.VT = Math.max(0, 100 - p.cash);
+      var base = runPortfolio(ctx, vt, p.cash, p);
+      var assets = KEYS.map(function (k) {
+        var arr = Array.prototype.slice.call(ctx.px[k], user.i0);
+        return { key: k, m: metrics(ctx, user.i0, arr) };
+      });
+      return { user: user, base: base, assets: assets, i0: user.i0 };
+    }
+    // ===== 純函式 END =====
+
+    window.__ep67 = { KEYS: KEYS, EVENTS: EVENTS, PRESETS: PRESETS, DEFAULTS: DEFAULTS, parsePct: parsePct, normalizeInputs: normalizeInputs,
+      validateData: validateData, buildCtx: buildCtx, simulate: simulate, metrics: metrics, windowDD: windowDD, calendarReturns: calendarReturns,
+      compute: compute, ctx: null, last: null };
+
+    (function () {
+      var DATA_URL = '/data/ep67-portfolio-prices.json';
+      function $(id) { return document.getElementById(id); }
+      function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+      var ctx = null, loadState = 'loading';   // loading | ok | fail
+      var FIELD_IDS = KEYS.map(function (k) { return 'w-' + k; }).concat(['w-cash', 'rate', 'rebal', 'startYear']);
+      var lastCompute = null;
+
+      // ---------- 格式 ----------
+      function t10(x) { return Math.round(x * 1000); }                       // 小數 → 百分比的 0.1 單位（整數）
+      function fmtT10(t) { var s = (Math.abs(t) / 10).toFixed(1); return (t < 0 ? '−' : '') + s + '%'; }
+      function pct(x) { return fmtT10(t10(x)); }
+      function diffPts(a, b, hi, lo) {                                        // 以顯示到的精度比較
+        var d = t10(a) - t10(b);
+        if (d === 0) return '相同';
+        return (d > 0 ? hi : lo) + ' ' + (Math.abs(d) / 10).toFixed(1) + ' 點';
+      }
+      function fmtMoney(v) { return Math.round(v).toLocaleString('en-US'); }
+      function fmtW(v) { var r = Math.round(v * 10) / 10; return String(v > 0 && r === 0 ? Math.round(v * 1000) / 1000 : r) + '%'; }
+      function nb(d) { return '<span class="whitespace-nowrap">' + d + '</span>'; }
+      function fmtInput(v) { return String(Math.round(v * 1e6) / 1e6); }
+
+      // ---------- 輸入 ----------
+      function readRaw() {
+        var w = {}; KEYS.forEach(function (k) { w[k] = $('w-' + k).value; });
+        return { w: w, cash: $('w-cash').value, rate: $('rate').value, rebal: $('rebal').value, startYear: $('startYear').value };
+      }
+      function fillPreset(key) {
+        var P = PRESETS[key];
+        KEYS.forEach(function (k) { $('w-' + k).value = P.w[k] !== undefined ? fmtInput(P.w[k]) : '0'; });
+        $('w-cash').value = fmtInput(P.cash);
+      }
+      function resetAll() {
+        fillPreset(DEFAULTS.preset);
+        $('rate').value = String(DEFAULTS.rate); $('rebal').value = DEFAULTS.rebal; $('startYear').value = String(DEFAULTS.startYear);
+      }
+      function matchPreset(n) {
+        if (!n.ok) return null;
+        var hit = null;
+        Object.keys(PRESETS).forEach(function (key) {
+          var P = PRESETS[key], same = Math.abs(n.rawCash - P.cash) < 1e-9;
+          KEYS.forEach(function (k) { if (Math.abs(n.rawWeights[k] - (P.w[k] || 0)) > 1e-9) same = false; });
+          if (same) hit = key;
+        });
+        return hit;
+      }
+
+      // ---------- 合計提示 ----------
+      function renderSum(n) {
+        var box = $('sumBox'), html, cls;
+        var sumTxt = trimNum(n.sum, 4);
+        if (n.errors.length) {
+          cls = 'border-red-300 bg-red-50 text-red-800';
+          html = '<p class="font-medium">有欄位需要修正，修正前不會計算：</p><ul class="list-disc pl-5">' + n.errors.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>' +
+            '<p class="mt-1 text-xs">目前能讀懂的欄位合計 ' + esc(sumTxt) + '%</p>';
+        } else if (n.sumOff) {
+          var diff = 100 - n.sum, newCash = n.rawCash + diff;
+          cls = 'border-amber-300 bg-amber-50 text-amber-900';
+          html = '<p><strong>合計 ' + esc(sumTxt) + '%</strong>，' + (diff > 0 ? '還差 ' : '多了 ') + esc(trimNum(Math.abs(diff), 4)) + '%，要剛好 100% 才會計算（工具不會幫你改數字）。</p>';
+          if (newCash >= 0 && newCash <= 100) html += '<button type="button" id="fixCash" data-cash="' + esc(fmtInput(newCash)) + '" class="mt-2 text-xs font-medium px-3 py-1 rounded-lg border border-amber-400 hover:bg-amber-100 transition-colors">把差額調整到現金（現金改成 ' + esc(fmtInput(newCash)) + '%）</button>';
+        } else {
+          cls = 'border-green-300 bg-green-50 text-green-800';
+          html = '<p><strong>合計 ' + esc(sumTxt) + '%</strong>' + (n.scale !== 1 && Math.abs(n.sum - 100) > 5e-4 ? '（差在四捨五入範圍內，計算時已等比例換算成 100%）' : '') + '</p>';
+        }
+        box.className = 'mt-4 rounded-lg border px-3 py-2 text-sm ' + cls;
+        box.innerHTML = html;
+        var fx = $('fixCash');
+        if (fx) fx.addEventListener('click', function () { $('w-cash').value = fx.getAttribute('data-cash'); render(); });
+      }
+
+      // ---------- 結果 ----------
+      function row(label, uHtml, bHtml, dHtml, m) {
+        return '<tr class="border-b border-gray-100 align-top"><td class="py-2 pr-2">' + label + '</td>' +
+          '<td class="py-2 px-2 text-right font-medium tabular-nums" data-m="' + m + '" data-s="user">' + uHtml + '</td>' +
+          '<td class="py-2 px-2 text-right tabular-nums" data-m="' + m + '" data-s="base">' + bHtml + '</td>' +
+          '<td class="py-2 pl-2 text-right text-gray-600">' + dHtml + '</td></tr>';
+      }
+      function small(s) { return '<div class="text-xs text-gray-500 font-normal">' + s + '</div>'; }
+      function ddCell(m) {
+        if (m.noDrop) return '0.0%' + small('期間沒有下跌');
+        return pct(m.mdd) + small('高點 ' + nb(m.pkDate) + '<br>最低 ' + nb(m.loDate));
+      }
+      function recCell(m) {
+        if (m.noDrop) return '—' + small('期間沒有下跌');
+        if (m.recDays === null) return '尚未回本' + small('高點起算已 ' + m.sincePeakDays + ' 天');
+        return m.recDays + ' 天' + small('回到高點 ' + nb(m.recDate));
+      }
+      function renderResults(p, c) {
+        var u = c.user, b = c.base, um = u.m, bm = b.m;
+        var startDate = ctx.dates[c.i0], endDate = ctx.dates[ctx.n - 1];
+        $('periodText').textContent = startDate + ' → ' + endDate + '（' + um.years.toFixed(1) + ' 年）';
+        $('legendText').innerHTML = '<strong style="color:#C5611A">你的組合</strong>：依上面填的比例（現金 ' + esc(fmtW(p.cash)) + '）。<strong style="color:#475569">全 VT 基準</strong>：VT ' + esc(fmtW(Math.max(0, 100 - p.cash))) + '＋現金 ' + esc(fmtW(p.cash)) + '（現金比例、年息、再平衡與起算年都跟你的組合相同）。差 ＝ 你的組合與基準相比。';
+        var recDiff = '—';
+        if (!um.noDrop && !bm.noDrop && um.recDays !== null && bm.recDays !== null) {
+          var dd = um.recDays - bm.recDays; recDiff = dd === 0 ? '相同' : (dd < 0 ? '快 ' : '慢 ') + Math.abs(dd) + ' 天';
+        }
+        var fu = Math.round(um.final), fb = Math.round(bm.final), fd = fu - fb;
+        $('metricsBody').innerHTML =
+          row('年化報酬', pct(um.cagr), pct(bm.cagr), diffPts(um.cagr, bm.cagr, '高', '低'), 'cagr') +
+          row('年化波動', pct(um.vol), pct(bm.vol), diffPts(um.vol, bm.vol, '高', '低'), 'vol') +
+          row('最大跌幅', ddCell(um), ddCell(bm), (um.noDrop || bm.noDrop) ? '—' : diffPts(um.mdd, bm.mdd, '少跌', '多跌'), 'mdd') +
+          row('最大跌幅回本天數', recCell(um), recCell(bm), recDiff, 'rec') +
+          row('起點 100 萬變成', fu.toLocaleString('en-US') + ' 萬', fb.toLocaleString('en-US') + ' 萬', fd === 0 ? '相同' : (fd > 0 ? '多 ' : '少 ') + Math.abs(fd).toLocaleString('en-US') + ' 萬', 'final') +
+          row('調回目標次數（不含起點配置）', u.nReb + ' 次', b.nReb + ' 次', u.nReb === b.nReb ? '相同' : (u.nReb > b.nReb ? '多 ' : '少 ') + Math.abs(u.nReb - b.nReb) + ' 次', 'nreb');
+        $('metricsNote').textContent = '年化波動＝日報酬標準差 × √252；回本天數是從高點日起算的日曆天數；終值是 ' + startDate + ' 起點 100 萬、到 ' + endDate + ' 的結果（不含稅費）。' + (p.rebal === 'yearly' ? '每年第一個交易日調回目標比例。' : p.rebal === 'band' ? '偏離 5 個百分點才調回：核心、攻擊、全球分散、另類四個桶與現金，任一個占總資產的比例偏離目標 5 個百分點以上，當天收盤整個組合調回目標。' : '不再平衡，起點配置之後各部位自己漲跌。');
+
+        // 逐年
+        var yb = '';
+        u.cal.forEach(function (r, i) {
+          var rb = b.cal[i];
+          var label = r.year + ((i === u.cal.length - 1 && r.lastDate && r.lastDate.slice(5) !== '12-31') ? '（到 ' + r.lastDate.slice(5) + '）' : '');
+          yb += '<tr class="border-b border-gray-100"><td class="py-2 pr-2">' + label + '</td>' +
+            '<td class="py-2 px-2 text-right font-medium tabular-nums" data-y="' + r.year + '" data-s="user">' + pct(r.ret) + '</td>' +
+            '<td class="py-2 px-2 text-right tabular-nums" data-y="' + r.year + '" data-s="base">' + pct(rb.ret) + '</td>' +
+            '<td class="py-2 pl-2 text-right text-gray-600">' + diffPts(r.ret, rb.ret, '高', '低') + '</td></tr>';
+        });
+        $('yearlyBody').innerHTML = yb;
+        $('yearlyNote').textContent = '每年報酬 ＝ 年底價值 ÷ 前一年底價值 − 1；第一年（' + u.cal[0].year + '）從 ' + startDate + ' 收盤算起，' + endDate.slice(0, 4) + ' 年是到 ' + endDate.slice(5) + ' 的年初至今。';
+
+        // 事件
+        var eb = '';
+        EVENTS.forEach(function (e, i) {
+          var ue = u.ev[i], be = b.ev[i];
+          var ok = ue && be && ue.inside && be.inside;
+          var span = nb(e.a) + ' → ' + nb(e.b);
+          if (!ok) {
+            eb += '<tr class="border-b border-gray-100"><td class="py-2 pr-2">' + e.label + small(span) + '</td><td class="py-2 px-2 text-right text-gray-500" colspan="3" data-e="' + e.key + '">— 窗口起點早於你選的起算年，不計算</td></tr>';
+          } else {
+            eb += '<tr class="border-b border-gray-100 align-top"><td class="py-2 pr-2">' + e.label + small(span) + '</td>' +
+              '<td class="py-2 px-2 text-right font-medium tabular-nums" data-e="' + e.key + '" data-s="user">' + pct(ue.dd) + small(ue.dd === 0 ? '窗口內沒有下跌' : '最低 ' + nb(ue.lowDate)) + '</td>' +
+              '<td class="py-2 px-2 text-right tabular-nums" data-e="' + e.key + '" data-s="base">' + pct(be.dd) + small(be.dd === 0 ? '窗口內沒有下跌' : '最低 ' + nb(be.lowDate)) + '</td>' +
+              '<td class="py-2 pl-2 text-right text-gray-600">' + diffPts(ue.dd, be.dd, '少跌', '多跌') + '</td></tr>';
+          }
+        });
+        $('eventsBody').innerHTML = eb;
+
+        // 單一標的
+        var ab = '';
+        c.assets.forEach(function (a) {
+          var hot = (a.key === 'BTC' || a.key === '00631L');
+          var w = p.weights[a.key];
+          ab += '<tr class="border-b border-gray-100 align-top' + (hot ? ' bg-amber-50/70' : '') + '" data-a="' + a.key + '"><td class="py-2 pr-2">' + esc(SHORT[a.key]) + '</td>' +
+            '<td class="py-2 px-2 text-right tabular-nums">' + (w > 0 ? fmtW(w) : '—') + '</td>' +
+            '<td class="py-2 px-2 text-right tabular-nums" data-a="' + a.key + '" data-f="cagr">' + pct(a.m.cagr) + '</td>' +
+            '<td class="py-2 pl-2 text-right tabular-nums" data-a="' + a.key + '" data-f="mdd">' + pct(a.m.mdd) + small(nb(a.m.pkDate) + ' → ' + nb(a.m.loDate)) + '</td></tr>';
+        });
+        $('assetsBody').innerHTML = ab;
+        var am = {}; c.assets.forEach(function (a) { am[a.key] = a.m.mdd; });
+        var shallow = t10(c.user.m.mdd) > t10(am.BTC) && t10(c.user.m.mdd) > t10(am['00631L']);
+        var risky = p.weights.BTC + p.weights['00631L'];
+        $('assetNote').textContent = (shallow
+          ? '你的組合最大跌幅（' + pct(c.user.m.mdd) + '）比比特幣（' + pct(am.BTC) + '）、00631L（' + pct(am['00631L']) + '）淺，是因為組合裡有現金與其他標的，這兩檔的占比只有 ' + fmtW(risky) + '；這不代表這兩檔本身不會再跌到那麼深。'
+          : '你的組合最大跌幅是 ' + pct(c.user.m.mdd) + '，這兩檔占你組合的 ' + fmtW(risky) + '。比特幣與 00631L 單獨持有時的最大跌幅在上表，組合的跌幅取決於你給它們多少比例。') +
+          '00631L 是兩倍槓桿型。';
+        drawChart(c);
+      }
+
+      // ---------- 走勢圖（SVG，依容器寬度畫，字不會被縮小）----------
+      function niceTop(maxV) {
+        var raw = maxV / 5, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), f = raw / mag;
+        var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag;
+        return { step: step, top: Math.ceil(maxV / step - 1e-9) * step };
+      }
+      function drawChart(c) {
+        var box = $('chartBox'); if (!box || !c) return;
+        var W = Math.max(280, Math.floor(box.clientWidth || 600)), H = 230, L = 40, R = 38, T = 10, B = 24;
+        var u = c.user, b = c.base, n = u.v.length, i0 = c.i0;
+        var d0 = ctx.day[i0], d1 = ctx.day[i0 + n - 1], span = Math.max(1, d1 - d0);
+        var maxV = 0; for (var k = 0; k < n; k++) { if (u.v[k] > maxV) maxV = u.v[k]; if (b.v[k] > maxV) maxV = b.v[k]; }
+        var nt = niceTop(Math.max(maxV, 100) * 1.02), step = nt.step, top = nt.top;
+        function X(kk) { return L + (ctx.day[i0 + kk] - d0) / span * (W - L - R); }
+        function Y(v) { return T + (1 - v / top) * (H - T - B); }
+        function path(arr) {
+          var st = Math.max(1, Math.floor(n / 300)), s = '';
+          for (var kk = 0; kk < n; kk += st) s += (s ? 'L' : 'M') + X(kk).toFixed(1) + ' ' + Y(arr[kk]).toFixed(1);
+          if ((n - 1) % st !== 0) s += 'L' + X(n - 1).toFixed(1) + ' ' + Y(arr[n - 1]).toFixed(1);
+          return s;
+        }
+        var g = '';
+        for (var t = 0; t <= top + 1e-9; t += step) {
+          g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(t).toFixed(1) + '" y2="' + Y(t).toFixed(1) + '" stroke="#e5e7eb" stroke-width="1"/>' +
+            '<text x="' + (L - 6) + '" y="' + (Y(t) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6b7280">' + Math.round(t) + '</text>';
+        }
+        var y0 = ctx.year[i0], y1 = ctx.year[i0 + n - 1], every = (y1 - y0) > 7 ? 2 : 1;
+        for (var y = y0; y <= y1; y += every) {
+          var xd = Math.max(d0, Date.UTC(y, 0, 1) / 86400000), x = L + (xd - d0) / span * (W - L - R);
+          g += '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (y === y0 ? 'start' : 'middle') + '" font-size="11" fill="#6b7280">' + y + '</text>';
+        }
+        var eu = u.v[n - 1], eb = b.v[n - 1], yu = Y(eu), yb = Y(eb);
+        if (Math.abs(yu - yb) < 13) { if (yu <= yb) { yu -= 6; yb += 6; } else { yu += 6; yb -= 6; } }
+        g += '<path d="' + path(b.v) + '" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="5 3"/>' +
+          '<path d="' + path(u.v) + '" fill="none" stroke="#C5611A" stroke-width="2"/>' +
+          '<text x="' + (W - R + 4) + '" y="' + (yu + 4).toFixed(1) + '" font-size="11" font-weight="600" fill="#C5611A">' + Math.round(eu) + '</text>' +
+          '<text x="' + (W - R + 4) + '" y="' + (yb + 4).toFixed(1) + '" font-size="11" fill="#475569">' + Math.round(eb) + '</text>';
+        box.innerHTML = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="起點 100 的資產走勢：你的組合最後 ' + Math.round(eu) + '，全 VT 基準最後 ' + Math.round(eb) + '">' + g + '</svg>' +
+          '<div class="flex flex-wrap gap-4 text-xs text-gray-600 mt-1"><span><span style="color:#C5611A">━</span> 你的組合</span><span><span style="color:#475569">╍</span> 全 VT 基準</span></div>';
+      }
+
+      // ---------- 主流程 ----------
+      function setStatus(html, show) {
+        var s = $('statusBox'); s.innerHTML = html; s.classList.toggle('hidden', !show);
+      }
+      function render() {
+        var n = normalizeInputs(readRaw());
+        renderSum(n);
+        var matched = matchPreset(n);
+        FIELD_IDS.forEach(function (id) {
+          var el = $(id), on = n.badIds.indexOf(id) >= 0;
+          el.classList.toggle('border-red-400', on); el.classList.toggle('bg-red-50', on); el.classList.toggle('border-gray-300', !on);
+        });
+        document.querySelectorAll('.presetBtn').forEach(function (btn) {
+          var on = btn.getAttribute('data-preset') === matched;
+          btn.classList.toggle('border-brand', on); btn.classList.toggle('bg-brand/10', on); btn.classList.toggle('text-brand-dark', on); btn.classList.toggle('font-semibold', on);
+          btn.classList.toggle('border-gray-300', !on); btn.classList.toggle('text-gray-700', !on);
+        });
+        var wrap = $('resultsWrap');
+        if (loadState === 'loading') { wrap.classList.add('hidden'); setStatus('價格資料載入中…', true); return; }
+        if (loadState === 'fail') { wrap.classList.add('hidden'); return; }
+        if (!n.ok) {
+          wrap.classList.add('hidden'); lastCompute = null; window.__ep67.last = null;
+          setStatus(n.errors.length ? '請先修正上面標紅的欄位，結果才會出現。' : '上面的比例合計要剛好 100%，結果才會出現（工具不會自己改你的數字）。', true);
+          return;
+        }
+        var c = compute(ctx, n);
+        lastCompute = c; window.__ep67.last = { p: n, c: c };
+        setStatus('', false); wrap.classList.remove('hidden');
+        renderResults(n, c);
+      }
+
+      function showLoadFail(msg) {
+        loadState = 'fail'; $('resultsWrap').classList.add('hidden');
+        setStatus('<p class="font-medium text-red-700 mb-1">價格資料載入失敗</p><p class="mb-2">可能是網路暫時不通，或檔案暫時無法讀取（' + esc(msg) + '）。你填的比例都還在，請重新載入資料再試；如果還是不行，稍後再回來看。</p><button type="button" id="retryBtn" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">重新載入資料</button>', true);
+        $('retryBtn').addEventListener('click', loadData);
+      }
+      function loadData() {
+        loadState = 'loading'; setStatus('價格資料載入中…', true);
+        fetch(DATA_URL).then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        }).then(function (d) {
+          var err = validateData(d);
+          if (err) throw new Error(err);
+          ctx = buildCtx(d); window.__ep67.ctx = ctx; loadState = 'ok'; render();
+        }).catch(function (e) { showLoadFail(e instanceof SyntaxError ? '資料檔內容格式不對' : (e && e.message ? e.message : '未知錯誤')); });
+      }
+
+      // ---------- 事件 ----------
+      document.querySelectorAll('.presetBtn').forEach(function (btn) {
+        btn.addEventListener('click', function () { fillPreset(btn.getAttribute('data-preset')); render(); });
+      });
+      $('resetBtn').addEventListener('click', function () { resetAll(); render(); });
+      KEYS.forEach(function (k) { $('w-' + k).addEventListener('input', render); });
+      $('w-cash').addEventListener('input', render);
+      $('rate').addEventListener('input', render);
+      $('rebal').addEventListener('change', render);
+      $('startYear').addEventListener('change', render);
+      var rz = null;
+      window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (lastCompute && loadState === 'ok') drawChart(lastCompute); }, 120); });
+
+      resetAll();
+      loadData();
+    })();
+  </script>
+</BaseLayout>
