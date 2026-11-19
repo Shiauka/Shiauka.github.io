@@ -673,7 +673,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         var am = {}; c.assets.forEach(function (a) { am[a.key] = a.m.mdd; });
         var shallow = t10(c.user.m.mdd) > t10(am.BTC) && t10(c.user.m.mdd) > t10(am['00631L']);
         var risky = p.weights.BTC + p.weights['00631L'];
-        $('assetNote').textContent = (shallow
+        $('assetNote').textContent = (risky <= 1e-9
+          ? '你的組合沒有放比特幣和 00631L，上表是它們單獨持有時的最大跌幅，只供參考。'
+          : shallow
           ? '你的組合最大跌幅（' + pct(c.user.m.mdd) + '）比比特幣（' + pct(am.BTC) + '）、00631L（' + pct(am['00631L']) + '）淺，是因為組合裡有現金與其他標的，這兩檔的占比只有 ' + fmtW(risky) + '；這不代表這兩檔本身不會再跌到那麼深。'
           : '你的組合最大跌幅是 ' + pct(c.user.m.mdd) + '，這兩檔占你組合的 ' + fmtW(risky) + '。比特幣與 00631L 單獨持有時的最大跌幅在上表，組合的跌幅取決於你給它們多少比例。') +
           '00631L 是兩倍槓桿型。';
