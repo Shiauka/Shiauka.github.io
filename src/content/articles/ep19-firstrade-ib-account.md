@@ -17,7 +17,7 @@ draft: false
 
 ## 兩家券商怎麼選：第一證券 vs IB
 
-台灣人開海外券商，目前最值得認真考慮的是**第一證券（Firstrade）**和 **Interactive Brokers（IB）**。
+台灣人開海外券商，目前最值得認真考慮的是<strong>第一證券（Firstrade）</strong>和 **Interactive Brokers（IB）**。
 
 先給結論：**第一次接觸、想要中文介面和中文客服，選第一證券；想要最完整的操作彈性、未來可能買愛爾蘭籍 ETF，選 IB。**
 
