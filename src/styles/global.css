@@ -108,6 +108,19 @@ body {
   background-color: #fafafa;
 }
 
+/* 手機：表格太寬時可左右捲動，不要把最右欄切掉 */
+@media (max-width: 640px) {
+  .article-body table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .article-body td {
+    min-width: 5.5rem;
+  }
+}
+
 /* ── 引用區塊 ── */
 .article-body blockquote {
   border-left: 4px solid #E87930;
@@ -156,11 +169,19 @@ body {
   margin: 2.5rem 0;
 }
 
-/* ── 清單 ── */
+/* ── 清單（Tailwind preflight 會清掉 list-style，這裡補回）── */
 .article-body ul,
 .article-body ol {
   padding-left: 1.5rem;
   margin-bottom: 1.25rem;
+}
+
+.article-body ul {
+  list-style: disc;
+}
+
+.article-body ol {
+  list-style: decimal;
 }
 
 .article-body li {
