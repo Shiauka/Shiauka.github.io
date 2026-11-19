@@ -252,15 +252,15 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     <!-- How to read -->
     <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
       <p class="font-semibold text-gray-900">📌 怎麼讀</p>
-      <p><strong>年化報酬：</strong>整段期間的年複合報酬（幾何平均），含配息再投入、含現金利息。<strong>年化波動：</strong>日報酬標準差乘上 √252，數字越大，日常起伏越大。</p>
+      <p><strong>年化報酬：</strong>整段期間的年複合報酬（幾何平均），含配息再投入、含現金利息。<strong>月報酬年化波動：</strong>把每個日曆月最後一個交易日的組合價值串起來，相鄰月底的月報酬標準差乘上 √12，數字越大，月與月之間的起伏越大。</p>
       <p><strong>最大跌幅與回本天數：</strong>最大跌幅是任何高點到之後最低點的最大跌幅，並列出高點日與最低日；回本天數是從那個高點日起算，到組合價值第一次回到高點值的日曆天數。</p>
       <p><strong>終值：</strong>起點 100 萬，到 2026-11-17 變成多少萬。這是「假如十一年前就用這個比例、照你選的再平衡規則」的結果，沒有扣稅費。</p>
       <p><strong>怎麼看差在哪：</strong>先看逐年報酬，找出差距集中在哪幾年；再看單一標的表，找出是哪幾個標的把差距拉開；最後看事件窗口，比較同一次下跌兩邊各跌多少。用預設按鈕可以一步步拆：80% 全 VT → 不加料（只換成核心＋全球分散）→ 完整四桶（再加攻擊與另類）。</p>
       <p><strong>對照例子（預設設定：現金 20%、年息 1.5%、每年再平衡、2016 起算）：</strong>
-        完整四桶 年化 19.4%、波動 12.7%、最大跌幅 −23.3%、回本 145 天、終值 686 萬；
-        80% 全 VT 10.0%、13.5%、−27.1%、196 天、281 萬；
-        不加料 13.1%、11.2%、−24.2%、189 天、381 萬；
-        VT＋小衛星 11.4%、11.0%、−23.3%、167 天、324 萬。
+        完整四桶 年化 19.4%、月報酬年化波動 13.1%、最大跌幅 −23.3%、回本 145 天、終值 686 萬；
+        80% 全 VT 10.0%、10.5%、−27.1%、196 天、281 萬；
+        不加料 13.1%、11.1%、−24.2%、189 天、381 萬；
+        VT＋小衛星 11.4%、9.6%、−23.3%、167 天、324 萬。
         同樣四組，把再平衡改成「偏離 5 個百分點才調回」：完整四桶 年化 17.8%、最大跌幅 −24.2%（調回 8 次）；80% 全 VT 10.3%、−27.4%（調回 5 次）；不加料 13.1%、−24.7%；VT＋小衛星 11.8%、−23.6%。
         這是同一段「很強的十年」裡的結果，換一段期間（試試從 2020 或 2024 起算）會很不一樣。</p>
     </div>
@@ -271,7 +271,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <p class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-950"><strong>這是在用後照鏡開車：過去最好的比例，不會是未來最好的比例。</strong>這個工具是拿來看「差在哪」，不是拿來找最佳比例。</p>
       <p><strong>資料怎麼建：</strong>Yahoo Finance 含配息還原的每日收盤價（2026-11-19 抓取，到 2026-11-17）：VT、VOO、QQQ、VEA、VWO、IAU、BTC-USD、0050.TW、00631L.TW。美元計價的標的用 Yahoo 的 TWD=X 匯率換成台幣；TWD=X 有單日跳動的雜訊，所以先取置中 5 日中位數再換算。交易日取 VT 與 0050 的交易日聯集，其中一邊休市的那天，沿用前一個交易日的價格。</p>
       <p><strong>比特幣用 BTC-USD 代表：</strong>用的是比特幣本身的價格，沒有扣費用，也沒有反映交易所與保管風險；比特幣 ETF 2024 年才上市，沒有十年以上的資料。<strong>00631L 從 2016-01-04 起算</strong>：2015 年前期的資料有分割調整的斷點與異常日，和 0050 的兩倍日報酬交叉驗證，2015 年 9 月起才吻合。</p>
-      <p><strong>匯率濾波的影響：</strong>TWD=X 的單日雜訊在 2016 年特別多，置中 5 日中位數會把雜訊壓掉，也會壓掉一點真實的單日匯率波動，所以美元資產的年化波動會略低於不濾波的算法（以全 VT 基準為例，約低 1 個百分點）；年化報酬與終值幾乎不受影響。</p>
+      <p><strong>為什麼波動用月報酬：</strong>跨市場組合有收盤時間差（台股早於美股）、休市日沿用前一日價格，TWD=X 的單日雜訊又先經過 5 日中位數過濾，這些會扭曲日資料裡股票與匯率之間的相關性，讓日報酬算出來的波動失真（可能偏高，也可能偏低），不同組合的波動順序甚至會翻轉。因此「年化波動」改用月報酬：每個日曆月最後一個交易日的組合價值，相鄰月底的月報酬取母體標準差（與先前日報酬的算法一致），乘上 √12；第一個月底之前的不算在內，最後一個不完整的月份（11 月只到 11-17）算一筆。月報酬的筆數比日資料少很多（從 2016 年起算 130 筆，從 2024 年起算只有 34 筆），起算年越晚、這個數字越不穩，一位小數只能當參考。最大跌幅、回本天數、事件窗口仍用日資料，不受影響。年化報酬與終值幾乎不受匯率濾波影響。</p>
       <p><strong>回測怎麼算：</strong>起點總資產 100，各標的與現金照你填的比例配置；現金按日曆天數以固定年息複利計息，兩邊相同；不計交易成本、稅、匯差與價差，ETF 內扣的費用已反映在還原價裡。</p>
       <p><strong>三種再平衡規則：</strong>回測預設的規則是「每年第一個交易日硬調回目標」，不管偏離多少，每年第一個交易日把所有標的與現金調回目標比例。「不再平衡」只在起點配置一次，之後各部位自己漲跌。「偏離 5 個百分點才調回」每個交易日收盤檢查：核心（VOO＋0050）、攻擊（QQQ＋00631L）、全球分散（VEA＋VWO）、另類（IAU＋BTC）四個桶與現金，只要任一個占總資產的比例偏離目標 5 個百分點以上，當天收盤就把整個組合調回目標。VT 不屬於這四個桶，不單獨檢查：只有 VT 與現金時，兩者互為補數，現金偏離 5 個百分點就等於 VT 偏離 5 個百分點；但 VT 加上其他標的（例如「VT＋小衛星」）時，VT 的占比可能偏離目標超過 5 個百分點而不觸發調回。表格裡的「調回目標次數」不含起點那一次配置。</p>
       <p><strong>起算年：</strong>選 2020 就從 2020 年第一個交易日開始、起點價值 100；如果事件窗口的起點早於起算日（例如從 2021 年起算，看不到 2020 年的窗口；從 2022 年起算，連 2022 年的窗口也看不到，因為它從 2021-11-08 開始），那一列顯示「—」。逐年報酬的第一年從起算日當天收盤算起，2026 年是到 11-17 的年初至今。</p>
@@ -386,12 +386,12 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       return '';
     }
     function buildCtx(data) {
-      var n = data.dates.length, day = new Float64Array(n), year = new Int16Array(n);
+      var n = data.dates.length, day = new Float64Array(n), year = new Int16Array(n), ym = new Int32Array(n);
       for (var i = 0; i < n; i++) {
         var p = data.dates[i].split('-');
-        day[i] = Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; year[i] = +p[0];
+        day[i] = Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; year[i] = +p[0]; ym[i] = +p[0] * 12 + (+p[1] - 1);
       }
-      return { dates: data.dates, day: day, year: year, px: data.px, n: n };
+      return { dates: data.dates, day: day, year: year, ym: ym, px: data.px, n: n };
     }
     function startIndex(ctx, startYear) { for (var i = 0; i < ctx.n; i++) if (ctx.year[i] >= startYear) return i; return -1; }
 
@@ -435,7 +435,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       return { i0: i0, v: v, nReb: nReb };
     }
 
-    // 與 ep67_backtest.metrics 同算法。v 為與 ctx.dates[i0..] 對齊的價值序列
+    // 與 ep67_backtest.metrics 同算法，但「年化波動」改用月報酬：每個日曆月最後一個交易日的組合價值，
+    // 相鄰月底之間的月報酬（第一個月底之前的不算），取母體標準差 × √12。日報酬版本另存為 volDaily（頁面不顯示）。
+    // v 為與 ctx.dates[i0..] 對齊的價值序列
     function metrics(ctx, i0, v) {
       var n = v.length, d0 = ctx.day[i0], d1 = ctx.day[i0 + n - 1];
       var yrs = (d1 - d0) / 365.25;
@@ -445,7 +447,17 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       for (k = 1; k < n; k++) { rets[k - 1] = v[k] / v[k - 1] - 1; mean += rets[k - 1]; }
       mean /= m;
       var ss = 0; for (k = 0; k < m; k++) ss += (rets[k] - mean) * (rets[k] - mean);
-      var vol = Math.sqrt(ss / m) * Math.sqrt(252);
+      var volDaily = Math.sqrt(ss / m) * Math.sqrt(252);
+      var me = [];                                    // 每個日曆月最後一個交易日（相對 v 的位置）
+      for (k = 0; k < n; k++) if (k === n - 1 || ctx.ym[i0 + k + 1] !== ctx.ym[i0 + k]) me.push(k);
+      var mm = me.length - 1, vol = NaN;
+      if (mm >= 2) {
+        var mr = new Float64Array(mm), mmean = 0;
+        for (k = 1; k < me.length; k++) { mr[k - 1] = v[me[k]] / v[me[k - 1]] - 1; mmean += mr[k - 1]; }
+        mmean /= mm;
+        var ss2 = 0; for (k = 0; k < mm; k++) ss2 += (mr[k] - mmean) * (mr[k] - mmean);
+        vol = Math.sqrt(ss2 / mm) * Math.sqrt(12);
+      }
       var peak = v[0], pk = 0, mdd = 0, mddPk = 0, mddLo = 0;
       for (k = 0; k < n; k++) {
         if (v[k] > peak) { peak = v[k]; pk = k; }
@@ -454,7 +466,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       }
       var pkV = v[mddPk], rec = -1;
       for (k = mddLo + 1; k < n; k++) if (v[k] >= pkV) { rec = k; break; }
-      return { final: v[n - 1], cagr: cagr, vol: vol, mdd: mdd, years: yrs,
+      return { final: v[n - 1], cagr: cagr, vol: vol, volDaily: volDaily, nMonthRets: mm, mdd: mdd, years: yrs,
         pkDate: ctx.dates[i0 + mddPk], loDate: ctx.dates[i0 + mddLo],
         recDate: rec >= 0 ? ctx.dates[i0 + rec] : null,
         recDays: rec >= 0 ? ctx.day[i0 + rec] - ctx.day[i0 + mddPk] : null,
@@ -610,12 +622,12 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         var fu = Math.round(um.final), fb = Math.round(bm.final), fd = fu - fb;
         $('metricsBody').innerHTML =
           row('年化報酬', pct(um.cagr), pct(bm.cagr), diffPts(um.cagr, bm.cagr, '高', '低'), 'cagr') +
-          row('年化波動', pct(um.vol), pct(bm.vol), diffPts(um.vol, bm.vol, '高', '低'), 'vol') +
+          row('月報酬年化波動', isFinite(um.vol) ? pct(um.vol) : '—', isFinite(bm.vol) ? pct(bm.vol) : '—', (isFinite(um.vol) && isFinite(bm.vol)) ? diffPts(um.vol, bm.vol, '高', '低') : '—', 'vol') +
           row('最大跌幅', ddCell(um), ddCell(bm), (um.noDrop || bm.noDrop) ? '—' : diffPts(um.mdd, bm.mdd, '少跌', '多跌'), 'mdd') +
           row('最大跌幅回本天數', recCell(um), recCell(bm), recDiff, 'rec') +
           row('起點 100 萬變成', fu.toLocaleString('en-US') + ' 萬', fb.toLocaleString('en-US') + ' 萬', fd === 0 ? '相同' : (fd > 0 ? '多 ' : '少 ') + Math.abs(fd).toLocaleString('en-US') + ' 萬', 'final') +
           row('調回目標次數（不含起點配置）', u.nReb + ' 次', b.nReb + ' 次', u.nReb === b.nReb ? '相同' : (u.nReb > b.nReb ? '多 ' : '少 ') + Math.abs(u.nReb - b.nReb) + ' 次', 'nreb');
-        $('metricsNote').textContent = '年化波動＝日報酬標準差 × √252；回本天數是從高點日起算的日曆天數；終值是 ' + startDate + ' 起點 100 萬、到 ' + endDate + ' 的結果（不含稅費）。' + (p.rebal === 'yearly' ? '每年第一個交易日調回目標比例。' : p.rebal === 'band' ? '偏離 5 個百分點才調回：核心、攻擊、全球分散、另類四個桶與現金，任一個占總資產的比例偏離目標 5 個百分點以上，當天收盤整個組合調回目標。' : '不再平衡，起點配置之後各部位自己漲跌。');
+        $('metricsNote').textContent = '月報酬年化波動＝每個日曆月最後一個交易日的組合價值，相鄰月底的月報酬標準差 × √12；最大跌幅與回本天數用日資料，回本天數是從高點日起算的日曆天數；終值是 ' + startDate + ' 起點 100 萬、到 ' + endDate + ' 的結果（不含稅費）。' + (p.rebal === 'yearly' ? '每年第一個交易日調回目標比例。' : p.rebal === 'band' ? '偏離 5 個百分點才調回：核心、攻擊、全球分散、另類四個桶與現金，任一個占總資產的比例偏離目標 5 個百分點以上，當天收盤整個組合調回目標。' : '不再平衡，起點配置之後各部位自己漲跌。');
 
         // 逐年
         var yb = '';
