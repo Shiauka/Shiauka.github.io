@@ -1,0 +1,593 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="真實時薪計算機：兩份 offer，多出來的時間每小時值多少？"
+  description="填入兩份工作的年收入、每週工時、待命、通勤，算出把時間全部算進去之後的真實時薪（稅前、稅後），以及多賺的那筆錢除以多花的時間，那段時間每小時值多少；也算出每週最多能多花幾個小時、高收入那份要開到多少才追平。對應 EP68。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP68</p>
+      <h1 class="text-3xl font-bold mb-3">真實時薪計算機</h1>
+      <p class="text-gray-600 leading-relaxed">
+        offer 上只寫了年薪，沒寫你要花多少時間去換。把<strong>工時、下班後的待命、通勤</strong>一層一層加回去，看兩份工作的真實時薪；
+        再算一個更重要的數字：<strong>收入高的那份多給的錢，除以它多要的時間，那段時間每小時值多少</strong>。
+        預設值是影片裡的假設例子，請換成你自己的數字。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="font-semibold text-gray-900">兩份工作的數字</h2>
+        <button id="presetBtn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">回到預設值（影片例子）</button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="rounded-xl border border-gray-200 bg-white p-4 space-y-3" id="boxA">
+          <label class="block">
+            <span class="text-sm text-gray-600">名稱</span>
+            <input id="A_name" type="text" value="工作 A" maxlength="20"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">一年的全部收入（元，含年終；分紅用保守年份；有領加班費也加進來；可填「150萬」）</span>
+            <input id="A_pay" type="text" inputmode="decimal" value="1,500,000"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">每週真正的工時（小時，扣掉午休；下班後回訊息、在家開電腦也算）</span>
+            <input id="A_work" type="text" inputmode="decimal" value="60"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">待命：平均每週被叫起來、動手處理幾小時</span>
+            <input id="A_oncall" type="text" inputmode="decimal" value="3"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">待命：手機開著、沒被叫的每週小時</span>
+              <input id="A_idle" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">要算幾 %（0＝不算）</span>
+              <input id="A_idleRatio" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">通勤單程（分鐘）</span>
+              <input id="A_commute" type="text" inputmode="decimal" value="60"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">每週進公司幾天（有在家上班就扣掉）</span>
+              <input id="A_days" type="text" inputmode="decimal" value="5"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">每月通勤車錢（元）</span>
+              <input id="A_commuteCost" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">因為這份工作多出的每月花費（元，可不填）</span>
+              <input id="A_otherCost" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <label class="block taxCustom hidden">
+            <span class="text-sm text-gray-600">這份收入一年要繳的綜所稅（元）</span>
+            <input id="A_tax" type="text" inputmode="decimal" value="81,620"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-4 space-y-3" id="boxB">
+          <label class="block">
+            <span class="text-sm text-gray-600">名稱</span>
+            <input id="B_name" type="text" value="工作 B" maxlength="20"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">一年的全部收入（元，含年終；分紅用保守年份；有領加班費也加進來）</span>
+            <input id="B_pay" type="text" inputmode="decimal" value="1,100,000"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">每週真正的工時（小時，扣掉午休）</span>
+            <input id="B_work" type="text" inputmode="decimal" value="45"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">待命：平均每週被叫起來、動手處理幾小時</span>
+            <input id="B_oncall" type="text" inputmode="decimal" value="0"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">待命：手機開著、沒被叫的每週小時</span>
+              <input id="B_idle" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">要算幾 %（0＝不算）</span>
+              <input id="B_idleRatio" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">通勤單程（分鐘）</span>
+              <input id="B_commute" type="text" inputmode="decimal" value="20"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">每週進公司幾天（有在家上班就扣掉）</span>
+              <input id="B_days" type="text" inputmode="decimal" value="5"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="text-sm text-gray-600">每月通勤車錢（元）</span>
+              <input id="B_commuteCost" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-gray-600">因為這份工作多出的每月花費（元，可不填）</span>
+              <input id="B_otherCost" type="text" inputmode="decimal" value="0"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+            </label>
+          </div>
+          <label class="block taxCustom hidden">
+            <span class="text-sm text-gray-600">這份收入一年要繳的綜所稅（元）</span>
+            <input id="B_tax" type="text" inputmode="decimal" value="33,620"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          </label>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4 mt-5">
+        <label class="block">
+          <span class="text-sm text-gray-600">一年上班幾週（預設 47；特休多的人可以調低）</span>
+          <input id="weeks" type="text" inputmode="decimal" value="47"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">稅怎麼算</span>
+          <select id="taxMode" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="single" selected>單身、只有薪資、標準扣除（115 年度，自動算）</option>
+            <option value="custom">我自己填兩份的年稅額（已婚合併、有其他所得、列舉扣除）</option>
+            <option value="rate">我只知道邊際稅率（只算多出來那段的稅後）</option>
+          </select>
+        </label>
+        <label class="block hidden" id="rateWrap">
+          <span class="text-sm text-gray-600">你的邊際稅率</span>
+          <select id="rate" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none bg-white">
+            <option value="0">0%</option>
+            <option value="5">5%</option>
+            <option value="12" selected>12%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+            <option value="40">40%</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button type="button" data-scn="video" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">影片例子</button>
+        <button type="button" data-scn="near" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">A 不用待命、通勤也 20 分鐘</button>
+        <button type="button" data-scn="a53" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">A 每週只做 52 小時</button>
+        <button type="button" data-scn="b50" class="scnBtn text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">B 其實每週也做 50 小時</button>
+      </div>
+
+      <p id="notice" class="text-xs text-amber-700 mt-3 hidden"></p>
+      <p class="text-xs text-gray-400 mt-3">假設：每週總時數 ＝ 工時 ＋ 待命處理時間 ＋ 沒被叫的待命 × 你填的成數 ＋ 通勤（單程 × 2 × 每週進公司天數）。一年 ＝ 每週 × 上班週數。車錢與其他花費每月 × 12，從收入扣掉。預設的 47 週 ＝ 2026 年平日 261 天，扣掉國定假日 16 天、特休 10 天，剩 235 天。勞健保、勞退、二代健保補充保費沒算。</p>
+    </div>
+
+    <!-- Cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Conclusion -->
+    <div id="conclusion" class="rounded-2xl border border-brand bg-brand/5 p-5 mb-6 text-sm leading-relaxed"></div>
+
+    <!-- Layers -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <p class="font-semibold text-gray-900 mb-1">一層一層把時間加回去：每小時多少（稅前）</p>
+      <p class="text-xs text-gray-500 mb-3">帳面＝假設每週 40 小時；之後每一列都多算一種時間。</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 sm:pr-4 font-medium">算進去的時間</th>
+              <th class="py-2 px-2 sm:px-4 font-medium text-right" id="thA">工作 A</th>
+              <th class="py-2 pl-2 sm:pl-4 font-medium text-right" id="thB">工作 B</th>
+            </tr>
+          </thead>
+          <tbody id="layerBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <details class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm">
+      <summary class="font-semibold text-gray-900 cursor-pointer">明細：時數、稅、現金成本</summary>
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-2 pr-2 sm:pr-4 font-medium">項目</th>
+              <th class="py-2 px-2 sm:px-4 font-medium text-right" id="thA2">工作 A</th>
+              <th class="py-2 pl-2 sm:pl-4 font-medium text-right" id="thB2">工作 B</th>
+            </tr>
+          </thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- How to read -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">📌 怎麼讀</p>
+      <p><strong>真實時薪：</strong>一年的收入（扣掉車錢與因工作多出的花費），除以一年所有花在這份工作上的時間。兩份比下來差距通常比 offer 上看起來小很多，幾個小時的工時或一段通勤就能決定誰贏。</p>
+      <p><strong>多出來的時間每小時值多少：</strong>收入高的那份，等於先拿到另一份的收入，再多花一些時間多賺一筆。多賺的錢 ÷ 多花的時間，就是那段時間的價錢。高收入那份的真實時薪一輸，這個數字一定比兩份都低；重點是低多少，以及你願不願意用這個價錢賣掉那些時間。</p>
+      <p><strong>每週最多能多花幾小時：</strong>多賺的錢，換算成時數少的那份的真實時薪，大概等於幾個小時。高收入那份每週多花的時間超過這個數，它的真實時薪就輸。</p>
+      <p><strong>對照影片：</strong>預設值（A 150 萬、每週 60 小時、待命 3 小時、通勤單程 60 分鐘；B 110 萬、45 小時、不待命、通勤 20 分鐘；47 週）：帳面 798／585 元，真實時薪 437／484 元；一年多 1,159 小時，多出來的時間每小時 345 元，稅後約 304 元；每週多花超過約 17.6 小時就輸；A 要開到約 166 萬才追平。</p>
+    </div>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 說明</p>
+      <p><strong>待命算不算工作時間：</strong>勞動部講過的原則，是看那段時間你能不能自由利用；受雇主命令、隨時等著上工就算，能自由利用就不算。人在家、手機開著的待命常常吵不清楚，所以預設只算真的被叫起來處理的時間（對有待命那份最有利），沒被叫的時間要不要算、算幾成，由你決定。</p>
+      <p><strong>加班費與補休：</strong>有領加班費的話，把加班費加進年收入。影片的例子假設多做的時間沒有另外領錢；工作 A 一年只要多領約 16 萬，真實時薪就追平了。加班費的基準是每個月固定領的全部工資（本薪加伙食津貼、職務加給這類每月都有的錢）÷ 30 ÷ 8，年終、紅利這類非經常性給與不算，只拿本薪來算是違法的。補休是勞工的選擇：要你自己選、雇主同意才換成補休，公司不能規定只能補休；有補休的話，休掉的那些時間就不要算在工時裡。</p>
+      <p><strong>責任制：</strong>不是公司說了就算，要是勞動部核定公告的工作，有書面約定，並報地方主管機關核備（勞基法第 84-1 條）。資訊服務業的研發、維運工程師在核定名單上，但一樣要書面約定、報地方政府核備，核備之後工時也還是有上限。</p>
+      <p><strong>工時從哪裡來：</strong>打卡紀錄只是下限，下班後回訊息、在家開電腦的時間也要加上。出勤紀錄依勞基法第 30 條要記到分鐘，你申請時公司不能拒絕。</p>
+      <p><strong>過勞的參考線：</strong>勞動部的過勞認定參考指引，看的是發病前二到六個月，平均每個月加班有沒有超過 80 小時；它的算法是以 30 天為一個月、每月 176 小時以外才算加班。每週做 60 小時，照這個算法大約是每月 81 小時，剛好超過 80 那條線。另外，勞基法的加班上限是每月 46 小時，經工會或勞資會議同意最多 54 小時；每週 60 小時，一個月的延長工時大約 86 小時，兩者都超過。</p>
+      <p><strong>稅：</strong>「單身自動」用 115 年度（2026 年所得、2027 年報稅）的免稅額 101,000、標準扣除額 136,000、薪資所得特別扣除額 227,000，稅率 5%／12%／20%／30%／40%。已婚的人，薪資可以選擇分開計稅，多半仍落在 12%，可以改用「邊際稅率 12%」；合併申報、有其他所得或列舉扣除的人，請改成自己填稅額，或只填邊際稅率。</p>
+      <p><strong>沒算進去的：</strong>勞健保與二代健保補充保費、雇主提繳的勞退、股票與員工酬勞、經歷對下一份薪水的影響、健康與家庭。這些不在數字裡，但可能比數字更重要。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採簡化假設，結果會隨你填的數字改變，不構成投資、稅務或法律建議；勞動條件與稅額請以實際契約、薪資單與主管機關公告為準。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/articles/ep68-real-hourly-wage" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">讀 EP68 完整文章 →</a>
+      <a href="/articles/ep47-income-redundancy" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">副業該追求什麼（EP47）</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== 純函式 BEGIN（不碰 DOM；獨立驗證可整段抽出來跑）=====
+    var JOB_FIELDS = ['pay', 'work', 'oncall', 'idle', 'idleRatio', 'commute', 'days', 'commuteCost', 'otherCost', 'tax'];
+    var LIM = {
+      pay: { lo: 0, hi: 1e9, name: '年收入', money: true },
+      work: { lo: 0, hi: 168, name: '每週工時' },
+      oncall: { lo: 0, hi: 168, name: '待命處理時間' },
+      idle: { lo: 0, hi: 168, name: '沒被叫的待命時間' },
+      idleRatio: { lo: 0, hi: 100, name: '待命折算成數' },
+      commute: { lo: 0, hi: 600, name: '通勤單程分鐘' },
+      days: { lo: 0, hi: 7, name: '每週進公司天數' },
+      commuteCost: { lo: 0, hi: 1e7, name: '每月車錢', money: true },
+      otherCost: { lo: 0, hi: 1e7, name: '每月其他花費', money: true },
+      tax: { lo: 0, hi: 1e9, name: '年稅額', money: true },
+      weeks: { lo: 1, hi: 52, name: '一年上班週數' },
+    };
+    var DEFAULTS = {
+      A: { name: '工作 A', pay: 1500000, work: 60, oncall: 3, idle: 0, idleRatio: 0, commute: 60, days: 5, commuteCost: 0, otherCost: 0, tax: 81620 },
+      B: { name: '工作 B', pay: 1100000, work: 45, oncall: 0, idle: 0, idleRatio: 0, commute: 20, days: 5, commuteCost: 0, otherCost: 0, tax: 33620 },
+      weeks: 47, taxMode: 'single', rate: 12,
+    };
+    var STD_WEEK = 40;
+    // 115 年度綜所稅（單身、只有薪資、標準扣除）
+    var TAX115 = { exempt: 101000, stdDed: 136000, salaryDed: 227000,
+      brackets: [[610000, 0.05, 0], [1380000, 0.12, 42700], [2770000, 0.20, 153100], [5190000, 0.30, 430100], [Infinity, 0.40, 949100]] };
+
+    function parseMoney(s) {
+      var str = String(s === undefined || s === null ? '' : s).normalize('NFKC').replace(/NT\$|\$|,|，|、|\s|元/gi, '');
+      var sign = 1;
+      if (/^[-−]/.test(str)) { sign = -1; str = str.slice(1); }
+      if (str === '') return NaN;
+      var mm = str.match(/^(?:(\d+(?:\.\d+)?)億)?(?:(\d+(?:\.\d+)?)萬)?(\d+(?:\.\d+)?)?$/);
+      if (!mm || (mm[1] === undefined && mm[2] === undefined && mm[3] === undefined)) return NaN;
+      var v = (mm[1] ? parseFloat(mm[1]) * 1e8 : 0) + (mm[2] ? parseFloat(mm[2]) * 1e4 : 0) + (mm[3] ? parseFloat(mm[3]) : 0);
+      return isFinite(v) ? sign * v : NaN;
+    }
+    function parseNum(s) {
+      var str = String(s === undefined || s === null ? '' : s).normalize('NFKC').replace(/[%％,，\s]/g, '').replace(/^−/, '-');
+      if (str === '' || !/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(str)) return NaN;
+      var v = parseFloat(str);
+      return isFinite(v) ? v : NaN;
+    }
+    function roundTo(v, d) { var f = Math.pow(10, d); return Math.round(v * f + (v >= 0 ? 1e-9 : -1e-9)) / f; }
+
+    // 115 年度單身、只有薪資、標準扣除的綜所稅
+    function incomeTax115(pay) {
+      var salaryDed = Math.min(Math.max(pay, 0), TAX115.salaryDed);
+      var net = Math.max(0, pay - salaryDed - TAX115.exempt - TAX115.stdDed);
+      for (var i = 0; i < TAX115.brackets.length; i++) {
+        var b = TAX115.brackets[i];
+        if (net <= b[0]) return { tax: Math.max(0, net * b[1] - b[2]), net: net, rate: b[1] };
+      }
+    }
+
+    // raw: { A: {欄位: 字串}, B: {...}, weeks, taxMode, rate }；回傳 { p, msgs, changed }
+    function normalizeInputs(raw) {
+      var msgs = [], changed = { A: {}, B: {} }, p = { A: {}, B: {} };
+      ['A', 'B'].forEach(function (j) {
+        var r = raw[j] || {};
+        var nm = String(r.name === undefined || r.name === null ? '' : r.name).trim();
+        p[j].name = nm === '' ? DEFAULTS[j].name : nm.slice(0, 20);
+        JOB_FIELDS.forEach(function (k) {
+          var L = LIM[k], def = DEFAULTS[j][k];
+          var s = r[k];
+          var v = L.money ? parseMoney(s) : parseNum(s);
+          var label = p[j].name + L.name;
+          if (!isFinite(v)) {
+            msgs.push(label + (String(s === undefined || s === null ? '' : s).trim() === '' ? '空白，已改用預設 ' : '看不懂，已改用 ') + def);
+            v = def; changed[j][k] = true;
+          }
+          if (v < L.lo) { msgs.push(label + '不能小於 ' + L.lo + '，已改成 ' + L.lo); v = L.lo; changed[j][k] = true; }
+          if (v > L.hi) { msgs.push(label + '不能大於 ' + L.hi + '，已改成 ' + L.hi); v = L.hi; changed[j][k] = true; }
+          var rr = L.money ? Math.round(v) : roundTo(v, 2);
+          if (rr !== v) changed[j][k] = true;
+          p[j][k] = rr;
+        });
+      });
+      var w = parseNum(raw.weeks), L = LIM.weeks;
+      if (!isFinite(w)) { msgs.push('一年上班週數' + (String(raw.weeks === undefined || raw.weeks === null ? '' : raw.weeks).trim() === '' ? '空白，已改用預設 ' : '看不懂，已改用 ') + DEFAULTS.weeks); w = DEFAULTS.weeks; changed.weeks = true; }
+      if (w < L.lo) { msgs.push('一年上班週數不能小於 1，已改成 1'); w = L.lo; changed.weeks = true; }
+      if (w > L.hi) { msgs.push('一年上班週數不能大於 52，已改成 52'); w = L.hi; changed.weeks = true; }
+      var wr = roundTo(w, 1); if (wr !== w) changed.weeks = true;
+      p.weeks = wr;
+      p.taxMode = ['single', 'custom', 'rate'].indexOf(raw.taxMode) >= 0 ? raw.taxMode : DEFAULTS.taxMode;
+      var rt = parseNum(raw.rate);
+      p.rate = [0, 5, 12, 20, 30, 40].indexOf(rt) >= 0 ? rt : DEFAULTS.rate;
+      return { p: p, msgs: msgs, changed: changed };
+    }
+
+    // 單一份工作：每週時數拆項、一年時數、現金成本、稅
+    function jobStats(j, weeks, taxMode) {
+      var commuteWeek = j.commute * 2 * j.days / 60;
+      var idleCounted = j.idle * j.idleRatio / 100;
+      var weekTotal = j.work + j.oncall + idleCounted + commuteWeek;
+      var yearHours = weekTotal * weeks;
+      var cost = (j.commuteCost + j.otherCost) * 12;
+      var tax = null, taxInfo = null;
+      if (taxMode === 'single') { taxInfo = incomeTax115(j.pay); tax = taxInfo.tax; }
+      else if (taxMode === 'custom') { tax = j.tax; }
+      var netCash = j.pay - cost;
+      function per(money, h) { return h > 0 ? money / h : null; }
+      return {
+        commuteWeek: commuteWeek, idleCounted: idleCounted, weekTotal: weekTotal, yearHours: yearHours,
+        cost: cost, tax: tax, taxInfo: taxInfo, netCash: netCash, netAfterTax: tax === null ? null : netCash - tax,
+        paper: per(j.pay, STD_WEEK * weeks),
+        l1: per(j.pay, j.work * weeks),
+        l2: per(j.pay, (j.work + j.oncall + idleCounted) * weeks),
+        l3: per(j.pay, yearHours),
+        real: per(netCash, yearHours),
+        realAfterTax: tax === null ? null : per(netCash - tax, yearHours),
+      };
+    }
+
+    function compute(p) {
+      var A = jobStats(p.A, p.weeks, p.taxMode), B = jobStats(p.B, p.weeks, p.taxMode);
+      var res = { A: A, B: B, weeks: p.weeks, taxMode: p.taxMode, rate: p.rate };
+      if (A.yearHours <= 0 || B.yearHours <= 0) { res.invalid = true; return res; }
+      // 收入高的那份（以扣掉現金成本後的稅前收入比）
+      if (A.netCash === B.netCash) { res.same = true; return res; }
+      var hiKey = A.netCash > B.netCash ? 'A' : 'B', loKey = hiKey === 'A' ? 'B' : 'A';
+      var hi = res[hiKey], lo = res[loKey];
+      res.hiKey = hiKey; res.loKey = loKey;
+      res.dMoney = hi.netCash - lo.netCash;
+      res.dHoursYear = hi.yearHours - lo.yearHours;
+      res.dHoursWeek = hi.weekTotal - lo.weekTotal;
+      if (p.taxMode === 'rate') res.dTax = (p[hiKey].pay - p[loKey].pay) * p.rate / 100;   // 現金成本不能抵稅
+      else res.dTax = hi.tax - lo.tax;
+      res.dMoneyAfterTax = res.dMoney - res.dTax;
+      if (res.dHoursYear > 1e-9) {
+        res.marginal = res.dMoney / res.dHoursYear;
+        res.marginalAfterTax = res.dMoneyAfterTax / res.dHoursYear;
+      } else { res.noExtraTime = true; }
+      // 門檻：多賺的錢 ÷ 上班週數 ÷ 時數少那份的真實時薪（稅前）
+      var base = lo.real;
+      if (base !== null && base > 0) {
+        res.threshold = res.dMoney / p.weeks / base;
+        // 收入高的那份，年收入要多少，真實時薪才追得上（稅前；現金成本照扣）
+        res.breakeven = base * hi.yearHours + hi.cost;
+      }
+      function winOf(a, b) {
+        if (a === null || b === null) return null;
+        if (Math.round(a) === Math.round(b)) return 'tie';   // 四捨五入到元後同分＝幾乎打平
+        return a > b ? 'A' : 'B';
+      }
+      res.winner = winOf(A.real, B.real);
+      res.winnerAfterTax = winOf(A.realAfterTax, B.realAfterTax);
+      // 收入高那份已經贏：breakeven 是「降到多少以下才會輸」；輸了：「要到多少才追平」
+      if (res.breakeven !== undefined) res.breakevenType = (A.real !== null && B.real !== null && res[hiKey].real > res[loKey].real) ? 'floor' : 'match';
+      return res;
+    }
+    // ===== 純函式 END =====
+
+    window.__ep68 = { parseMoney: parseMoney, parseNum: parseNum, incomeTax115: incomeTax115, normalizeInputs: normalizeInputs, jobStats: jobStats, compute: compute, DEFAULTS: DEFAULTS, LIM: LIM };
+
+    (function () {
+      function $(id) { return document.getElementById(id); }
+      function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+      function ntd(v) { return Math.round(v).toLocaleString('en-US'); }
+      function hr(v) { return v === null || v === undefined ? '—' : ntd(v) + ' 元'; }
+      function h1(v) { return roundTo(v, 1).toLocaleString('en-US', { maximumFractionDigits: 1 }); }
+      function card(label, value, desc, accent) {
+        return '<div class="rounded-2xl border border-gray-200 p-5 bg-white"><div class="text-sm text-gray-500 mb-1">' + label + '</div>' +
+          '<div class="text-2xl font-bold ' + (accent ? '' : 'text-gray-900') + '"' + (accent ? ' style="color:#C5611A"' : '') + '>' + value + '</div>' +
+          '<div class="text-xs text-gray-500 mt-1 leading-relaxed">' + desc + '</div></div>';
+      }
+      var lastMsgs = [];
+      function readRaw() {
+        var r = { A: {}, B: {} };
+        ['A', 'B'].forEach(function (j) { r[j].name = $(j + '_name').value; JOB_FIELDS.forEach(function (k) { r[j][k] = $(j + '_' + k).value; }); });
+        r.weeks = $('weeks').value; r.taxMode = $('taxMode').value; r.rate = $('rate').value;
+        return r;
+      }
+      function fmtField(k, v) { return LIM[k] && LIM[k].money ? ntd(v) : String(v); }
+      function writeFields(p, onlyChanged, changed) {
+        ['A', 'B'].forEach(function (j) {
+          JOB_FIELDS.forEach(function (k) {
+            var el = $(j + '_' + k);
+            if (!onlyChanged || (changed[j][k] && document.activeElement !== el)) el.value = fmtField(k, p[j][k]);
+          });
+        });
+        if (!onlyChanged || (changed.weeks && document.activeElement !== $('weeks'))) $('weeks').value = String(p.weeks);
+      }
+      function syncTaxUI() {
+        var m = $('taxMode').value;
+        document.querySelectorAll('.taxCustom').forEach(function (el) { el.classList.toggle('hidden', m !== 'custom'); });
+        $('rateWrap').classList.toggle('hidden', m !== 'rate');
+      }
+
+      function render(commit, keepNotice) {
+        syncTaxUI();
+        var n = normalizeInputs(readRaw());
+        var p = n.p, msgs = n.msgs;
+        ['A', 'B'].forEach(function (j) {
+          var j0 = p[j];
+          var wk = j0.work + j0.oncall + j0.idle * j0.idleRatio / 100 + j0.commute * 2 * j0.days / 60;
+          if (wk > 168) msgs.push(j0.name + '一週加起來 ' + h1(wk) + ' 小時，超過一週的 168 小時，請檢查');
+        });
+        if (msgs.length) lastMsgs = msgs.slice(); else if (!commit || keepNotice === false) lastMsgs = [];
+        var shown = msgs.length ? msgs : lastMsgs;
+        if (commit) writeFields(p, false); else writeFields(p, true, n.changed);
+        var notice = $('notice');
+        notice.textContent = shown.join('；');
+        notice.classList.toggle('hidden', shown.length === 0);
+
+        var c = compute(p);
+        var nA = esc(p.A.name), nB = esc(p.B.name);
+        ['thA', 'thA2'].forEach(function (id) { $(id).textContent = p.A.name; });
+        ['thB', 'thB2'].forEach(function (id) { $(id).textContent = p.B.name; });
+        var A = c.A, B = c.B;
+        var after = c.taxMode !== 'rate';
+
+        // Cards
+        var cardsHtml = card(nA + '的真實時薪', hr(A.real), '稅前' + (after ? '；稅後 ' + hr(A.realAfterTax) : '') + '｜一週 ' + h1(A.weekTotal) + ' 小時') +
+          card(nB + '的真實時薪', hr(B.real), '稅前' + (after ? '；稅後 ' + hr(B.realAfterTax) : '') + '｜一週 ' + h1(B.weekTotal) + ' 小時');
+        if (c.invalid) cardsHtml += card('多出來的時間每小時值多少', '—', '有一份工作的總時數是 0，算不出來', true);
+        else if (c.same) cardsHtml += card('多出來的時間每小時值多少', '—', '兩份扣掉現金成本後的收入一樣，直接比時數就好', true);
+        else if (c.noExtraTime) cardsHtml += card('多出來的時間每小時值多少', '不用多花時間', esc(p[c.hiKey].name) + '收入比較高，花的時間也沒有比較多', true);
+        else cardsHtml += card('多出來的時間每小時值多少', hr(c.marginal), '稅前；稅後 ' + hr(c.marginalAfterTax) + '｜一年多 ' + ntd(c.dHoursYear) + ' 小時', true);
+        $('cards').innerHTML = cardsHtml;
+
+        // Conclusion
+        var html = '';
+        if (A.yearHours <= 0 || B.yearHours <= 0) {
+          html = '<p>有一份工作的總時數是 0，算不出時薪。請填入每週工時。</p>';
+        } else if (c.same) {
+          html = '<p class="font-semibold text-gray-900 mb-2">兩份扣掉現金成本後的收入一樣</p><p>那就看誰花的時間少：' + (A.weekTotal === B.weekTotal ? '兩份一樣。' : esc((A.weekTotal < B.weekTotal ? p.A : p.B).name) + '每週少花 ' + h1(Math.abs(A.weekTotal - B.weekTotal)) + ' 小時。') + '</p>';
+        } else {
+          var hiN = esc(p[c.hiKey].name), loN = esc(p[c.loKey].name);
+          var hiS = c[c.hiKey], loS = c[c.loKey];
+          if (c.noExtraTime) {
+            html = '<p class="font-semibold text-gray-900 mb-2">' + hiN + '收入高 ' + ntd(c.dMoney) + ' 元，花的時間也沒有比較多</p><p>這種情況沒有「多出來的時間」要算，' + hiN + '的真實時薪就是比較高（' + hr(hiS.real) + ' 對 ' + hr(loS.real) + '）。</p>';
+          } else {
+            var wN = c.winner === 'A' ? nA : nB, oN = c.winner === 'A' ? nB : nA;
+            var wS = c.winner === 'A' ? A : B, oS = c.winner === 'A' ? B : A;
+            if (c.winner === 'tie') html += '<p class="font-semibold text-gray-900 mb-2">兩份的真實時薪幾乎打平（稅前）：' + nA + ' ' + hr(A.real) + '，' + nB + ' ' + hr(B.real) + '</p>';
+            else html += '<p class="font-semibold text-gray-900 mb-2">' + wN + '的真實時薪比較高（稅前）：' + hr(wS.real) + ' 對 ' + hr(oS.real) + '</p>';
+            if (c.winnerAfterTax && c.winnerAfterTax !== c.winner) {
+              html += '<p class="mb-2" style="color:#C5611A">注意：' + (c.winnerAfterTax === 'tie' ? '算到稅後，兩份幾乎打平（' : '稅後是' + (c.winnerAfterTax === 'A' ? nA : nB) + '比較高（') + nA + ' ' + hr(A.realAfterTax) + '，' + nB + ' ' + hr(B.realAfterTax) + '）。收入高的那份稅率比較高，多賺的錢要先扣稅。</p>';
+            }
+            // 划算判斷：用稅後邊際 vs 另一份稅後真實時薪；稅後算不出（邊際稅率模式）時用稅前
+            var cmpPost = loS.realAfterTax !== null;
+            var margCmp = cmpPost ? c.marginalAfterTax : c.marginal, loCmp = cmpPost ? loS.realAfterTax : loS.real;
+            html += '<p class="mb-2">' + hiN + '一年多 ' + ntd(c.dMoney) + ' 元，要多花 ' + ntd(c.dHoursYear) + ' 小時（每週多 ' + h1(c.dHoursWeek) + ' 小時）。多出來的這些時間，每小時 <strong>' + hr(c.marginal) + '</strong>' +
+              (c.taxMode === 'rate' ? '，用邊際稅率 ' + c.rate + '% 算稅後約 ' : '，稅後約 ') + '<strong>' + hr(c.marginalAfterTax) + '</strong>。';
+            if (loCmp !== null && loCmp > 0) {
+              var tag = cmpPost ? '（都用稅後比）' : '（邊際稅率模式算不出' + loN + '的稅後時薪，這裡用稅前比）';
+              if (Math.round(margCmp) === Math.round(loCmp)) html += '你在' + loN + '每小時是 ' + hr(loCmp) + '，兩邊幾乎一樣' + tag + '。';
+              else if (margCmp < loCmp) html += '你在' + loN + '每小時是 ' + hr(loCmp) + '，多出來的時間每小時低了大約 ' + Math.round((1 - margCmp / loCmp) * 100) + '%' + tag + '。';
+              else html += '你在' + loN + '每小時是 ' + hr(loCmp) + '，多出來的時間每小時反而更高' + tag + '，以時薪來看多做是划算的。';
+            }
+            html += '</p>';
+            if (c.threshold !== undefined) {
+              html += '<p class="mb-2">門檻（稅前）：多賺的 ' + ntd(c.dMoney) + ' 元，換算成' + loN + '的真實時薪，大約是<strong>每週 ' + h1(c.threshold) + ' 小時</strong>。' + hiN + '每週多花的時間超過這個數，它的真實時薪就輸；你現在填的是每週多 ' + h1(c.dHoursWeek) + ' 小時。</p>';
+              var wan = Math.round(c.breakeven / 10000);
+              if (c.breakevenType === 'match') html += '<p class="mb-2">' + hiN + '的年收入要到大約 <strong>' + wan.toLocaleString('en-US') + ' 萬</strong>，真實時薪才追得上' + loN + '（稅前、時數不變）。</p>';
+              else html += '<p class="mb-2">' + hiN + '的年收入要降到大約 <strong>' + wan.toLocaleString('en-US') + ' 萬</strong>以下，真實時薪才會輸給' + loN + '（稅前、時數不變）。</p>';
+            }
+            html += '<p class="text-xs text-gray-500">時薪只是一把尺。存第一桶金、這段經歷能讓下一份薪水明顯變高、這幾年你本來也沒有更想做的事，這三種情況，收入高那份還是可能值得接；接之前先決定要做幾年。</p>';
+          }
+        }
+        $('conclusion').innerHTML = html;
+
+        // Layers
+        function lrow(name, a, b) {
+          return '<tr class="border-b border-gray-100"><td class="py-2 pr-2 sm:pr-4">' + name + '</td><td class="py-2 px-2 sm:px-4 text-right">' + hr(a) + '</td><td class="py-2 pl-2 sm:pl-4 text-right">' + hr(b) + '</td></tr>';
+        }
+        var anyCost = A.cost > 0 || B.cost > 0;
+        $('layerBody').innerHTML =
+          lrow('帳面（每週 40 小時）', A.paper, B.paper) +
+          lrow('換成真實工時', A.l1, B.l1) +
+          lrow('再加待命', A.l2, B.l2) +
+          lrow('再加通勤', A.l3, B.l3) +
+          (anyCost ? lrow('再扣車錢與其他花費', A.real, B.real) : '') +
+          (after ? lrow('稅後', A.realAfterTax, B.realAfterTax) : '');
+
+        // Detail
+        function drow(name, a, b) {
+          return '<tr class="border-b border-gray-100"><td class="py-2 pr-2 sm:pr-4">' + name + '</td><td class="py-2 px-2 sm:px-4 text-right">' + a + '</td><td class="py-2 pl-2 sm:pl-4 text-right">' + b + '</td></tr>';
+        }
+        var d = drow('每週工時', h1(p.A.work), h1(p.B.work)) +
+          drow('每週待命（處理＋折算）', h1(p.A.oncall + A.idleCounted), h1(p.B.oncall + B.idleCounted)) +
+          drow('每週通勤（來回）', h1(A.commuteWeek), h1(B.commuteWeek)) +
+          drow('每週合計', h1(A.weekTotal), h1(B.weekTotal)) +
+          drow('一年合計（× ' + p.weeks + ' 週）', ntd(A.yearHours), ntd(B.yearHours)) +
+          drow('一年車錢＋其他花費', ntd(A.cost), ntd(B.cost));
+        if (c.taxMode === 'single') d += drow('綜合所得淨額（115 年度單身）', ntd(A.taxInfo.net), ntd(B.taxInfo.net)) + drow('適用稅率', Math.round(A.taxInfo.rate * 100) + '%', Math.round(B.taxInfo.rate * 100) + '%');
+        if (after) d += drow('綜所稅', ntd(A.tax), ntd(B.tax));
+        $('detailBody').innerHTML = d;
+      }
+
+      var SCN = {
+        video: { A: {}, B: {} },
+        near: { A: { oncall: 0, commute: 20 }, B: {} },
+        a53: { A: { work: 52 }, B: {} },
+        b50: { A: {}, B: { work: 50 } },
+      };
+      function setDefaults() {
+        ['A', 'B'].forEach(function (j) {
+          $(j + '_name').value = DEFAULTS[j].name;
+          JOB_FIELDS.forEach(function (k) { $(j + '_' + k).value = fmtField(k, DEFAULTS[j][k]); });
+        });
+        $('weeks').value = String(DEFAULTS.weeks); $('taxMode').value = DEFAULTS.taxMode; $('rate').value = String(DEFAULTS.rate);
+      }
+      $('presetBtn').addEventListener('click', function () { setDefaults(); render(true, false); });
+      document.querySelectorAll('.scnBtn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          setDefaults();
+          var s = SCN[b.getAttribute('data-scn')];
+          ['A', 'B'].forEach(function (j) { Object.keys(s[j]).forEach(function (k) { $(j + '_' + k).value = fmtField(k, s[j][k]); }); });
+          render(true, false);
+        });
+      });
+      var ids = ['weeks'];
+      ['A', 'B'].forEach(function (j) { ids.push(j + '_name'); JOB_FIELDS.forEach(function (k) { ids.push(j + '_' + k); }); });
+      ids.forEach(function (id) {
+        $(id).addEventListener('input', function () { render(false); });
+        $(id).addEventListener('change', function () { render(true); });
+      });
+      ['taxMode', 'rate'].forEach(function (id) { $(id).addEventListener('change', function () { render(true); }); });
+      render(false);
+    })();
+  </script>
+</BaseLayout>
