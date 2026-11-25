@@ -1,0 +1,323 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="每月投入換算：買幾股、手續費實際多少"
+  description="每月投入 5,000 元買 0050，實際會買幾股、手續費付多少、最低收費會不會讓手續費變很高？填入每月金額、最近股價與你那家的折數與最低收費，一次算出來——對應 EP69。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <div class="mb-8">
+      <p class="text-brand font-medium text-sm uppercase tracking-wide mb-2">Tools · 對應 EP69</p>
+      <h1 class="text-3xl font-bold mb-3">每月投入換算</h1>
+      <p class="text-gray-600 leading-relaxed">
+        每個月固定投一筆錢買 0050，因為只能買整數股，<strong>實際扣的錢通常比你設定的少一點</strong>，零頭沒買到的錢還在帳戶裡；另外還要付手續費，而且<strong>最低收費</strong>會讓小金額的手續費比例變得比你想像的高。
+        填入每月金額、你最近看到的股價，以及你那家的折數與最低收費，一次看清楚：每月約買幾股、實際扣多少、手續費佔多少。
+      </p>
+    </div>
+
+    <!-- Inputs -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 bg-gray-50/60">
+      <h2 class="font-semibold text-gray-900 mb-1">你的每月投入</h2>
+      <p class="text-xs text-gray-500 mb-4">預設值只是示範，不代表任何建議。<strong>現價與最低收費要填你實際看到的。</strong></p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-600">每月投入金額（NT$）</span>
+          <input id="amount" type="text" inputmode="decimal" autocomplete="off" value="5000"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400 block mt-1">可輸入 5000 或 5,000。</span>
+          <span id="w-amount" class="text-xs text-amber-700 block mt-1" aria-live="polite"></span>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">0050 最近股價（NT$）</span>
+          <input id="price" type="text" inputmode="decimal" autocomplete="off" value="100"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400 block mt-1">示範用，請填你看到的當天價格。</span>
+          <span id="w-price" class="text-xs text-amber-700 block mt-1" aria-live="polite"></span>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">手續費折數</span>
+          <input id="discount" type="text" inputmode="decimal" autocomplete="off" value="10"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400 block mt-1">例如 6 折填 6；10＝不打折。範圍 0.1～10。</span>
+          <span id="w-discount" class="text-xs text-amber-700 block mt-1" aria-live="polite"></span>
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-600">券商最低收費（NT$／每筆）</span>
+          <input id="minfee" type="text" inputmode="decimal" autocomplete="off" value="20"
+            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
+          <span class="text-xs text-gray-400 block mt-1">整股常見 20 元、零股有些家是 1 元，各家不同，請看你那家的費率。可填 0～200。</span>
+          <span id="w-minfee" class="text-xs text-amber-700 block mt-1" aria-live="polite"></span>
+        </label>
+      </div>
+      <div class="mt-4 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600">
+        法定手續費上限：<strong>成交金額的 0.1425%</strong>（固定，不能改；券商可以打折，但不能超過）
+      </div>
+    </div>
+
+    <!-- Verdict cards -->
+    <div id="cards" class="grid sm:grid-cols-3 gap-4 mb-6"></div>
+
+    <!-- Insight -->
+    <div id="insight" class="rounded-2xl border border-brand/30 bg-brand/5 p-5 mb-8 text-sm leading-relaxed"></div>
+
+    <!-- Compare -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8">
+      <h2 class="font-semibold text-gray-900 mb-1">同樣金額，最低收費 1 元 vs 20 元</h2>
+      <p class="text-xs text-gray-400 mb-4">其他條件（每月金額、股價、折數）都用你上面填的，只把最低收費換成 1 元與 20 元，兩種都算出來並列，沒有預設哪一種比較好——哪一家適合你，要看你實際的費率與規則。</p>
+      <div id="compare" class="overflow-x-auto"></div>
+    </div>
+
+    <!-- Detail -->
+    <details class="mb-8">
+      <summary class="cursor-pointer text-sm font-medium text-brand select-none mb-3">▸ 計算明細（用你填的數字一步步算）</summary>
+      <div id="detail" class="mt-3 text-sm text-gray-600 leading-relaxed space-y-1"></div>
+    </details>
+
+    <!-- Note -->
+    <div class="rounded-2xl border border-gray-200 p-6 mb-8 text-sm text-gray-600 leading-relaxed space-y-2">
+      <p class="font-semibold text-gray-900">💡 這個計算機的假設與用法</p>
+      <p><strong>只買整數股：</strong>每月買的股數，是「買進金額＋手續費」不超過你每月投入金額的最大整數股。所以設定 5,000 元，實際扣的可能是 4,900 多，零頭沒買到的錢還在你的帳戶裡，不算虧。</p>
+      <p><strong>手續費算法：</strong>手續費＝max（最低收費，買進金額 × 0.1425% × 折數 ÷ 10），無條件捨去到元。各家進位方式可能略有差異。</p>
+      <p><strong>為什麼要看最低收費：</strong>金額小的時候，照比例算的手續費只有幾塊錢，但最低收費會把它墊高，所以小額定期定額的手續費「比例」，可能比你以為的高很多。折扣有的是當下少收，有的是事後退，也有活動期限，請看你那家的說明。</p>
+      <p>影片：EP69（台灣新手第一次買 0050：整股、零股、定期定額）。</p>
+    </div>
+
+    <!-- Disclaimer + CTA -->
+    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+      本計算機僅供一般資訊參考，採用簡化假設（固定費率、整數股、不含個別券商促銷與稅務退補），不構成投資、稅務或法律建議。實際費用以各券商當期條件為準。資料全部在你的瀏覽器裡計算，不會送出。
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/tools/brokerage-fee-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark transition-colors">券商手續費計算機 →</a>
+      <a href="/tools/dca-snowball-calculator" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">定期定額複利雪球</a>
+      <a href="/tools" class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-brand transition-colors">看其他工具</a>
+    </div>
+
+  </div>
+
+  <script is:inline>
+    // ===== PURE CALC START（純函式，不碰 DOM，可整段抽出來單獨執行）=====
+    var MBC_LIMITS = {
+      amount:   { min: 1,    max: 1e9, def: 5000, label: '每月投入金額' },
+      price:    { min: 0.01, max: 1e9, def: 100,  label: '股價' },
+      discount: { min: 0.1,  max: 10,  def: 10,   label: '手續費折數' },
+      minFee:   { min: 0,    max: 200, def: 20,   label: '最低收費' }
+    };
+    var MBC_LEGAL_RATE = 0.001425; // 法定手續費上限 0.1425%
+    var MBC_SEARCH_CAP = 100; // 二分搜尋迭代上限（遠大於 log2(1e11)≈37）
+
+    // 把任意輸入轉成數字；回傳 NaN 代表無法解讀
+    function parseNum(raw) {
+      if (typeof raw === 'number') return raw;
+      if (raw === null || raw === undefined) return NaN;
+      var s = String(raw).normalize('NFKC').replace(/[,\s]/g, '').replace(/NT\$|\$|元/gi, '');
+      if (s === '') return NaN;
+      if (!/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(s)) return NaN;
+      return Number(s);
+    }
+
+    // 夾住單一欄位：回傳 { value, note }；note 為空字串代表沒調整
+    function clampField(key, raw) {
+      var L = MBC_LIMITS[key];
+      var v = parseNum(raw);
+      if (Number.isNaN(v)) return { value: L.def, note: '看不懂這個數字，暫時用預設值 ' + L.def + '。' };
+      if (v === Infinity || v > L.max) return { value: L.max, note: '超過上限，已改用 ' + L.max.toLocaleString('en-US') + '。' };
+      if (v === -Infinity || v < L.min) {
+        var why = (v <= 0 && L.min > 0) ? '必須大於 0，' : '低於下限，';
+        return { value: L.min, note: why + '已改用 ' + L.min + '。' };
+      }
+      return { value: v, note: '' };
+    }
+
+    // 手續費：max(最低收費, 無條件捨去(買進金額 × 0.1425% × 折數/10))；買進金額 0 代表沒成交，不收費
+    function feeOf(buyAmount, discount, minFee) {
+      if (!(buyAmount > 0)) return 0;
+      var raw = buyAmount * MBC_LEGAL_RATE * (discount / 10);
+      var byRate = Math.floor(raw + 1e-9); // +1e-9 避免浮點誤差把 7 算成 6.999999
+      return Math.max(minFee, byRate);
+    }
+
+    // 買 n 股的成交金額（小數兩位內，去掉浮點雜訊）
+    function buyAmountOf(n, price) {
+      return Math.round(n * price * 100) / 100;
+    }
+
+    function totalCost(n, price, discount, minFee) {
+      var b = buyAmountOf(n, price);
+      return b + feeOf(b, discount, minFee);
+    }
+
+    // 主函式：calc(每月投入, 股價, 折數, 最低收費)
+    // 所有輸入先夾進合理範圍；n＝滿足 買進金額＋手續費 <= 每月投入 的最大整數股
+    function calc(amount, price, discount, minFee) {
+      var a = clampField('amount', amount), p = clampField('price', price),
+          d = clampField('discount', discount), m = clampField('minFee', minFee);
+      var A = a.value, P = p.value, D = d.value, M = m.value;
+      var notes = { amount: a.note, price: p.note, discount: d.note, minFee: m.note };
+
+      // 總成本對 n 單調不減：先用公式估上界，再二分搜尋（次數有上限）
+      var hi = Math.floor(A / P);          // 光買進金額就不能超過 A
+      var lo = 0;
+      var guard = 0;
+      while (lo < hi && guard < MBC_SEARCH_CAP) {
+        var mid = Math.floor((lo + hi + 1) / 2);
+        if (totalCost(mid, P, D, M) <= A + 1e-9) lo = mid; else hi = mid - 1;
+        guard++;
+      }
+      var n = lo;
+
+      var buy = buyAmountOf(n, P);
+      var fee = feeOf(buy, D, M);
+      var paid = buy + fee;
+      var leftover = Math.round((A - paid) * 100) / 100;
+      var feeRatio = buy > 0 ? fee / buy : null;
+      return {
+        inputs: { amount: A, price: P, discount: D, minFee: M },
+        notes: notes,
+        canBuy: n > 0,
+        shares: n,
+        buyAmount: buy,
+        fee: fee,
+        paid: paid,
+        leftover: leftover,
+        feeRatio: feeRatio,
+        yearFee: fee * 12,
+        yearBuy: buy * 12,
+        yearFeeRatio: buy > 0 ? (fee * 12) / (buy * 12) : null
+      };
+    }
+    // ===== PURE CALC END =====
+
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var money = function (n) {
+        var r = Math.round(n * 100) / 100;
+        return 'NT$' + r.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      };
+      var pct = function (x) { if (x === null) return '—'; var v = x * 100; return v.toFixed(v > 0 && v < 0.1 ? 2 : 1) + '%'; };
+      var sh = function (n) { return n.toLocaleString('en-US') + ' 股'; };
+
+      function render() {
+        var r = calc($('amount').value, $('price').value, $('discount').value, $('minfee').value);
+        var inp = r.inputs;
+        $('w-amount').textContent = r.notes.amount;
+        $('w-price').textContent = r.notes.price;
+        $('w-discount').textContent = r.notes.discount;
+        $('w-minfee').textContent = r.notes.minFee;
+
+        // Cards
+        if (!r.canBuy) {
+          $('cards').innerHTML =
+            '<div class="sm:col-span-3 rounded-2xl border border-brand bg-brand/5 p-5">' +
+            '<div class="text-lg font-bold text-gray-900">這個金額買不到一股，請提高金額或確認股價</div>' +
+            '<div class="text-xs text-gray-500 mt-1">每月投入 ' + money(inp.amount) + '，股價 ' + money(inp.price) + '，連一股加手續費都不夠。零頭沒買到的錢 ' + money(inp.amount) + ' 還在帳戶裡。</div>' +
+            '</div>';
+        } else {
+          $('cards').innerHTML =
+            '<div class="rounded-2xl border border-brand bg-brand/5 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">每月約買</div>' +
+              '<div class="text-2xl font-bold text-gray-900">' + sh(r.shares) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">買進金額 ' + money(r.buyAmount) + '</div>' +
+            '</div>' +
+            '<div class="rounded-2xl border border-gray-200 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">實際扣款金額</div>' +
+              '<div class="text-2xl font-bold text-gray-900">' + money(r.paid) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">買進 ' + money(r.buyAmount) + ' ＋ 手續費 ' + money(r.fee) + '</div>' +
+            '</div>' +
+            '<div class="rounded-2xl border border-gray-200 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">零頭沒買到的錢</div>' +
+              '<div class="text-2xl font-bold text-gray-900">' + money(r.leftover) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">還在你的帳戶裡，不算虧</div>' +
+            '</div>' +
+            '<div class="rounded-2xl border border-gray-200 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">每月手續費</div>' +
+              '<div class="text-2xl font-bold" style="color:#C5611A">' + money(r.fee) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">佔買進金額 ' + pct(r.feeRatio) + '</div>' +
+            '</div>' +
+            '<div class="rounded-2xl border border-gray-200 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">一年 12 次手續費合計</div>' +
+              '<div class="text-2xl font-bold" style="color:#C5611A">' + money(r.yearFee) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">佔一年買進金額 ' + pct(r.yearFeeRatio) + '</div>' +
+            '</div>' +
+            '<div class="rounded-2xl border border-gray-200 p-5">' +
+              '<div class="text-sm font-medium text-gray-600 mb-1">一年買進金額</div>' +
+              '<div class="text-2xl font-bold text-gray-900">' + money(r.yearBuy) + '</div>' +
+              '<div class="text-xs text-gray-500 mt-1">每月 ' + sh(r.shares) + ' × 12 個月</div>' +
+            '</div>';
+        }
+
+        // Insight
+        var read;
+        if (!r.canBuy) {
+          read = '<p>把每月投入金額調高，或確認股價是不是填對了，再看結果。</p>';
+        } else {
+          var cmp = r.fee > 0 && Math.floor(r.buyAmount * MBC_LEGAL_RATE * (inp.discount / 10) + 1e-9) < inp.minFee
+            ? '這個金額下，手續費是被<strong>最低收費 ' + money(inp.minFee) + '</strong> 墊高的（照比例算只有約 ' + money(r.buyAmount * MBC_LEGAL_RATE * (inp.discount / 10)) + '），所以比例看起來比較高。'
+            : '這個金額下，手續費是照比例算的，最低收費沒有發揮作用。';
+          read = '<p class="mb-2">每月投入 ' + money(inp.amount) + '、股價 ' + money(inp.price) + '，每月約買 <strong>' + sh(r.shares) + '</strong>，實際扣 <strong>' + money(r.paid) + '</strong>，其中手續費 <strong style="color:#C5611A">' + money(r.fee) + '（' + pct(r.feeRatio) + '）</strong>。一年 12 次手續費合計 <strong style="color:#C5611A">' + money(r.yearFee) + '</strong>。</p>' +
+                 '<p class="mb-2">' + cmp + '</p>';
+        }
+        $('insight').innerHTML =
+          '<p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>' + read +
+          '<ul class="list-disc pl-5 space-y-1 text-gray-700">' +
+          '<li>這是<strong>簡化估算</strong>：只算買進時的手續費，不含賣出時才收的證交稅、不含配息。</li>' +
+          '<li>各家的定期定額規則不同（最低扣款金額、金額是否含手續費、扣款日、用哪天的哪個價格成交），<strong>以你那家券商的說明為準</strong>；實際成交價也不會剛好等於你填的股價。</li>' +
+          '<li>手續費法定上限是成交金額的 0.1425%，券商可以打折；各家進位方式可能略有差異。另外最低收費是另外規定的，金額小的時候，手續費佔比會高過 0.1425%。</li>' +
+          '<li>如果你那家的定期定額是「每筆固定 1 元」之類的專案，費用就不是這裡算的方式；有些家折扣是事後退款，當天實際扣的是牌告價，股數可能比這裡算的少一點。</li>' +
+          '<li>結論卡的數字都是「全部算進去」之後的結果（含手續費與最低收費、只買整數股），不是只挑好看的那個。</li>' +
+          '<li>本工具不推薦任何券商或商品，0050 只是示範用的標的。</li>' +
+          '</ul>';
+
+        // Compare
+        var c1 = calc(inp.amount, inp.price, inp.discount, 1);
+        var c20 = calc(inp.amount, inp.price, inp.discount, 20);
+        var row = function (label, f) {
+          return '<tr class="border-b border-gray-100"><td class="py-2 pr-4 text-gray-500">' + label + '</td>' +
+                 '<td class="py-2 px-4 text-right">' + f(c1) + '</td>' +
+                 '<td class="py-2 pl-4 text-right">' + f(c20) + '</td></tr>';
+        };
+        var cmpHtml =
+          '<table class="w-full text-sm border-collapse"><thead><tr class="text-left text-gray-500 border-b border-gray-200">' +
+          '<th class="py-2 pr-4 font-medium"></th>' +
+          '<th class="py-2 px-4 font-medium text-right">最低收費 1 元</th>' +
+          '<th class="py-2 pl-4 font-medium text-right">最低收費 20 元</th></tr></thead><tbody>' +
+          row('每月約買', function (c) { return c.canBuy ? sh(c.shares) : '買不到一股'; }) +
+          row('每月手續費', function (c) { return c.canBuy ? money(c.fee) : '—'; }) +
+          row('手續費佔買進金額', function (c) { return pct(c.feeRatio); }) +
+          row('一年 12 次手續費', function (c) { return c.canBuy ? '<strong>' + money(c.yearFee) + '</strong>' : '—'; }) +
+          '</tbody></table>';
+        if (c1.canBuy && c20.canBuy) {
+          var diff = Math.round((c20.yearFee - c1.yearFee) * 100) / 100;
+          var line;
+          if (diff > 0) line = '同樣的每月金額，最低收費 20 元那種，一年手續費比 1 元那種<strong>多 ' + money(diff) + '</strong>。';
+          else if (diff < 0) line = '同樣的每月金額，最低收費 1 元那種，一年手續費比 20 元那種<strong>多 ' + money(-diff) + '</strong>（兩者買到的股數不同所致）。';
+          else line = '同樣的每月金額，兩種最低收費的一年手續費<strong>一樣</strong>：手續費已經高到不受最低收費影響。';
+          cmpHtml += '<p class="mt-3 text-sm text-gray-700">' + line + '</p>';
+        } else {
+          cmpHtml += '<p class="mt-3 text-sm text-gray-700">其中至少一種情況買不到一股，無法比較一年手續費；請提高金額或確認股價。</p>';
+        }
+        cmpHtml += '<p class="mt-2 text-xs text-gray-400">差距會隨金額縮小：每月金額越大，照比例算的手續費越容易超過最低收費，兩種就越接近。折數也會影響。</p>';
+        $('compare').innerHTML = cmpHtml;
+
+        // Detail
+        var rawFee = r.buyAmount * MBC_LEGAL_RATE * (inp.discount / 10);
+        $('detail').innerHTML = r.canBuy
+          ? '<p>1. 每月投入 ' + money(inp.amount) + '，股價 ' + money(inp.price) + '，折數 ' + inp.discount + '，最低收費 ' + money(inp.minFee) + '。</p>' +
+            '<p>2. 找最大的整數股 n，使「n × 股價 ＋ 手續費」不超過每月投入：n ＝ ' + r.shares.toLocaleString('en-US') + '。</p>' +
+            '<p>3. 買進金額 ＝ ' + r.shares.toLocaleString('en-US') + ' × ' + money(inp.price) + ' ＝ ' + money(r.buyAmount) + '。</p>' +
+            '<p>4. 照比例算的手續費 ＝ ' + money(r.buyAmount) + ' × 0.1425% × ' + inp.discount + '／10 ＝ ' + rawFee.toFixed(2) + ' 元，無條件捨去為 ' + Math.floor(rawFee + 1e-9) + ' 元。</p>' +
+            '<p>5. 手續費 ＝ max（最低收費 ' + money(inp.minFee) + '，' + Math.floor(rawFee + 1e-9) + ' 元）＝ ' + money(r.fee) + '。</p>' +
+            '<p>6. 實際扣款 ＝ ' + money(r.buyAmount) + ' ＋ ' + money(r.fee) + ' ＝ ' + money(r.paid) + '；零頭 ＝ ' + money(inp.amount) + ' － ' + money(r.paid) + ' ＝ ' + money(r.leftover) + '。</p>' +
+            '<p>7. 一年手續費 ＝ ' + money(r.fee) + ' × 12 ＝ ' + money(r.yearFee) + '；每月買進金額固定，所以一年的佔比和單月相同（' + pct(r.yearFeeRatio) + '）。</p>'
+          : '<p>連一股加手續費都超過每月投入金額，所以買不到。</p>';
+      }
+
+      ['amount', 'price', 'discount', 'minfee'].forEach(function (id) {
+        $(id).addEventListener('input', render);
+      });
+      render();
+    })();
+  </script>
+</BaseLayout>
