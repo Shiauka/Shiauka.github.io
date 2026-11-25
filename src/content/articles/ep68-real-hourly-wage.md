@@ -174,6 +174,9 @@ draft: false
 - [EP44｜存到 100 萬之後，下一個目標不是 200 萬](/articles/ep44-first-million-next-step)
 - [EP47｜一個月多兩萬，等於幫自己多存了將近七百萬](/articles/ep47-income-redundancy)：想把多出來的時間拿去做副業，先看這篇怎麼想副業的價值
 
+
+下一篇：[買 0050 只要幾千塊：整股、零股、定期定額，第一筆選哪一種](/articles/ep69-first-0050-purchase)
+
 ---
 
 ## 資料來源
