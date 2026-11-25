@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
 <BaseLayout
   title="每月投入換算：買幾股、手續費實際多少"
-  description="每月投入 5,000 元買 0050，實際會買幾股、手續費付多少、最低收費會不會讓手續費變很高？填入每月金額、最近股價與你那家的折數與最低收費，一次算出來——對應 EP69。"
+  description="每月投入 5,000 元買 0050，實際會買幾股、手續費付多少、最低收費會不會讓手續費變很高？填入每月金額、最近股價與你的券商的折數與最低收費，一次算出來——對應 EP69。"
 >
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
 
@@ -14,7 +14,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <h1 class="text-3xl font-bold mb-3">每月投入換算</h1>
       <p class="text-gray-600 leading-relaxed">
         每個月固定投一筆錢買 0050，因為只能買整數股，<strong>實際扣的錢通常比你設定的少一點</strong>，零頭沒買到的錢還在帳戶裡；另外還要付手續費，而且<strong>最低收費</strong>會讓小金額的手續費比例變得比你想像的高。
-        填入每月金額、你最近看到的股價，以及你那家的折數與最低收費，一次看清楚：每月約買幾股、實際扣多少、手續費佔多少。
+        填入每月金額、你最近看到的股價，以及你的券商的折數與最低收費，一次看清楚：每月約買幾股、實際扣多少、手續費佔多少。
       </p>
     </div>
 
@@ -48,7 +48,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           <span class="text-sm text-gray-600">券商最低收費（NT$／每筆）</span>
           <input id="minfee" type="text" inputmode="decimal" autocomplete="off" value="20"
             class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand focus:ring-1 focus:ring-brand outline-none" />
-          <span class="text-xs text-gray-400 block mt-1">整股常見 20 元、零股有些家是 1 元，各家不同，請看你那家的費率。可填 0～200。</span>
+          <span class="text-xs text-gray-400 block mt-1">整股常見 20 元、零股有些券商是 1 元，各家券商不同，請看你的券商的費率。可填 0～200。</span>
           <span id="w-minfee" class="text-xs text-amber-700 block mt-1" aria-live="polite"></span>
         </label>
       </div>
@@ -81,7 +81,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       <p class="font-semibold text-gray-900">💡 這個計算機的假設與用法</p>
       <p><strong>只買整數股：</strong>每月買的股數，是「買進金額＋手續費」不超過你每月投入金額的最大整數股。所以設定 5,000 元，實際扣的可能是 4,900 多，零頭沒買到的錢還在你的帳戶裡，不算虧。</p>
       <p><strong>手續費算法：</strong>手續費＝max（最低收費，買進金額 × 0.1425% × 折數 ÷ 10），無條件捨去到元。各家進位方式可能略有差異。</p>
-      <p><strong>為什麼要看最低收費：</strong>金額小的時候，照比例算的手續費只有幾塊錢，但最低收費會把它墊高，所以小額定期定額的手續費「比例」，可能比你以為的高很多。折扣有的是當下少收，有的是事後退，也有活動期限，請看你那家的說明。</p>
+      <p><strong>為什麼要看最低收費：</strong>金額小的時候，照比例算的手續費只有幾塊錢，但最低收費會把它墊高，所以小額定期定額的手續費「比例」，可能比你以為的高很多。折扣有的是當下少收，有的是事後退，也有活動期限，請看你的券商的說明。</p>
       <p>影片：EP69（台灣新手第一次買 0050：整股、零股、定期定額）。</p>
     </div>
 
@@ -263,9 +263,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           '<p class="font-semibold text-gray-900 mb-2">📌 怎麼讀這個結果</p>' + read +
           '<ul class="list-disc pl-5 space-y-1 text-gray-700">' +
           '<li>這是<strong>簡化估算</strong>：只算買進時的手續費，不含賣出時才收的證交稅、不含配息。</li>' +
-          '<li>各家的定期定額規則不同（最低扣款金額、金額是否含手續費、扣款日、用哪天的哪個價格成交），<strong>以你那家券商的說明為準</strong>；實際成交價也不會剛好等於你填的股價。</li>' +
+          '<li>各家的定期定額規則不同（最低扣款金額、金額是否含手續費、扣款日、用哪天的哪個價格成交），<strong>以你的券商的說明為準</strong>；實際成交價也不會剛好等於你填的股價。</li>' +
           '<li>手續費由券商自己訂，牌告大多是成交金額的 0.1425%，券商常常打折；各家進位方式可能略有差異。另外最低收費也是券商自訂的，金額小的時候，手續費佔比會高過 0.1425%。</li>' +
-          '<li>如果你那家的定期定額是「每筆固定 1 元」之類的專案，費用就不是這裡算的方式；有些家折扣是事後退款，當天實際扣的是牌告價，股數可能比這裡算的少一點。</li>' +
+          '<li>如果你的券商的定期定額是「每筆固定 1 元」之類的專案，費用就不是這裡算的方式；有些券商的折扣是事後退款，當天實際扣的是牌告價，股數可能比這裡算的少一點。</li>' +
           '<li>結論卡的數字都是「全部算進去」之後的結果（含手續費與最低收費、只買整數股），不是只挑好看的那個。</li>' +
           '<li>本工具不推薦任何券商或商品，0050 只是示範用的標的。</li>' +
           '</ul>';
