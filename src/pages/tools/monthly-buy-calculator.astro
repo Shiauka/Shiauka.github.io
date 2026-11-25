@@ -53,7 +53,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         </label>
       </div>
       <div class="mt-4 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600">
-        法定手續費上限：<strong>成交金額的 0.1425%</strong>（固定，不能改；券商可以打折，但不能超過）
+        牌告手續費率：<strong>成交金額的 0.1425%</strong>（固定，不能改；券商常常打折，費率與最低收費由券商自訂）
       </div>
     </div>
 
@@ -105,7 +105,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
       discount: { min: 0.1,  max: 10,  def: 10,   label: '手續費折數' },
       minFee:   { min: 0,    max: 200, def: 20,   label: '最低收費' }
     };
-    var MBC_LEGAL_RATE = 0.001425; // 法定手續費上限 0.1425%
+    var MBC_LEGAL_RATE = 0.001425; // 牌告手續費率 0.1425%（券商自訂，非法定上限）
     var MBC_SEARCH_CAP = 100; // 二分搜尋迭代上限（遠大於 log2(1e11)≈37）
 
     // 把任意輸入轉成數字；回傳 NaN 代表無法解讀
@@ -264,7 +264,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
           '<ul class="list-disc pl-5 space-y-1 text-gray-700">' +
           '<li>這是<strong>簡化估算</strong>：只算買進時的手續費，不含賣出時才收的證交稅、不含配息。</li>' +
           '<li>各家的定期定額規則不同（最低扣款金額、金額是否含手續費、扣款日、用哪天的哪個價格成交），<strong>以你那家券商的說明為準</strong>；實際成交價也不會剛好等於你填的股價。</li>' +
-          '<li>手續費法定上限是成交金額的 0.1425%，券商可以打折；各家進位方式可能略有差異。另外最低收費是另外規定的，金額小的時候，手續費佔比會高過 0.1425%。</li>' +
+          '<li>手續費由券商自己訂，牌告大多是成交金額的 0.1425%，券商常常打折；各家進位方式可能略有差異。另外最低收費也是券商自訂的，金額小的時候，手續費佔比會高過 0.1425%。</li>' +
           '<li>如果你那家的定期定額是「每筆固定 1 元」之類的專案，費用就不是這裡算的方式；有些家折扣是事後退款，當天實際扣的是牌告價，股數可能比這裡算的少一點。</li>' +
           '<li>結論卡的數字都是「全部算進去」之後的結果（含手續費與最低收費、只買整數股），不是只挑好看的那個。</li>' +
           '<li>本工具不推薦任何券商或商品，0050 只是示範用的標的。</li>' +
